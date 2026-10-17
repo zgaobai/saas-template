@@ -1,0 +1,1 @@
+CREATE INDEX `subscription_user_updated_idx` ON `subscriptions` (`user_id`,`updated_at`,`id`);

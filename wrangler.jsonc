@@ -1,0 +1,113 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "qihang-saas-starter",
+  "main": "./src/server.ts",
+  "compatibility_date": "2026-10-15",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "APP_URL": "http://127.0.0.1:4317",
+    "APP_ENV": "development",
+    "PANCAKE_ENVIRONMENT": "test",
+    "AI_MODEL": "gpt-4.1-mini",
+    "PAYMENT_PROVIDER": "pancake",
+    "CREEM_ENVIRONMENT": "test",
+    "PAYPAL_ENVIRONMENT": "sandbox",
+    "AI_API_STYLE": "responses",
+    "MODERATION_PROVIDER": "pancake"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "qihang-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "qihang-files"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": [
+      "*/5 * * * *",
+      "0 0 * * *"
+    ]
+  },
+  "env": {
+    "staging": {
+      "name": "qihang-saas-starter-staging",
+      "vars": {
+        "APP_URL": "https://replace-staging.invalid",
+        "APP_ENV": "staging",
+        "PANCAKE_ENVIRONMENT": "test",
+        "AI_MODEL": "gpt-4.1-mini",
+        "PAYMENT_PROVIDER": "pancake",
+        "CREEM_ENVIRONMENT": "test",
+        "PAYPAL_ENVIRONMENT": "sandbox",
+        "AI_API_STYLE": "responses",
+        "MODERATION_PROVIDER": "pancake"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "qihang-db-staging",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FILES",
+          "bucket_name": "qihang-files-staging"
+        }
+      ],
+      "triggers": {
+        "crons": [
+          "*/5 * * * *",
+          "0 0 * * *"
+        ]
+      }
+    },
+    "production": {
+      "name": "qihang-saas-starter-production",
+      "vars": {
+        "APP_URL": "https://replace-production.invalid",
+        "APP_ENV": "production",
+        "PANCAKE_ENVIRONMENT": "prod",
+        "AI_MODEL": "gpt-4.1-mini",
+        "PAYMENT_PROVIDER": "pancake",
+        "CREEM_ENVIRONMENT": "production",
+        "PAYPAL_ENVIRONMENT": "production",
+        "AI_API_STYLE": "responses",
+        "MODERATION_PROVIDER": "pancake"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "qihang-db-production",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FILES",
+          "bucket_name": "qihang-files-production"
+        }
+      ],
+      "triggers": {
+        "crons": [
+          "*/5 * * * *",
+          "0 0 * * *"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+name: Template checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run setup:local
+      - run: npm run check
+      - name: Local smoke
+        run: |
+          npm run dev > /tmp/template-dev.log 2>&1 &
+          DEV_PID=$!
+          trap 'kill "$DEV_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:4317/api/health > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/smoke-local.mjs

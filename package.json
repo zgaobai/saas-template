@@ -1,0 +1,79 @@
+{
+  "name": "qihang-saas-starter",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zgaobai/saas-template.git"
+  },
+  "homepage": "https://github.com/zgaobai/saas-template#readme",
+  "bugs": {
+    "url": "https://github.com/zgaobai/saas-template/issues"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4317 --strictPort",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test && npm run build && npm run security:check",
+    "security:check": "node scripts/check-boundaries.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "npm run db:migrate:production",
+    "deploy": "npm run deploy:production",
+    "setup:local": "node scripts/setup-local.mjs && npm run db:migrate",
+    "format": "prettier --write src scripts tests *.ts *.json *.md docs",
+    "config:check": "node scripts/check-config.mjs",
+    "build:staging": "node scripts/environment-run.mjs build staging",
+    "deploy:staging": "node scripts/environment-run.mjs deploy staging",
+    "db:migrate:staging": "node scripts/environment-run.mjs migrate staging",
+    "config:check:staging": "node scripts/check-config.mjs --env staging",
+    "env:sync:staging": "node scripts/sync-env.mjs staging",
+    "env:sync:production": "node scripts/sync-env.mjs production",
+    "build:production": "node scripts/environment-run.mjs build production",
+    "deploy:production": "node scripts/environment-run.mjs deploy production",
+    "db:migrate:production": "node scripts/environment-run.mjs migrate production",
+    "config:check:production": "node scripts/check-config.mjs --env production"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.94",
+    "@base-ui/react": "^1.9.0",
+    "@fontsource-variable/noto-sans-sc": "^5.3.1",
+    "@tanstack/react-router": "^1.170.44",
+    "@tanstack/react-start": "^1.169.2",
+    "ai": "^7.0.141",
+    "better-auth": "^1.7.9",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.4",
+    "lucide-react": "^1.57.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "resend": "^6.33.0",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.64.0",
+    "@cloudflare/workers-types": "^5.20261015.1",
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "drizzle-kit": "^0.31.11",
+    "prettier": "^3.9.10",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4",
+    "wrangler": "^4.151.0"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "^0.25.12"
+    }
+  }
+}

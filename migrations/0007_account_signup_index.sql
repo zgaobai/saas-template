@@ -1,0 +1,1 @@
+CREATE INDEX `account_signup_idx` ON `account` (`user_id`,`created_at`,`id`);
