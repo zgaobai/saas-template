@@ -71,7 +71,10 @@ export function AuthForm({
           password,
           callbackURL: localizedPath(returnTo, locale),
         });
-        if (r.error) throw new Error("注册未完成，请检查邮箱或稍后重试。");
+        if (r.error)
+          throw new Error(
+            r.error.message || "注册未完成，请检查邮箱或稍后重试。",
+          );
         if (caps.local) await success();
         else setMessage("请查收验证邮件，验证后即可登录。");
       } else if (mode === "forgot") {

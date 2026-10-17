@@ -46,6 +46,7 @@ npm run env:sync:staging
 - `REDEMPTION_ENCRYPTION_KEY`：64 位 Hex 兑换卡密加密密钥（留空自动生成）。
 - `ADMIN_USER_IDS`：以半角逗号分隔的管理员 User ID 列表，授权访问 `/admin` 管理后台。
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`：（可选）Google OAuth 一键登录。
+- **注册防刷与反羊毛机制**：内置 Cloudflare 边缘 IP 频控（10 次/小时）、400+ 临时黑产邮箱过滤与 Gmail/主流邮箱别名规整去重，开箱即用，无需额外配置第三方反欺诈环境变量。
 
 ### 3. AI 模型与内容合规
 - **AI 大模型管理**：所有 AI 厂商与模型（DeepSeek、OpenAI、Claude 等）、API Key 与端点统一通过【管理员后台 `/admin/ai`】可视化添加、测试与动态切换，无需在环境文件中配置。

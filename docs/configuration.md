@@ -32,6 +32,13 @@ npm run config:check 合并本地 Wrangler vars、.dev.vars、进程环境，只
 
 AI_API_STYLE=responses 默认使用 OpenAI Responses；兼容 Chat Completions 的服务使用 chat，设置对应 AI_BASE_URL（包含 /v1 等服务商要求的路径）和 AI_MODEL。凭据仍使用 OPENAI_API_KEY 这个变量名。不同厂商专有协议不因此自动兼容。AI_BASE_URL 必须 HTTPS，只有本地开发 localhost/127.0.0.1 允许 HTTP。接入层在 modules/ai/server/model.ts，业务提示词在 modules/tools/server/prompts.ts。
 
+### 认证安全与反薅羊毛机制
+
+系统在身份认证接入层内置了三道防刷防羊毛规则，无需额外配置第三方付费反欺诈服务即可生效：
+- **边缘 IP 频控限制**：基于 Cloudflare Workers 注入的 `cf-connecting-ip` 限制单个 IP 每小时最多注册 10 次；超限返回 HTTP 429。本地开发（`APP_ENV === "development"`）自动豁免匿名流量，避免调试锁死。
+- **一次性临时邮箱阻断**：内置 400+ 临时黑产邮箱服务域名及通配子域黑名单，在注册验证阶段拦截并返回 HTTP 400。
+- **主流邮箱别名规范化去重**：对 Gmail 自动剔除点号 `.` 与 `+` 标签（如 `a.b.c+test@gmail.com` -> `abc@gmail.com`），对 Outlook、Hotmail、iCloud、Proton 等自动清洗 `+` 别名标签；规整后通过数据库 `UNIQUE(email)` 约束拦截，防止利用同一实体邮箱通过别名无限次重复领取初始免费积分。
+
 ## 支付共通规则
 
 PAYMENT_PROVIDER 可选 pancake、stripe、creem、paypal，默认 pancake。页面统一调用内部结账接口，不携带价格、积分或提供商选择。历史订单保留提供商、金额和积分；切换默认渠道不会更改历史订单。保留旧渠道凭据和回调，直到旧订阅和退款结束。

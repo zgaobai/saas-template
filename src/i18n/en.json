@@ -634,6 +634,8 @@
   "保留所有权利。": "All rights reserved.",
   "全球边缘网络驱动": "Powered by Cloudflare Edge",
   "GitHub 仓库": "GitHub repository",
+  "不支持使用临时邮箱或一次性邮箱注册，请使用常用个人或工作邮箱。": "Disposable and temporary email addresses are not supported. Please use a personal or work email.",
+  "当前 IP 注册过于频繁，请稍后再试。": "Too many registrations from this IP. Please try again later.",
   "网站导航": "Site navigation",
   "功能介绍": "Features",
   "收起导航": "Close navigation",

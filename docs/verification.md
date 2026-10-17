@@ -117,3 +117,37 @@ npm run check
 多语言地址从 lang 查询参数调整为 `/zh/`、`/en/` 前缀，复用一套路由文件。旧链接自动跳转；站内 Link、语言切换、登录回跳、邮件回跳、canonical/hreflang 与 sitemap 使用新路径。API、支付回调、服务端函数与静态资源不加前缀。
 
 新增 5 项路由回归测试，全量 281 项测试、类型检查、构建与客户端密钥扫描通过。浏览器确认 `/zh/billing` 与 `/en/billing` 双向切换、账户菜单全部带语言前缀、订单标签 section 参数与刷新状态保留。HTTP 检查确认中英文首屏、公开页面链接、旧 URL 跳转、未登录账户到对应语言登录弹窗的跳转链，以及 `/api/health` 正常响应。当前本地环境未部署云端或调用真实支付/OAuth 服务。
+
+
+## 体验与基础修复（2026-10-17）
+
+- **AI 能力动态探测**：`publicCapabilities()` 从固定硬编码改为动态依赖模型配置状态，未配置模型与 API Key 时前台工具页如实显示配置提示，禁用生成操作，避免误导用户。
+- **本地冒烟就绪轮询**：`smoke-local.mjs` 脚本增强本地服务冷启动弹性等待机制（最多重试 60 次、间隔 500ms），彻底消除自动化流程中未就绪竞争引发的偶发断言失败。
+- **开源许可协议**：补充标准开源 MIT License 声明文件（`LICENSE`），明确知识产权、许可权限与免责声明。
+- **页脚布局与文案优化**：修复长描述文本在不同视口宽度下的文字换行与溢出，清理页脚与主视觉区中重复的信息文案。
+
+
+## 注册防刷与反薅羊毛安全防御（2026-10-17）
+
+针对通过邮件别名（`+` 标签、点号 trick）以及临时一次性黑产邮箱反复注册批量套取系统初始体验积分的羊毛党，构筑了端到端三道防御防线：
+
+1. **IP 注册频率限制**：
+   - 基于 Cloudflare Workers 边缘真实客户端头 `cf-connecting-ip`（防伪造），限制单个 IP 每小时最多注册 10 次；
+   - 超出后直接返回 HTTP 429 与地道中英文错误提示；
+   - 保护本地开发环境（`APP_ENV === "development"`），无边缘请求头时不误锁匿名测试流量。
+2. **临时邮箱域名拦截（Disposable Email Blocking）**：
+   - 引入 400+ 常见一次性临时邮箱服务商域名黑名单与通配子域正则匹配（覆盖 `mailinator.com`, `temp-mail.org`, `10minutemail.com`, `guerrillamail.com`, `yopmail.com` 等）；
+   - 拦截后直接返回 HTTP 400，拒绝发放凭证与写入数据库。
+3. **主流邮箱规范化去重（Email Normalization & Canonicalization）**：
+   - 针对 Gmail：自动剔除点号（如 `a.l.e.x@gmail.com` 映射为 `alex@gmail.com`），清洗 `+alias` 标签，统一 `googlemail.com` 为 `gmail.com`；
+   - 针对 Outlook / Hotmail / Live / iCloud / Fastmail / Proton：自动剔除 `+` 别名标签；
+   - 保留普通高校/企业域名的真实点号（如 `john.smith@acme.com`）；
+   - 规整后传递至 Better-Auth，触发数据库 `UNIQUE(email)` 约束，命中重复注册阻断（HTTP 422），彻底防止利用同一实体邮箱派生无限别名套取新手积分。
+4. **前端交互与多语言适配**：
+   - 前端注册/登录表单统一解析后端错误消息并渲染在顶部通知横幅中，按钮正常解除 loading 态；
+   - 接入 `src/i18n` 中英文地道文案。
+5. **自动化测试与交付质检**：
+   - 新增 `tests/email-security.test.ts` 专项测试套件（7 项断言，覆盖规整、过滤、拦截与多语言错误返回）；
+   - 全项目 28 个测试文件、321 项自动化测试全部通过；
+   - `npm run check`（TypeScript 严格类型检查 + 321 项测试 + Vite 生产构建 + 密钥物理扫描）100% 通过。
+

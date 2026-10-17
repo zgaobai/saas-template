@@ -62,8 +62,12 @@
 - **[@base-ui/react](https://base-ui.com/)**：无样式、高度符合无障碍标准的现代 UI 原语库（用于全局模态弹窗、Popover、下拉选择等）。
 - **[Lucide Icons](https://lucide.dev/)**：风格统一、体积轻量、辨识度极高的现代矢量图标库。
 
-### 4. 身份认证与会话安全
+### 4. 身份认证与安全防刷
 - **[Better Auth](https://www.better-auth.com/)**：针对全栈应用深度优化的现代认证库，支持邮箱/密码登录、找回密码、邮箱验证重发与 Google OAuth 一键授权。
+- **三道反羊毛安全防线 (Anti-Abuse)**：
+  - **边缘 IP 限流**：基于 Cloudflare 边缘只读头 `cf-connecting-ip` 实行单 IP 10 次/小时频控拦截；
+  - **一次性邮箱拦截**：内置 400+ 临时黑产邮箱服务与通配子域阻断（如 mailinator、temp-mail 等）；
+  - **别名规范化去重**：自动清洗 Gmail 点号 `.` 及各主流服务商（Gmail、Outlook、iCloud 等）的 `+alias` 标签，命中数据库 `UNIQUE(email)` 约束，彻底阻断利用别名批量套取初始赠送积分。
 
 ### 5. AI 模型引擎与安全合规
 - **[Vercel AI SDK 4](https://sdk.vercel.ai/)**：统一的大模型调用抽象层，支持 Responses 与 Chat Completions 协议，提供文本渐进式流式输出（SSE）。
@@ -84,7 +88,7 @@
 
 ### 8. 邮件服务与工程化测试
 - **[Resend](https://resend.com/)**：现代开发者邮件投递平台，处理事务性邮件。
-- **[Vitest](https://vitest.dev/)**：全套 314 个单元与集成测试。
+- **[Vitest](https://vitest.dev/)**：全套 321 个单元与集成测试。
 - **[TypeScript 5.8](https://www.typescriptlang.org/)**：全项目端到端强类型约束。
 
 ---
@@ -216,7 +220,7 @@ export const site = {
 ```bash
 npm run check
 ```
-该命令会自动按顺序执行：**TypeScript 严格类型检查 + 全套 314 项自动化测试 + 生产环境打包构建 + 客户端密钥防泄露物理扫描**。
+该命令会自动按顺序执行：**TypeScript 严格类型检查 + 全套 321 项自动化测试 + 生产环境打包构建 + 客户端密钥防泄露物理扫描**。
 
 ---
 
@@ -257,7 +261,7 @@ npm run deploy:production
 > `deploy` 命令会自动串联执行以下完整工作流，无需人工干预：
 > 1. **配置自动同步**：自动读取对应的环境文件，更新 `APP_URL` 与数据库绑定；
 > 2. **密钥批量加密上传**：通过 Cloudflare 官方 `wrangler secret bulk` 秒级批量加密同步所有非空密钥；
-> 3. **交付级严苛质检**：执行全量 TypeScript 校验与 314 项自动化测试；
+> 3. **交付级严苛质检**：执行全量 TypeScript 校验与 321 项自动化测试；
 > 4. **生产构建与物理扫描**：Vite 构建轻量同构产物，并物理扫描确保零私钥泄露给客户端；
 > 5. **数据库自动迁移**：自动将最新 D1 Schema 迁移应用至云端；
 > 6. **零停机分发**：秒级同步至 Cloudflare 全球 300+ 边缘节点。
@@ -274,11 +278,11 @@ npm run deploy:production
 | :--- | :--- |
 | `npm run dev` | 启动本地 Vite 开发服务器（端口 4317） |
 | `npm run setup:local` | 自动生成本地密钥并初始化本地 SQLite 数据库 |
-| `npm run deploy:staging` | **一键测试站发布**（同步测试配置、314 项质检、自动数据库迁移并发布） |
-| `npm run deploy:production` | **一键生产站发布**（同步正式配置、314 项质检、自动数据库迁移并发布） |
+| `npm run deploy:staging` | **一键测试站发布**（同步测试配置、321 项质检、自动数据库迁移并发布） |
+| `npm run deploy:production` | **一键生产站发布**（同步正式配置、321 项质检、自动数据库迁移并发布） |
 | `npm run env:sync:staging` | 将 `.env.staging` 中的配置与密钥批量加密同步至 Cloudflare 测试环境 |
 | `npm run env:sync:production` | 将 `.env.production` 中的配置与密钥批量加密同步至 Cloudflare 生产环境 |
-| `npm run check` | **交付级质检**（TypeScript + 314 项测试 + 生产构建 + 私钥防泄露扫描） |
+| `npm run check` | **交付级质检**（TypeScript + 321 项测试 + 生产构建 + 私钥防泄露扫描） |
 | `npm run test` | 快速执行 Vitest 全量单元/集成测试 |
 | `npm run config:check` | 检查当前配置项缺项（安全诊断，不泄漏明文） |
 | `npm run db:migrate` | 应用本地数据库迁移 |
