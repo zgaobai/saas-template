@@ -38,6 +38,7 @@
 - 📦 **开箱即用，零前置凭据体验**：本地预设 SQLite 数据库与随机安全密钥。即使尚未申请任何第三方 API Key，也可直接在本地运行完整的注册登录、工具预览、示例效果、暗黑主题切换与后台大盘。
 - 🔧 **工具即配置，提示词即业务**：工具展示信息（`catalog.ts`）、专业私有提示词（`prompts.ts`）、前后端输入契约（`input.ts`）集中声明，不需要大改底层路由或数据库结构。
 - 💳 **多支付即插即用**：通过 `PAYMENT_PROVIDER` 环境变量一键切换 Pancake / Stripe / Creem / PayPal，保留历史订单兼容性。
+- 🤖 **即插即用飞书到账通知**：内置飞书群机器人（Interactive Card）即时到账推送，支付成功后自动向飞书群推送绿色标题栏卡片，直观展现订单金额、累计流水、积分到账状态与脱敏用户信息，支持 HMAC-SHA256 签名与 2.5s 熔断保护。
 - 🔒 **客户端零密钥泄露**：强制 `@tanstack/react-start/server-only` 边界隔离，构建打包自动执行物理扫描，绝不让任何数据库私钥、支付密钥或 AI Key 泄露到前端。
 
 ---
@@ -79,6 +80,7 @@
 - **[Stripe](https://stripe.com/)**：全球主流信用卡支付、周期性订阅管理与 Webhook 事件对账。
 - **[Creem](https://creem.io/)**：轻量出海托管支付与数字商品订阅结算。
 - **[PayPal](https://developer.paypal.com/)**：全球电子钱包结算，支持月付/年付周期性订阅。
+- **[飞书即时到账通知机器人](https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot)**：全渠道支付对账完成后，支持实时向飞书群推送绿色标题栏交互式卡片（Interactive Card），自带 8 维对账详情、用户邮箱脱敏、HMAC-SHA256 签名及网络异常容灾隔离。
 
 ### 7. 数据分析、SEO 与 GEO 优化
 - **[Google Analytics 4 (GA4)](https://analytics.google.com/)**：支持转化漏斗与用户行为追踪。
@@ -186,6 +188,8 @@ npm run dev
 | | `PAYPAL_*` | 可选通道 | PayPal REST App 凭据（`CLIENT_ID`, `CLIENT_SECRET`, `WEBHOOK_ID`）。支持可选 `PAYPAL_BASE_URL` 覆盖。 |
 | **5. 网站访问统计分析** | `GA_MEASUREMENT_ID` | 选填 | Google Analytics 4 衡量 ID（仅在生产环境 HTTPS 且可被索引时自动注入，本地绝不产生脏数据）。 |
 | | `UMAMI_WEBSITE_ID` | 选填 | Umami 统计 Website ID（轻量注重隐私）。 |
+| **6. 运营监控与即时告警** | `FEISHU_WEBHOOK_URL` | 选填 | 飞书群自定义机器人 Webhook 地址。配置后全渠道支付成功实时推送卡片；留空自动关闭。 |
+| | `FEISHU_WEBHOOK_SECRET` | 选填 | 飞书机器人安全签名密钥（支持 Web Crypto HMAC-SHA256 签名校验）。 |
 
 > [!TIP]
 > **关于网络专线与 Base URL 覆盖**：
