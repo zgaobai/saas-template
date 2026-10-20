@@ -9,7 +9,8 @@ export function getRouter() {
     routeTree,
     scrollRestoration: true,
     defaultPreload: "intent",
-    defaultPreloadStaleTime: 0,
+    defaultPreloadDelay: 50,
+    defaultPreloadStaleTime: 30000,
   });
   currentLocale = () =>
     router.state.location.search.lang === "zh" ? "zh" : "en";

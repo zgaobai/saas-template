@@ -151,3 +151,49 @@ npm run check
    - 全项目 28 个测试文件、321 项自动化测试全部通过；
    - `npm run check`（TypeScript 严格类型检查 + 321 项测试 + Vite 生产构建 + 密钥物理扫描）100% 通过。
 
+
+## 菜单切换与数据加载性能重构（2026-10-20）
+
+彻底解决点击侧边栏菜单切换路由时因多个服务端 Server Functions（`publicSite`、`requestLocale`、`sessionInfo`）串行往返导致的“界面假死延迟”，以及组件重新挂载时强制清空数据引发的“空白骨架屏反复闪烁”问题：
+
+1. **路由会话客户端缓存（`src/modules/auth/client.ts` & `src/routes/_app.tsx`）**：
+   - 增加 60 秒有效期的客户端内存用户会话缓存，同一会话在后台各菜单（总览、任务、订单、用户等）之间跳转时 0ms 秒通，免除每次网络往返；
+   - 在退出登录（`app-shell.tsx` 与 `account-settings.tsx`）及注销时即刻主动清理缓存；
+   - 严格限定在浏览器端（`typeof window !== "undefined"`），SSR 阶段请求隔离，绝无跨用户数据串扰。
+2. **站点信息与语言解析缓存（`src/routes/__root.tsx`）**：
+   - 客户端长效复用部署级静态元数据 `publicSite`；
+   - 基于 `search.lang` 智能复用客户端解析结果，消除每次跳转对 `requestLocale` 的重复网络调用。
+3. **预加载与响应度优化（`src/router.tsx`）**：
+   - 启用 `defaultPreload: "intent"`、`defaultPreloadDelay: 50` 与 `defaultPreloadStaleTime: 30000`；
+   - 鼠标悬停链接即刻就绪代码分块，并在 30 秒内复用预载数据，点击链接即开。
+4. **数据 SWR 缓存与静默更新（`src/lib/use-resource.ts`）**：
+   - 引入 Stale-While-Revalidate 机制，访问过的列表与表单在菜单切回时瞬间以既有数据秒级渲染（消灭空白骨架屏）；
+   - 后台静默发送 `reload(true)` 刷新最新数据并差分更新；
+   - 内置 LRU 容量控制（上限 100 条）防内存溢出，并提供 `clearResourceCache()` 主动失效方法。
+5. **验证与交付自检**：
+   - 新增 `tests/client-cache.test.ts` 专项测试套件（5 项测试，覆盖客户端缓存有效性、主动失效、TTL 过期及 SSR 环境绕过隔离断言）；
+   - 全量 29 个测试文件、326 项测试全部通过；
+   - `npm run check`（TypeScript 严格类型检查 + 326 项测试 + Vite 生产构建 + 密钥防泄露物理扫描）100% 绿灯。
+
+
+## 飞书到账即时通知机器人架构接入（2026-10-20）
+
+实现支付成功后的即时飞书群机器人（Webhook Interactive Card）通知架构：
+
+1. **富文本卡片消息构建（`src/modules/billing/server/feishu-notify.ts`）**：
+   - 原生支持飞书交互式消息卡片（Interactive Card），带有绿色顶部标题栏 `💰 新订单支付成功`；
+   - 自动排版 8 个核心业务字段：订单金额（格式化币种）、累计支付金额（历史汇总）、积分数量、积分发放状态（`✅ 已发放`）、支付渠道名称映射、脱敏邮箱（保护隐私）、用户注册时间与支付入账时间；
+   - 卡片底部附带站点名注脚与分割线。
+2. **安全验签与非阻塞投递**：
+   - 支持基于 Web Crypto 的 HMAC-SHA256 签名计算（`FEISHU_WEBHOOK_SECRET`），与 Cloudflare Workers 边缘运行时原生兼容；
+   - 通知放在支付对账数据库批处理事务提交之后，包裹在独立异步异常隔离中，即使飞书网络故障或超时，也绝对不影响主支付 Webhook 响应与用户积分到账；
+   - 环境变量未配置 `FEISHU_WEBHOOK_URL` 时，代码自动静默跳过，保证零前置凭据运行不受影响。
+3. **全渠道支付挂载（`src/modules/billing/server/reconciliation.ts`）**：
+   - 在统一对账执行层挂载通知，Pancake、Stripe、Creem、PayPal 全渠道支付成功后自动触发，重试事件按凭据去重（避免重复推送）。
+4. **验证与自检**：
+   - 新增 `tests/feishu-notify.test.ts`（6 项测试，覆盖邮箱脱敏、渠道名称映射、货币格式化、HMAC 签名、卡片结构断言与环境缺省平稳回退）；
+   - 全量 30 个测试文件、332 项测试全部通过；
+   - `npm run check` 交付级检查全绿。
+
+
+

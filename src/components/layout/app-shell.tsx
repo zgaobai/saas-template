@@ -26,7 +26,8 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { Brand } from "./brand";
-import { authClient } from "@/modules/auth/client";
+import { authClient, clearClientSessionCache } from "@/modules/auth/client";
+import { clearResourceCache } from "@/lib/use-resource";
 import { Button } from "@/components/ui/button";
 export function AppShell({
   user,
@@ -261,6 +262,8 @@ export function AppShell({
               variant="ghost"
               aria-label={tr("退出登录")}
               onClick={async () => {
+                clearClientSessionCache();
+                clearResourceCache();
                 await authClient.signOut();
                 await navigate({
                   to: "/",

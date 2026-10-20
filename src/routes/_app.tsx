@@ -1,9 +1,19 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { sessionInfo } from "@/modules/auth/functions";
+import {
+  getCachedClientSession,
+  setCachedClientSession,
+  type SessionUser,
+} from "@/modules/auth/client";
 import { AppShell } from "@/components/layout/app-shell";
+
 export const Route = createFileRoute("/_app")({
   beforeLoad: async ({ location }) => {
-    const user = await sessionInfo();
+    let user: SessionUser | null = getCachedClientSession();
+    if (!user) {
+      user = (await sessionInfo()) as SessionUser | null;
+      setCachedClientSession(user);
+    }
     if (!user)
       throw redirect({ to: "/login", search: { next: location.pathname } });
     return { user };

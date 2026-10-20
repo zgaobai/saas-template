@@ -2,7 +2,8 @@ import { localizedPath } from "@/i18n/core";
 import { useI18n } from "@/i18n/react";
 import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { authClient } from "@/modules/auth/client";
+import { authClient, clearClientSessionCache } from "@/modules/auth/client";
+import { clearResourceCache } from "@/lib/use-resource";
 import { PageHeading } from "@/components/layout/page-heading";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
@@ -60,6 +61,8 @@ export function AccountSettings({
           <Button
             variant="secondary"
             onClick={async () => {
+              clearClientSessionCache();
+              clearResourceCache();
               const r = await authClient.signOut();
               if (r.error) {
                 setError("退出失败，请重试。");

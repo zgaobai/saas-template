@@ -45,6 +45,8 @@ export interface Bindings {
   GA_MEASUREMENT_ID?: string;
   UMAMI_WEBSITE_ID?: string;
   UMAMI_SCRIPT_URL?: string;
+  FEISHU_WEBHOOK_URL?: string;
+  FEISHU_WEBHOOK_SECRET?: string;
 }
 export const bindings = () => env as unknown as Bindings;
 export function required(value: string | undefined, name: string): string {

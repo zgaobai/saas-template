@@ -15,6 +15,10 @@ import { site } from "@/site";
 import { publicSite } from "@/modules/seo/functions";
 import { generateJsonLdSchema } from "@/modules/seo/geo";
 import { Analytics } from "@/modules/seo/components/analytics";
+let clientEnvironmentCache: Awaited<ReturnType<typeof publicSite>> | null =
+  null;
+let clientLocaleCache: { key: string; locale: "zh" | "en" } | null = null;
+
 export const Route = createRootRoute({
   validateSearch: (
     search: Record<string, unknown>,
@@ -34,12 +38,41 @@ export const Route = createRootRoute({
     next: search.next === undefined ? undefined : safeReturnTo(search.next),
   }),
   beforeLoad: async ({ search }) => {
-    const [environment, locale] = await Promise.all([
-      publicSite(),
-      requestLocale({
-        data: search.lang,
-      }),
-    ]);
+    let environment: Awaited<ReturnType<typeof publicSite>>;
+    let locale: "zh" | "en";
+
+    if (typeof window !== "undefined") {
+      if (clientEnvironmentCache) {
+        environment = clientEnvironmentCache;
+      } else {
+        environment = await publicSite();
+        clientEnvironmentCache = environment;
+      }
+
+      const searchLang = search.lang;
+      if (searchLang === "zh" || searchLang === "en") {
+        locale = searchLang;
+        clientLocaleCache = { key: searchLang, locale };
+      } else if (
+        clientLocaleCache &&
+        clientLocaleCache.key === (searchLang || "")
+      ) {
+        locale = clientLocaleCache.locale;
+      } else {
+        locale = (await requestLocale({ data: searchLang })) as "zh" | "en";
+        clientLocaleCache = { key: searchLang || "", locale };
+      }
+    } else {
+      const [envData, locData] = await Promise.all([
+        publicSite(),
+        requestLocale({
+          data: search.lang,
+        }),
+      ]);
+      environment = envData;
+      locale = locData as "zh" | "en";
+    }
+
     return {
       publicSite: {
         ...environment,

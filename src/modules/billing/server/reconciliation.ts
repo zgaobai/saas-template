@@ -1,6 +1,7 @@
 import "@tanstack/react-start/server-only";
 import { installmentStatements } from "./installments";
 import { orderMode } from "./plan-contract";
+import { notifyFeishuPayment } from "./feishu-notify";
 import { z } from "zod";
 import { bindings } from "@/server/env";
 import type { PaymentProviderId, Reconciliation } from "./providers/contract";
@@ -207,6 +208,21 @@ export async function applyReconciliation(
         )
         .bind(order.id, order.id),
     ]);
+    if (!old && bindings().FEISHU_WEBHOOK_URL) {
+      try {
+        await notifyFeishuPayment({
+          orderId: order.id,
+          userId: order.user_id,
+          amount: p.amount,
+          currency: order.currency,
+          credits: order.credits,
+          provider,
+          paymentId: p.paymentId,
+        });
+      } catch (err) {
+        console.error("Feishu payment notification failed:", err);
+      }
+    }
   }
   for (const r of events.refunds) {
     const receiptId = `${provider}:${r.paymentId}`;
