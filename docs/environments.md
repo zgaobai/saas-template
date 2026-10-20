@@ -66,3 +66,7 @@ npm run env:sync:staging
 ### 6. 网站访问统计（仅生产环境注入）
 - `GA_MEASUREMENT_ID`：Google Analytics 4 衡量 ID（例如 `G-XXXXXXXXXX`）。
 - `UMAMI_WEBSITE_ID` / `UMAMI_SCRIPT_URL`：Umami 统计 ID 与脚本地址。
+
+### 7. 运营监控与即时告警 (飞书机器人)
+- `FEISHU_WEBHOOK_URL`：（可选）飞书群自定义机器人的 Webhook 地址。配置后，当全渠道有任意新订单支付成功并完成积分发放时，自动向群内推送带绿色标题栏的富文本卡片通知。留空则自动关闭。
+- `FEISHU_WEBHOOK_SECRET`：（可选）飞书机器人的签名密钥，系统将自动使用 Web Crypto 计算 HMAC-SHA256 签名，提升告警通道安全性。
