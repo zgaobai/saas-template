@@ -25,10 +25,23 @@ npm run config:check 合并本地 Wrangler vars、.dev.vars、进程环境，只
 | ------ | -------------------------------------------------------- | ------------------------------------------- |
 | 认证   | BETTER_AUTH_SECRET，至少32字符                           | 本地自动生成；生产独立设置                  |
 | 邮件   | RESEND_API_KEY、EMAIL_FROM                               | Resend 验证发信域名；正式邮箱注册依赖邮件   |
-| Google | GOOGLE_CLIENT_ID、GOOGLE_CLIENT_SECRET                   | OAuth 回调 APP_URL/api/auth/callback/google |
+| Google | GOOGLE_CLIENT_ID、GOOGLE_CLIENT_SECRET                   | OAuth 回调 APP_URL/api/auth/callback/google 与 One Tap JavaScript 来源 |
 | AI     | OPENAI_API_KEY、AI_MODEL；可选 AI_BASE_URL、AI_API_STYLE | 取得模型访问权限                            |
 | 存储   | DB、FILES 绑定                                           | 创建 D1/R2，应用迁移                        |
 | 管理员 | ADMIN_USER_IDS                                           | 填写已有用户 ID，逗号分隔                   |
+
+### Google 登录与 Google One Tap (一键无感登录)
+
+系统同时支持两种 Google 认证体验：
+1. **标准 OAuth 2.0 重定向登录**：用户在登录弹窗中点击「使用 Google 账号登录」按钮，重定向至 Google 授权页。
+2. **Google One Tap (FedCM / GIS) 浮层**：未登录用户在访问站点首页或业务页面时，浏览器右上角自动浮现轻量化“以 [Google 用户名] 身份继续”卡片，单次点击即可静默完成登录，无需任何页面跳转。
+
+**Google Cloud 控制台配置要点**：
+- **已获授权的重定向 URI (Authorized redirect URIs)**：
+  `https://你的域名/api/auth/callback/google`（本地开发：`http://127.0.0.1:4317/api/auth/callback/google` 与 `http://localhost:4317/api/auth/callback/google`）
+- **已获授权的 JavaScript 来源 (Authorized JavaScript origins)**（**One Tap 必填**）：
+  `https://你的域名`（本地开发：`http://127.0.0.1:4317` 与 `http://localhost:4317`）
+- **容灾与隐私设计**：未配置 `GOOGLE_CLIENT_ID` 时，客户端完全不请求 Google 脚本；当网络无法访问 Google 服务时，代码内置了静默容灾，绝不影响普通页面渲染与邮箱登录。
 
 AI_API_STYLE=responses 默认使用 OpenAI Responses；兼容 Chat Completions 的服务使用 chat，设置对应 AI_BASE_URL（包含 /v1 等服务商要求的路径）和 AI_MODEL。凭据仍使用 OPENAI_API_KEY 这个变量名。不同厂商专有协议不因此自动兼容。AI_BASE_URL 必须 HTTPS，只有本地开发 localhost/127.0.0.1 允许 HTTP。接入层在 modules/ai/server/model.ts，业务提示词在 modules/tools/server/prompts.ts。
 

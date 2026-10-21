@@ -73,6 +73,7 @@ export function publicCapabilities() {
     auth: configured("auth"),
     email: configured("email"),
     google: configured("google"),
+    googleClientId: e.GOOGLE_CLIENT_ID || undefined,
     ai: configured("ai"),
     payments: paymentConfigured(),
     local: e.APP_ENV === "development",

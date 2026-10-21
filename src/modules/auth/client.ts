@@ -1,5 +1,25 @@
 import { createAuthClient } from "better-auth/react";
-export const authClient = createAuthClient();
+import { oneTapClient } from "better-auth/client/plugins";
+
+let dynamicGoogleClientId = "";
+
+export function setClientGoogleClientId(id: string): void {
+  dynamicGoogleClientId = id;
+}
+
+export function getClientGoogleClientId(): string {
+  return dynamicGoogleClientId;
+}
+
+export const authClient = createAuthClient({
+  plugins: [
+    oneTapClient({
+      get clientId() {
+        return dynamicGoogleClientId;
+      },
+    }),
+  ],
+});
 
 export interface SessionUser {
   id: string;

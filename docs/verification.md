@@ -196,4 +196,25 @@ npm run check
    - `npm run check` 交付级检查全绿。
 
 
+## Google One Tap (一键无感登录) 架构接入（2026-10-21）
+
+接入 Google One Tap（基于 Google Identity Services 与 FedCM 协议的一键浮层登录），免去用户繁琐的页面重定向跳转：
+
+1. **服务端 Better Auth One Tap 插件集成（`src/modules/auth/server/auth.ts`）**：
+   - 动态挂载 `better-auth/plugins` 的 `oneTap({ clientId: e.GOOGLE_CLIENT_ID })`；
+   - 注册并处理 `/api/auth/one-tap/callback` 端点，基于 Web Crypto 原生校验 Google ID Token 并完成账号关联与安全登录。
+2. **客户端 One Tap 插件与动态 Client ID 注入（`src/modules/auth/client.ts`）**：
+   - `authClient` 挂载 `oneTapClient` 插件，通过动态属性访问器读取公开能力集提供的 `googleClientId`；
+   - 提供 `setClientGoogleClientId` 动态绑定。
+3. **全站自动唤起与未登录感知（`src/modules/auth/components/google-one-tap.tsx`）**：
+   - 全局挂载至根路由 `__root.tsx`；
+   - 智能识别会话状态：已登录用户或无 Google 凭据时 0 开销静默跳过；未登录用户访问首页或公开页面时自动唤起右上角 One Tap 浮层；
+   - 跨国网络容灾：对 Google 外部脚本异常捕获兜底，弱网或受限网络下绝不阻塞任何正常功能。
+4. **验证与交付自检**：
+   - 新增 `tests/google-one-tap.test.ts` 专项测试套件（3 项测试，覆盖 Client 端插件方法、Server 端插件挂载、公开能力集字段暴露）；
+   - 全量 31 个测试文件、335 项测试全部通过；
+   - `npm run check`（TypeScript 严格类型检查 + 335 项测试 + Vite 生产构建 + 密钥防泄露物理扫描）100% 绿灯。
+
+
+
 

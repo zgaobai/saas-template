@@ -3,6 +3,7 @@ import "@tanstack/react-start/server-only";
 import { shortId } from "@/server/id";
 import { site } from "@/site";
 import { betterAuth } from "better-auth";
+import { oneTap } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/server/db/client";
 import { bindings, required } from "@/server/env";
@@ -55,6 +56,15 @@ export function auth() {
             },
           }
         : {},
+    plugins: [
+      ...(e.GOOGLE_CLIENT_ID
+        ? [
+            oneTap({
+              clientId: e.GOOGLE_CLIENT_ID,
+            }),
+          ]
+        : []),
+    ],
     rateLimit: { enabled: true, storage: "database", modelName: "rateLimit" },
     advanced: {
       database: { generateId: shortId },

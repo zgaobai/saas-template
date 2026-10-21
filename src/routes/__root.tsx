@@ -9,6 +9,7 @@ import {
   Link,
 } from "@tanstack/react-router";
 import { AuthDialogProvider } from "@/modules/auth/components/auth-dialog";
+import { GoogleOneTap } from "@/modules/auth/components/google-one-tap";
 import { safeReturnTo } from "@/modules/tools/catalog";
 import stylesheet from "@/styles/globals.css?url";
 import { site } from "@/site";
@@ -181,6 +182,7 @@ function Root() {
           </button>
           <div id="main-content" tabIndex={-1}>
             <AuthDialogProvider>
+              <GoogleOneTap />
               <Outlet />
             </AuthDialogProvider>
           </div>
