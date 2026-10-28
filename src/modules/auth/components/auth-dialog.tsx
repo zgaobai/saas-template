@@ -89,11 +89,11 @@ export function AuthDialogProvider({ children }: { children: ReactNode }) {
   const titles = {
     login: "登录或注册",
     register: "登录或注册",
-    forgot: "找回密码",
+    forgot: "登录或注册",
   };
   const descriptions = {
     register: "输入邮箱即可快速免密进入，新账户赠送 20 积分。",
-    forgot: "输入注册邮箱，我们会发送重置密码的链接。",
+    forgot: "输入邮箱即可快速免密进入，新账户赠送 20 积分。",
   };
   return (
     <AuthContext.Provider value={open}>

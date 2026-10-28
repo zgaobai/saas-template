@@ -5,6 +5,6 @@ export const Route = createFileRoute("/forgot-password")({
     next: safeReturnTo(search.next),
   }),
   beforeLoad: ({ search }) => {
-    throw redirect({ to: "/", search: { auth: "forgot", next: search.next } });
+    throw redirect({ to: "/", search: { auth: "login", next: search.next } });
   },
 });
