@@ -1,5 +1,5 @@
 import { createAuthClient } from "better-auth/react";
-import { oneTapClient } from "better-auth/client/plugins";
+import { oneTapClient, magicLinkClient } from "better-auth/client/plugins";
 
 let dynamicGoogleClientId = "";
 
@@ -13,6 +13,7 @@ export function getClientGoogleClientId(): string {
 
 export const authClient = createAuthClient({
   plugins: [
+    magicLinkClient(),
     oneTapClient({
       get clientId() {
         return dynamicGoogleClientId;

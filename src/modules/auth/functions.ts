@@ -66,3 +66,12 @@ export const accountSecurity = createServerFn({ method: "GET" }).handler(
     return readAccountSecurity(getRequest().headers);
   },
 );
+export const getDevMagicLink = createServerFn({ method: "POST" })
+  .validator((email: string) => email)
+  .handler(async ({ data: email }) => {
+    const { bindings } = await import("@/server/env");
+    const e = bindings();
+    if (e.APP_ENV !== "development") return null;
+    const { getLatestDevMagicLink } = await import("./server/dev-link");
+    return getLatestDevMagicLink(email);
+  });

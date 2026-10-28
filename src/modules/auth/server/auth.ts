@@ -3,7 +3,7 @@ import "@tanstack/react-start/server-only";
 import { shortId } from "@/server/id";
 import { site } from "@/site";
 import { betterAuth } from "better-auth";
-import { oneTap } from "better-auth/plugins";
+import { oneTap, magicLink } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/server/db/client";
 import { bindings, required } from "@/server/env";
@@ -57,6 +57,31 @@ export function auth() {
           }
         : {},
     plugins: [
+      magicLink({
+        sendMagicLink: async ({ email, url }, ctx) => {
+          const req = ctx?.headers
+            ? new Request("http://localhost", { headers: ctx.headers })
+            : undefined;
+          const tr = createTranslator(localeFromRequest(req));
+          if (local) {
+            const { recordDevMagicLink } = await import("./dev-link");
+            recordDevMagicLink(email, url);
+            console.info(
+              `\n========================================\n[Magic Link] 登录链接 for ${email}:\n${url}\n========================================\n`,
+            );
+          }
+          if (!local || e.RESEND_API_KEY) {
+            await sendAccountEmail(
+              email,
+              tr("登录{0}账号", [tr(site.name)]),
+              tr(
+                "请点击下方链接完成免密登录（10分钟内有效）：\n{0}\n\n如非本人操作，请忽略此邮件。",
+                [url],
+              ),
+            );
+          }
+        },
+      }),
       ...(e.GOOGLE_CLIENT_ID
         ? [
             oneTap({
