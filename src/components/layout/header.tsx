@@ -1,18 +1,44 @@
 import { LanguageSwitcher, useI18n } from "@/i18n/react";
 import { HomeSectionLink } from "@/components/layout/home-section-link";
 import { AuthLink } from "@/modules/auth/components/auth-dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { Brand } from "./brand";
 import { ThemeToggle } from "./theme-toggle";
-import { authClient, getCachedClientSession } from "@/modules/auth/client";
+import {
+  authClient,
+  getCachedClientSession,
+  setCachedClientSession,
+  type SessionUser,
+} from "@/modules/auth/client";
+import { sessionInfo } from "@/modules/auth/functions";
 import { UserAccountMenu } from "./user-account-menu";
 export function Header() {
-  const { t: tr, locale } = useI18n();
+  const { t: tr } = useI18n();
   const { data } = authClient.useSession();
-  const cachedUser = getCachedClientSession();
+  const [cachedUser, setCachedUser] = useState<SessionUser | null>(() =>
+    getCachedClientSession(),
+  );
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (data?.user) {
+      const existing = getCachedClientSession();
+      if (existing) {
+        setCachedUser(existing);
+      } else {
+        void sessionInfo().then((info) => {
+          if (info) {
+            setCachedClientSession(info);
+            setCachedUser(info);
+          }
+        });
+      }
+    } else {
+      setCachedUser(null);
+    }
+  }, [data?.user]);
   return (
     <header className="site-header">
       <div className="container header-inner">

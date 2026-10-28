@@ -7,7 +7,7 @@ import {
   ReceiptText,
   Settings,
   Shield,
-  LogOut,
+  Power,
 } from "lucide-react";
 import { useI18n } from "@/i18n/react";
 import { authClient, clearClientSessionCache } from "@/modules/auth/client";
@@ -100,7 +100,7 @@ export function UserAccountMenu({
 
             <Menu.Item
               closeOnClick
-              className="select-option account-menu-item"
+              className="account-menu-item"
               onClick={() => void navigate({ to: "/" })}
             >
               <LayoutGrid size={15} />
@@ -109,7 +109,7 @@ export function UserAccountMenu({
 
             <Menu.Item
               closeOnClick
-              className="select-option account-menu-item"
+              className="account-menu-item"
               onClick={() => void navigate({ to: "/subscriptions" })}
             >
               <CreditCard size={15} />
@@ -118,7 +118,7 @@ export function UserAccountMenu({
 
             <Menu.Item
               closeOnClick
-              className="select-option account-menu-item"
+              className="account-menu-item"
               onClick={() => void navigate({ to: "/billing" })}
             >
               <ReceiptText size={15} />
@@ -127,7 +127,7 @@ export function UserAccountMenu({
 
             <Menu.Item
               closeOnClick
-              className="select-option account-menu-item"
+              className="account-menu-item"
               onClick={() => void navigate({ to: "/account" })}
             >
               <Settings size={15} />
@@ -137,7 +137,7 @@ export function UserAccountMenu({
             {(isAdmin || user.isAdmin) && (
               <Menu.Item
                 closeOnClick
-                className="select-option account-menu-item is-admin"
+                className="account-menu-item is-admin"
                 onClick={() => void navigate({ to: "/admin" })}
               >
                 <Shield size={15} />
@@ -150,10 +150,10 @@ export function UserAccountMenu({
             <Menu.Item
               closeOnClick
               disabled={signingOut}
-              className="select-option account-menu-item is-logout"
+              className="account-menu-item is-logout"
               onClick={() => void handleSignOut()}
             >
-              <LogOut size={15} />
+              <Power size={15} />
               <span>{signingOut ? tr("正在退出…") : tr("退出登录")}</span>
             </Menu.Item>
           </Menu.Popup>
