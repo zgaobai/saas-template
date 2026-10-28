@@ -244,6 +244,27 @@ npm run check
    - 执行 `npm run check`（TypeScript 严格类型检查 + Vitest 测试集 + Vite 生产构建 + 密钥物理防泄漏扫描）全绿通过，生产构建时长优化至 `< 1s`。
 
 
+## GEO “问问 AI” 平台矩阵与 LLMS.TXT 页脚模板落地（2026-10-28）
+
+落地出海热门的 GEO（生成式引擎优化）与用户信任转化页脚模块：
+
+1. **AI 平台预填提问配置（`src/lib/ask-ai.ts`）**：
+   - 支持 ChatGPT（`https://chatgpt.com/?q={prompt}`）；
+   - 支持 Claude（`https://claude.ai/new?q={prompt}`）；
+   - 支持 Perplexity（`https://www.perplexity.ai/search?q={prompt}`）；
+   - 支持 Google Gemini（`https://www.google.com/search?udm=50&q={prompt}`，利用 `udm=50` 直达 Google AI 模式搜索且免登录）；
+   - 支持 Grok（`https://grok.com/?q={prompt}`）；
+   - 提供 `buildAskAiPrompt` 自动提取项目真实配置（`site.name` 与 `site.description`）并地道适配中英文。
+2. **页脚视觉栏（`src/components/layout/geo-ask-ai-bar.tsx`）**：
+   - 左侧展示 `AI 与 AGENT 文档 · LLMS.TXT`，点击直达站点 `/llms.txt` 标准规范文档；
+   - 动态文案提示 `看看 ChatGPT、Claude、Perplexity、Gemini 和 Grok 怎么介绍 <项目名>`；
+   - 右侧排列 5 款高辨识度 AI Logo 按钮，深浅色主题自适应与悬浮微动效，点击在新标签页自动唤起平台并预填提问。
+3. **测试与工程自检**：
+   - 在 `tests/seo.test.ts` 新增专项测试；
+   - 全量 32 个测试文件、345 项测试全部通过，`npm run check` 全绿。
+
+
+
 
 
 

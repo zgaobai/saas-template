@@ -2,6 +2,7 @@ import { useI18n } from "@/i18n/react";
 import { HomeSectionLink } from "@/components/layout/home-section-link";
 import { Link } from "@tanstack/react-router";
 import { Brand } from "./brand";
+import { GeoAskAiBar } from "./geo-ask-ai-bar";
 import { site } from "@/site";
 
 export function Footer() {
@@ -36,6 +37,7 @@ export function Footer() {
           <Link to="/terms">{tr("使用条款")}</Link>
         </nav>
       </div>
+      <GeoAskAiBar />
       <div className="footer-bottom">
         <span>
           © {new Date().getFullYear()} {tr(site.name)} AI. {tr("保留所有权利。")}

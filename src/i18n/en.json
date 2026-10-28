@@ -1249,5 +1249,8 @@
   "链接文案": "Button Text",
   "问题缺陷": "Bug Report",
   "飞书到账通知机器人": "Feishu Payment Webhook Bot",
-  "🔒 已启用安全签名": "🔒 Verified with HMAC signature"
+  "🔒 已启用安全签名": "🔒 Verified with HMAC signature",
+  "AI 与 AGENT 文档": "AI & Agent Documentation",
+  "看看 ChatGPT、Claude、Perplexity、Gemini 和 Grok 怎么介绍 {0}。": "See how ChatGPT, Claude, Perplexity, Gemini, and Grok describe {0}.",
+  "在 {0} 中了解 {1}": "Ask {0} about {1}"
 }

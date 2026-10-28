@@ -5,6 +5,7 @@ import {
   robotsText,
   pageHead,
 } from "../src/modules/seo/metadata";
+import { buildAskAiPrompt, getAskAiPlatforms } from "../src/lib/ask-ai";
 describe("public indexing boundaries", () => {
   it("never indexes development or local deployments", () => {
     for (const [url, production] of [
@@ -74,5 +75,42 @@ describe("public indexing boundaries", () => {
     // Production HTTPS: analytics is active
     const prodEnv = websiteEnvironment("https://tools.example.test", true, analytics);
     expect(prodEnv.analytics).toEqual(analytics);
+  });
+});
+
+describe("GEO Ask AI URL builders", () => {
+  it("builds localized ask prompts using project metadata", () => {
+    const zhPrompt = buildAskAiPrompt("启航", "文案与翻译", "zh");
+    expect(zhPrompt).toContain("启航");
+    expect(zhPrompt).toContain("文案与翻译");
+
+    const enPrompt = buildAskAiPrompt("Qihang", "AI Toolkit", "en");
+    expect(enPrompt).toContain("Qihang");
+    expect(enPrompt).toContain("AI Toolkit");
+  });
+
+  it("configures the 5 major AI platform query URLs", () => {
+    const platforms = getAskAiPlatforms();
+    expect(platforms).toHaveLength(5);
+    const ids = platforms.map((p) => p.id);
+    expect(ids).toEqual(["chatgpt", "claude", "perplexity", "gemini", "grok"]);
+
+    const prompt = "What is Qihang AI?";
+    const encoded = encodeURIComponent(prompt);
+
+    const chatgpt = platforms.find((p) => p.id === "chatgpt");
+    expect(chatgpt?.getUrl(prompt)).toBe(`https://chatgpt.com/?q=${encoded}`);
+
+    const claude = platforms.find((p) => p.id === "claude");
+    expect(claude?.getUrl(prompt)).toBe(`https://claude.ai/new?q=${encoded}`);
+
+    const perplexity = platforms.find((p) => p.id === "perplexity");
+    expect(perplexity?.getUrl(prompt)).toBe(`https://www.perplexity.ai/search?q=${encoded}`);
+
+    const gemini = platforms.find((p) => p.id === "gemini");
+    expect(gemini?.getUrl(prompt)).toBe(`https://www.google.com/search?udm=50&q=${encoded}`);
+
+    const grok = platforms.find((p) => p.id === "grok");
+    expect(grok?.getUrl(prompt)).toBe(`https://grok.com/?q=${encoded}`);
   });
 });
