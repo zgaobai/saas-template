@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { Brand } from "./brand";
-import { FeedbackDialog } from "./feedback-dialog";
+import { useFeedbackDialog } from "./feedback-dialog";
 import { authClient, clearClientSessionCache } from "@/modules/auth/client";
 import { clearResourceCache } from "@/lib/use-resource";
 import { Button } from "@/components/ui/button";
@@ -44,8 +44,8 @@ export function AppShell({
 }) {
   const { t: tr, locale } = useI18n();
   const navigate = useNavigate();
+  const { openFeedback } = useFeedbackDialog();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const locationHref = useRouterState({
     select: (state) => state.location.href,
@@ -151,7 +151,7 @@ export function AppShell({
               </Link>
               <button
                 type="button"
-                onClick={() => setFeedbackOpen(true)}
+                onClick={openFeedback}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -342,7 +342,6 @@ export function AppShell({
           <Outlet />
         </main>
       </div>
-      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </div>
   );
 }

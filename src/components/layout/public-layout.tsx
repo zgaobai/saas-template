@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Header } from "./header";
 import { Footer } from "./footer";
+import { FloatingFeedbackButton } from "./feedback-dialog";
+
 export function PublicLayout({
   children,
   className,
@@ -13,6 +15,7 @@ export function PublicLayout({
       <Header />
       <main className={className}>{children}</main>
       <Footer />
+      <FloatingFeedbackButton />
     </>
   );
 }

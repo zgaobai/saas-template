@@ -23,6 +23,7 @@ export function Footer() {
           <strong>{tr("资源")}</strong>
           <Link to="/blog">{tr("博客")}</Link>
           <HomeSectionLink section="faq">{tr("常见问题")}</HomeSectionLink>
+          <Link to="/feedback">{tr("反馈建议")}</Link>
           <a
             href="https://github.com/zgaobai/saas-template"
             target="_blank"

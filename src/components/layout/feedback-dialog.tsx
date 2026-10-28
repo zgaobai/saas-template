@@ -1,9 +1,23 @@
 import { useI18n } from "@/i18n/react";
-import { useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
 import { Dialog } from "@base-ui/react/dialog";
-import { Button } from "@/components/ui/button";
-import { Notice } from "@/components/ui/feedback";
-import { X, MessageSquare, CheckCircle2 } from "lucide-react";
+import { X, MessageSquare } from "lucide-react";
+import { FeedbackForm } from "@/modules/feedback/components/feedback-form";
+
+const FeedbackContext = createContext<{
+  openFeedback: () => void;
+  closeFeedback: () => void;
+}>({
+  openFeedback: () => {},
+  closeFeedback: () => {},
+});
+
+export const useFeedbackDialog = () => useContext(FeedbackContext);
 
 export function FeedbackDialog({
   open,
@@ -13,168 +27,92 @@ export function FeedbackDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const { t: tr } = useI18n();
-  const [type, setType] = useState<"suggestion" | "bug" | "billing" | "other">("suggestion");
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [contact, setContact] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
-  function resetForm() {
-    setType("suggestion");
-    setTitle("");
-    setContent("");
-    setContact("");
-    setError("");
-    setSubmitted(false);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      const res = await fetch("/api/app/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, title, content, contact }),
-      });
-      const json = (await res.json().catch(() => ({}))) as { message?: string };
-      if (!res.ok) {
-        throw new Error(json.message || "提交失败，请稍后重试");
-      }
-      setSubmitted(true);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={(val) => {
-        if (!val) resetForm();
-        onOpenChange(val);
-      }}
-    >
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop className="auth-backdrop" />
         <Dialog.Viewport className="auth-viewport">
           <Dialog.Popup className="auth-dialog" style={{ maxWidth: "520px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h2 style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
-                <MessageSquare size={20} color="var(--color-primary, #6366f1)" />
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "1.25rem",
+                  fontWeight: 600,
+                  margin: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <MessageSquare
+                  size={20}
+                  color="var(--color-primary, #6366f1)"
+                />
                 {tr("产品反馈与支持")}
               </h2>
-              <Dialog.Close style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6 }}>
+              <Dialog.Close
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "inherit",
+                  opacity: 0.6,
+                }}
+              >
                 <X size={20} />
               </Dialog.Close>
             </div>
 
-            {submitted ? (
-              <div style={{ textAlign: "center", padding: "24px 0" }}>
-                <CheckCircle2 size={48} color="#10b981" style={{ margin: "0 auto 12px" }} />
-                <h3 style={{ fontSize: "1.15rem", margin: "0 0 8px" }}>{tr("反馈已送达，非常感谢！")}</h3>
-                <p className="admin-secondary" style={{ fontSize: "0.875rem", margin: "0 0 20px" }}>
-                  {tr("你的宝贵意见将直接送达团队，并在后续版本迭代中持续优化。")}
-                </p>
-                <Button variant="primary" onClick={() => onOpenChange(false)}>
-                  {tr("完成")}
-                </Button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {error && <Notice kind="error">{tr(error)}</Notice>}
-
-                <div>
-                  <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
-                    {tr("反馈类型")}
-                  </label>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
-                    {[
-                      { id: "suggestion", label: tr("功能建议") },
-                      { id: "bug", label: tr("问题缺陷") },
-                      { id: "billing", label: tr("支付账单") },
-                      { id: "other", label: tr("其它咨询") },
-                    ].map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => setType(item.id as any)}
-                        style={{
-                          padding: "8px 4px",
-                          borderRadius: "6px",
-                          fontSize: "0.8rem",
-                          border: type === item.id ? "1px solid var(--color-primary, #6366f1)" : "1px solid rgba(255, 255, 255, 0.1)",
-                          background: type === item.id ? "rgba(99, 102, 241, 0.15)" : "transparent",
-                          color: type === item.id ? "var(--color-primary, #6366f1)" : "inherit",
-                          fontWeight: type === item.id ? 600 : 400,
-                          cursor: "pointer",
-                        }}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
-                    {tr("标题概要")} *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="input full-width"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder={tr("简述你的建议或遇到的问题...")}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
-                    {tr("详细描述")} *
-                  </label>
-                  <textarea
-                    required
-                    rows={4}
-                    className="input full-width"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder={tr("请详细说明你的诉求、操作步骤或期望效果...")}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
-                    {tr("联系方式 (选填)")}
-                  </label>
-                  <input
-                    type="text"
-                    className="input full-width"
-                    value={contact}
-                    onChange={(e) => setContact(e.target.value)}
-                    placeholder={tr("留下你的邮箱、微信或 Telegram，方便我们答复处理结果")}
-                  />
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
-                  <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-                    {tr("取消")}
-                  </Button>
-                  <Button type="submit" variant="primary" disabled={busy}>
-                    {busy ? tr("提交中...") : tr("确认提交")}
-                  </Button>
-                </div>
-              </form>
-            )}
+            <FeedbackForm
+              onSuccess={() => onOpenChange(false)}
+              onCancel={() => onOpenChange(false)}
+              showCancel={true}
+            />
           </Dialog.Popup>
         </Dialog.Viewport>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
+
+export function FloatingFeedbackButton() {
+  const { t: tr } = useI18n();
+  const { openFeedback } = useFeedbackDialog();
+
+  return (
+    <button
+      type="button"
+      className="floating-feedback-btn"
+      onClick={openFeedback}
+      aria-label={tr("反馈建议")}
+      title={tr("反馈建议")}
+    >
+      <MessageSquare size={16} />
+      <span className="floating-feedback-label">{tr("反馈建议")}</span>
+    </button>
+  );
+}
+
+export function FeedbackProvider({ children }: { children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <FeedbackContext.Provider
+      value={{
+        openFeedback: () => setOpen(true),
+        closeFeedback: () => setOpen(false),
+      }}
+    >
+      {children}
+      <FeedbackDialog open={open} onOpenChange={setOpen} />
+    </FeedbackContext.Provider>
   );
 }

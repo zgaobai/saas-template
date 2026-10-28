@@ -52,6 +52,9 @@ export function AdminAiConfig() {
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [apiStyle, setApiStyle] = useState<"chat" | "responses">("chat");
+  const [activeTab, setActiveTab] = useState<
+    "gateway" | "text" | "image" | "video" | "audio"
+  >("gateway");
 
   const [textModels, setTextModels] = useState<ModelItem[]>([
     {
@@ -672,195 +675,309 @@ export function AdminAiConfig() {
         {message && <Notice kind="success">{message}</Notice>}
         {error && <Notice kind="error">{error}</Notice>}
 
-        {/* 1. 网关与密钥 */}
-        <div className="card" style={{ padding: "24px", marginBottom: "20px" }}>
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: 600,
-              marginBottom: "16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <Zap size={18} /> {tr("聚合网关与密钥")}
-          </h3>
-
-          <Field
-            id="ai-base-url"
-            label={tr("网关接口地址 (Base URL)")}
-            hint={tr("支持任何 OpenAI 兼容中转接口，留空默认使用官方 OpenAI")}
-          >
-            <Input
-              id="ai-base-url"
-              type="text"
-              value={baseUrl}
-              onChange={(e) => setBaseUrl(e.target.value)}
-              placeholder="https://api.siliconflow.cn/v1"
-            />
-          </Field>
-
-          {/* 快捷填入预设 */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "8px",
-              marginBottom: "16px",
-              alignItems: "center",
-            }}
-          >
-            <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-              {tr("快捷填入：")}
-            </span>
-            <button
+        {/* 顶部 Tab 选项卡切换 */}
+        <div
+          className="admin-tabs"
+          role="group"
+          aria-label={tr("AI配置选项卡")}
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "8px",
+            marginBottom: "20px",
+          }}
+        >
+          {[
+            {
+              id: "gateway",
+              label: tr("聚合网关与密钥"),
+              icon: <Zap size={15} />,
+            },
+            {
+              id: "text",
+              label: tr("文本模型 ({0})", [textModels.length]),
+              icon: <Bot size={15} />,
+            },
+            {
+              id: "image",
+              label: tr("AI 绘图 ({0})", [imageModels.length]),
+              icon: <ImageIcon size={15} />,
+            },
+            {
+              id: "video",
+              label: tr("AI 视频 ({0})", [videoModels.length]),
+              icon: <Video size={15} />,
+            },
+            {
+              id: "audio",
+              label: tr("AI 音乐 ({0})", [audioModels.length]),
+              icon: <Music size={15} />,
+            },
+          ].map((tab) => (
+            <Button
+              key={tab.id}
               type="button"
-              className="button-ghost"
-              style={{ fontSize: "12px", padding: "3px 8px", borderRadius: "4px" }}
-              onClick={() => handleQuickFill("siliconflow")}
+              variant={activeTab === tab.id ? "primary" : "secondary"}
+              aria-pressed={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
             >
-              硅基流动 (SiliconFlow)
-            </button>
-            <button
-              type="button"
-              className="button-ghost"
-              style={{ fontSize: "12px", padding: "3px 8px", borderRadius: "4px" }}
-              onClick={() => handleQuickFill("deepseek")}
-            >
-              DeepSeek 官方
-            </button>
-            <button
-              type="button"
-              className="button-ghost"
-              style={{ fontSize: "12px", padding: "3px 8px", borderRadius: "4px" }}
-              onClick={() => handleQuickFill("openrouter")}
-            >
-              OpenRouter
-            </button>
-            <button
-              type="button"
-              className="button-ghost"
-              style={{ fontSize: "12px", padding: "3px 8px", borderRadius: "4px" }}
-              onClick={() => handleQuickFill("openai")}
-            >
-              OpenAI 官方
-            </button>
-          </div>
-
-          <Field
-            id="ai-api-key"
-            label={tr("聚合平台 API 密钥 (API Key)")}
-            hint={
-              data?.config.apiKeyHint
-                ? tr("当前密钥：{0}。如需更新请输入新密钥；不填保持不变。", [
-                    data.config.apiKeyHint,
-                  ])
-                : tr("请输入所选平台对应的通用 API Key，后端将加密存储。")
-            }
-          >
-            <Input
-              id="ai-api-key"
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder={
-                data?.config.hasApiKey
-                  ? tr("•••••••••••••••••••••••••••••••• (已配置，留空保持不变)")
-                  : "sk-xxxxxxxxxxxxxxxxxxxxxxxx"
-              }
-            />
-          </Field>
-
-          <Field
-            id="ai-api-style"
-            label={tr("接口协议模式")}
-            hint={tr("绝大多数聚合中转和国产大模型请选 Chat 协议")}
-          >
-            <div style={{ display: "flex", gap: "20px", marginTop: "6px" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
-                <input
-                  type="radio"
-                  name="apiStyle"
-                  value="chat"
-                  checked={apiStyle === "chat"}
-                  onChange={() => setApiStyle("chat")}
-                />
-                <span>Chat Completions ({tr("推荐·通用兼容")})</span>
-              </label>
-              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
-                <input
-                  type="radio"
-                  name="apiStyle"
-                  value="responses"
-                  checked={apiStyle === "responses"}
-                  onChange={() => setApiStyle("responses")}
-                />
-                <span>Responses API ({tr("OpenAI 新规范")})</span>
-              </label>
-            </div>
-          </Field>
+              {tab.icon}
+              <span>{tab.label}</span>
+            </Button>
+          ))}
         </div>
 
-        {/* 2. 四大模态模型配置列表 */}
-        {renderModelListSection(
-          tr("文本主力模型列表 (Text Models)"),
-          <Bot size={18} />,
-          tr("负责驱动写作、润色、摘要、地道翻译、邮件与社媒，支持多模型自由切换，星标代表默认主力模型。"),
-          textModels,
-          setTextModels,
-          "deepseek-ai/DeepSeek-V3",
-          tr("模型显示名称（如：DeepSeek V3）"),
-          true,
-        )}
+        {/* 1. 网关与密钥 Tab */}
+        {activeTab === "gateway" && (
+          <>
+            <div className="card" style={{ padding: "24px", marginBottom: "20px" }}>
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  marginBottom: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <Zap size={18} /> {tr("聚合网关与密钥")}
+              </h3>
 
-        {renderModelListSection(
-          tr("AI 绘图模型列表 (Image Models - 预留)"),
-          <ImageIcon size={18} />,
-          tr("为后续图片生成工具预留候选列表，如 FLUX.1、DALL-E 3 或 Midjourney。"),
-          imageModels,
-          setImageModels,
-          "black-forest-labs/FLUX.1-schnell",
-          tr("模型显示名称（如：FLUX 极速版）"),
-        )}
+              <Field
+                id="ai-base-url"
+                label={tr("网关接口地址 (Base URL)")}
+                hint={tr("支持任何 OpenAI 兼容中转接口，留空默认使用官方 OpenAI")}
+              >
+                <Input
+                  id="ai-base-url"
+                  type="text"
+                  value={baseUrl}
+                  onChange={(e) => setBaseUrl(e.target.value)}
+                  placeholder="https://api.siliconflow.cn/v1"
+                />
+              </Field>
 
-        {renderModelListSection(
-          tr("AI 视频模型列表 (Video Models - 预留)"),
-          <Video size={18} />,
-          tr("为后续视频生成工具预留候选模型，如可灵 Kling、Runway Gen-3 或 海螺。"),
-          videoModels,
-          setVideoModels,
-          "kling-v1",
-          tr("模型显示名称（如：可灵 Kling）"),
-        )}
-
-        {renderModelListSection(
-          tr("AI 音乐模型列表 (Audio Models - 预留)"),
-          <Music size={18} />,
-          tr("为后续音乐与配乐工具预留候选模型，如 Suno 或 Udio。"),
-          audioModels,
-          setAudioModels,
-          "suno-v3.5",
-          tr("模型显示名称（如：Suno 音乐）"),
-        )}
-
-        {/* 3. 启用状态 */}
-        <div className="card" style={{ padding: "20px", marginBottom: "20px" }}>
-          <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
-            <input
-              type="checkbox"
-              checked={enabled}
-              onChange={(e) => setEnabled(e.target.checked)}
-              style={{ width: "16px", height: "16px" }}
-            />
-            <div>
-              <div style={{ fontWeight: 500 }}>{tr("启用管理后台 AI 配置")}</div>
-              <div style={{ fontSize: "12px", color: "var(--muted)" }}>
-                {tr("开启后全站优先采用后台配置；关闭后自动无缝回退至服务器环境变量。")}
+              {/* 快捷填入预设 */}
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                  marginBottom: "16px",
+                  alignItems: "center",
+                }}
+              >
+                <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+                  {tr("快捷填入：")}
+                </span>
+                <button
+                  type="button"
+                  className="button-ghost"
+                  style={{
+                    fontSize: "12px",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                  }}
+                  onClick={() => handleQuickFill("siliconflow")}
+                >
+                  硅基流动 (SiliconFlow)
+                </button>
+                <button
+                  type="button"
+                  className="button-ghost"
+                  style={{
+                    fontSize: "12px",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                  }}
+                  onClick={() => handleQuickFill("deepseek")}
+                >
+                  DeepSeek 官方
+                </button>
+                <button
+                  type="button"
+                  className="button-ghost"
+                  style={{
+                    fontSize: "12px",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                  }}
+                  onClick={() => handleQuickFill("openrouter")}
+                >
+                  OpenRouter
+                </button>
+                <button
+                  type="button"
+                  className="button-ghost"
+                  style={{
+                    fontSize: "12px",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                  }}
+                  onClick={() => handleQuickFill("openai")}
+                >
+                  OpenAI 官方
+                </button>
               </div>
+
+              <Field
+                id="ai-api-key"
+                label={tr("聚合平台 API 密钥 (API Key)")}
+                hint={
+                  data?.config.apiKeyHint
+                    ? tr("当前密钥：{0}。如需更新请输入新密钥；不填保持不变。", [
+                        data.config.apiKeyHint,
+                      ])
+                    : tr("请输入所选平台对应的通用 API Key，后端将加密存储。")
+                }
+              >
+                <Input
+                  id="ai-api-key"
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder={
+                    data?.config.hasApiKey
+                      ? tr("•••••••••••••••••••••••••••••••• (已配置，留空保持不变)")
+                      : "sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+                  }
+                />
+              </Field>
+
+              <Field
+                id="ai-api-style"
+                label={tr("接口协议模式")}
+                hint={tr("绝大多数聚合中转和国产大模型请选 Chat 协议")}
+              >
+                <div style={{ display: "flex", gap: "20px", marginTop: "6px" }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="apiStyle"
+                      value="chat"
+                      checked={apiStyle === "chat"}
+                      onChange={() => setApiStyle("chat")}
+                    />
+                    <span>Chat Completions ({tr("推荐·通用兼容")})</span>
+                  </label>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="apiStyle"
+                      value="responses"
+                      checked={apiStyle === "responses"}
+                      onChange={() => setApiStyle("responses")}
+                    />
+                    <span>Responses API ({tr("OpenAI 新规范")})</span>
+                  </label>
+                </div>
+              </Field>
             </div>
-          </label>
-        </div>
+
+            {/* 启用状态 */}
+            <div
+              className="card"
+              style={{ padding: "20px", marginBottom: "20px" }}
+            >
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={enabled}
+                  onChange={(e) => setEnabled(e.target.checked)}
+                  style={{ width: "16px", height: "16px" }}
+                />
+                <div>
+                  <div style={{ fontWeight: 500 }}>
+                    {tr("启用管理后台 AI 配置")}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "var(--muted)" }}>
+                    {tr(
+                      "开启后全站优先采用后台配置；关闭后自动无缝回退至服务器环境变量。",
+                    )}
+                  </div>
+                </div>
+              </label>
+            </div>
+          </>
+        )}
+
+        {/* 2. 文本模型 Tab */}
+        {activeTab === "text" &&
+          renderModelListSection(
+            tr("文本主力模型列表 (Text Models)"),
+            <Bot size={18} />,
+            tr(
+              "负责驱动写作、润色、摘要、地道翻译、邮件与社媒，支持多模型自由切换，星标代表默认主力模型。",
+            ),
+            textModels,
+            setTextModels,
+            "deepseek-ai/DeepSeek-V3",
+            tr("模型显示名称（如：DeepSeek V3）"),
+            true,
+          )}
+
+        {/* 3. AI 绘图 Tab */}
+        {activeTab === "image" &&
+          renderModelListSection(
+            tr("AI 绘图模型列表 (Image Models - 预留)"),
+            <ImageIcon size={18} />,
+            tr("为后续图片生成工具预留候选列表，如 FLUX.1、DALL-E 3 或 Midjourney。"),
+            imageModels,
+            setImageModels,
+            "black-forest-labs/FLUX.1-schnell",
+            tr("模型显示名称（如：FLUX 极速版）"),
+          )}
+
+        {/* 4. AI 视频 Tab */}
+        {activeTab === "video" &&
+          renderModelListSection(
+            tr("AI 视频模型列表 (Video Models - 预留)"),
+            <Video size={18} />,
+            tr("为后续视频生成工具预留候选模型，如可灵 Kling、Runway Gen-3 或 海螺。"),
+            videoModels,
+            setVideoModels,
+            "kling-v1",
+            tr("模型显示名称（如：可灵 Kling）"),
+          )}
+
+        {/* 5. AI 音乐 Tab */}
+        {activeTab === "audio" &&
+          renderModelListSection(
+            tr("AI 音乐模型列表 (Audio Models - 预留)"),
+            <Music size={18} />,
+            tr("为后续音乐与配乐工具预留候选模型，如 Suno 或 Udio。"),
+            audioModels,
+            setAudioModels,
+            "suno-v3.5",
+            tr("模型显示名称（如：Suno 音乐）"),
+          )}
 
         {/* 4. 测试反馈 */}
         {testResult && (
