@@ -152,4 +152,31 @@ describe("dual-channel checkout", () => {
       checkout(req, { id: "user_test", email: "user@example.test" }),
     ).rejects.toThrow("支付通道维护中，请稍后再试。");
   });
+
+  it("blocks checkout when dynamic payments_enabled is false in system_settings", async () => {
+    state.env.DB = {
+      prepare: (sql: string) => ({
+        bind: (...args: any[]) => ({
+          first: async () =>
+            sql.includes("system_settings") ? { value: "false" } : null,
+          run: async () => ({ meta: { changes: 1 } }),
+        }),
+      }),
+      batch: async () => {},
+    };
+
+    const { checkout } = await import("@/modules/billing/server/service");
+    const req = new Request("https://app.test/api/app/checkout", {
+      method: "POST",
+      body: JSON.stringify({
+        planId: "creator",
+        requestId: "3e5b3218-1f48-4cb2-9d33-1498b5847db3",
+        interval: "month",
+      }),
+    });
+
+    await expect(
+      checkout(req, { id: "user_test", email: "user@example.test" }),
+    ).rejects.toThrow("支付通道维护中，请稍后再试。");
+  });
 });

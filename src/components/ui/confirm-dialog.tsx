@@ -1,4 +1,4 @@
-import { useState, useCallback, type ReactNode } from "react";
+import { useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { Modal } from "./modal";
 import { Button } from "./button";
 import { useI18n } from "@/i18n/react";
@@ -31,22 +31,34 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
     resolve: (val: boolean) => void;
   } | null>(null);
 
-  confirmHandler = useCallback((options: ConfirmOptions) => {
-    return new Promise<boolean>((resolve) => {
-      setState({
-        open: true,
-        options,
-        resolve,
+  const pendingResolveRef = useRef<((val: boolean) => void) | null>(null);
+
+  useEffect(() => {
+    confirmHandler = (options: ConfirmOptions) => {
+      if (pendingResolveRef.current) {
+        pendingResolveRef.current(false);
+      }
+      return new Promise<boolean>((resolve) => {
+        pendingResolveRef.current = resolve;
+        setState({
+          open: true,
+          options,
+          resolve,
+        });
       });
-    });
+    };
+    return () => {
+      confirmHandler = null;
+    };
   }, []);
 
-  const handleClose = (result: boolean) => {
-    if (state) {
-      state.resolve(result);
-      setState(null);
+  const handleClose = useCallback((result: boolean) => {
+    if (pendingResolveRef.current) {
+      pendingResolveRef.current(result);
+      pendingResolveRef.current = null;
     }
-  };
+    setState(null);
+  }, []);
 
   return (
     <>

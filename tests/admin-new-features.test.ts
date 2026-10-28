@@ -54,6 +54,10 @@ import {
   testEmailService,
 } from "@/modules/admin/server/diagnostics";
 import { adminOverview } from "@/modules/admin/server/queries";
+import {
+  isPaymentsActive,
+  setPaymentsActive,
+} from "@/modules/admin/server/system-settings";
 
 let db: DatabaseSync;
 
@@ -397,5 +401,36 @@ describe("Admin AI Model Analytics Feature", () => {
     expect(flux?.completed_count).toBe(1);
     expect(flux?.cost_micros).toBe(50000);
     expect(flux?.credits_charged).toBe(20);
+  });
+
+  describe("payments active toggle via system_settings", () => {
+    it("defaults to active and can be paused and resumed", async () => {
+      // Default state
+      expect(await isPaymentsActive()).toBe(true);
+
+      // Pause payments
+      await setPaymentsActive(false, "admin-user");
+      expect(await isPaymentsActive()).toBe(false);
+
+      // Verify system_settings row was created
+      const row = db
+        .prepare("SELECT value, updated_by FROM system_settings WHERE key = 'payments_enabled'")
+        .get() as any;
+      expect(row).toBeDefined();
+      expect(row.value).toBe("false");
+      expect(row.updated_by).toBe("admin-user");
+
+      // Verify audit log
+      const audit = db
+        .prepare("SELECT action, actor_id FROM audit_logs WHERE target_id = 'system' ORDER BY created_at DESC LIMIT 1")
+        .get() as any;
+      expect(audit).toBeDefined();
+      expect(audit.action).toBe("payments.paused");
+      expect(audit.actor_id).toBe("admin-user");
+
+      // Resume payments
+      await setPaymentsActive(true, "admin-user");
+      expect(await isPaymentsActive()).toBe(true);
+    });
   });
 });
