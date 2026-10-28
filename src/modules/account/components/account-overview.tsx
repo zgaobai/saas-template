@@ -1,6 +1,5 @@
 import { useI18n } from "@/i18n/react";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, CreditCard, ListChecks, Coins } from "lucide-react";
 import { PageHeading } from "@/components/layout/page-heading";
 import { useResource } from "@/lib/use-resource";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ export function AccountOverview({
     email: string;
   };
 }) {
-  const { t: tr, locale } = useI18n();
+  const { t: tr } = useI18n();
   const { data, error, loading, reload } = useResource<AccountBilling>(
     "/api/app/billing/summary",
     true,
@@ -50,37 +49,6 @@ export function AccountOverview({
       ) : (
         data && !error && <AccountSummary data={data} />
       )}
-      <nav className="account-shortcuts" aria-label={tr("账户常用操作")}>
-        <Link
-          to="/subscriptions"
-          search={{
-            section: "subscriptions",
-          }}
-        >
-          <CreditCard size={20} />
-          <span>
-            <strong>{tr("套餐与订单")}</strong>
-            <small>{tr("管理续费、兑换权益与查看付款记录")}</small>
-          </span>
-          <ArrowUpRight size={18} />
-        </Link>
-        <Link to="/billing">
-          <Coins size={20} />
-          <span>
-            <strong>{tr("积分流水")}</strong>
-            <small>{tr("查看积分获得、使用和失败退回")}</small>
-          </span>
-          <ArrowUpRight size={18} />
-        </Link>
-        <Link to="/history">
-          <ListChecks size={20} />
-          <span>
-            <strong>{tr("任务列表")}</strong>
-            <small>{tr("查看生成状态、内容与结果")}</small>
-          </span>
-          <ArrowUpRight size={18} />
-        </Link>
-      </nav>
     </div>
   );
 }
