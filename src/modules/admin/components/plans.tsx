@@ -479,57 +479,42 @@ function PlanEditor({
           </p>
 
           <div className="plan-channel-field-group">
-            <label
-              style={{
-                display: "block",
-                fontSize: "13px",
-                fontWeight: 600,
-                color: "var(--ink)",
-                marginBottom: "6px",
-              }}
+            <Field
+              id="plan-channel-select"
+              label={tr("选择配置的支付渠道")}
+              hint={tr(
+                "支持同时配置多个渠道（如信用卡渠道与 PayPal 组合），系统将保存全部已填写的商品 ID。",
+              )}
             >
-              {tr("选择支付渠道：")}
-            </label>
-            <div
-              className="plan-channel-tabs"
-              role="tablist"
-              aria-label={tr("选择支付渠道：")}
-            >
-              {availableChannels.map((c) => {
-                const isSelected = currentChannel.key === c.key;
-                const isActive = activeProvider === c.key;
-                const hasBase = Boolean(form.paymentBindings[c.key]);
-                const hasAnnual = Boolean(form.annualPaymentBindings?.[c.key]);
-                const isBound = hasBase || hasAnnual;
-                return (
-                  <button
-                    key={c.key}
-                    type="button"
-                    role="tab"
-                    aria-selected={isSelected}
-                    className={`plan-channel-tab-btn ${isSelected ? "selected" : ""}`}
-                    onClick={() => setSelectedChannel(c.key)}
-                  >
-                    <span>{c.name}</span>
-                    {isActive && (
-                      <span className="plan-channel-active-tag">
-                        {tr("当前启用")}
-                      </span>
-                    )}
-                    {isBound && (
-                      <span
-                        className="plan-channel-bound-tag"
-                        title={tr("已绑定")}
-                      >
-                        {tr("已绑定")}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+              <Select
+                id="plan-channel-select"
+                value={selectedChannel}
+                onValueChange={(val) =>
+                  setSelectedChannel(val as keyof PaymentBindings)
+                }
+              >
+                {availableChannels.map((c) => {
+                  const isActive = activeProvider === c.key;
+                  const hasBase = Boolean(form.paymentBindings[c.key]);
+                  const hasAnnual = Boolean(
+                    form.annualPaymentBindings?.[c.key],
+                  );
+                  const isBound = hasBase || hasAnnual;
+                  const tag = isActive
+                    ? ` · ${tr("当前启用")}`
+                    : isBound
+                      ? ` · ${tr("已绑定")}`
+                      : "";
+                  return (
+                    <option key={c.key} value={c.key}>
+                      {c.name + tag}
+                    </option>
+                  );
+                })}
+              </Select>
+            </Field>
 
-            <div className="plan-channel-card">
+            <div className="plan-channel-card" style={{ marginTop: "14px" }}>
               <div className="plan-channel-header">
                 <h4>
                   <span>{currentChannel.name}</span>

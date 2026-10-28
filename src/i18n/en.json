@@ -1199,6 +1199,8 @@
   "系统当前结算渠道": "Default Payment Gateway",
   "备用渠道 (选填)": "Optional Gateway",
   "选择支付渠道：": "Select Gateway:",
+  "选择配置的支付渠道": "Select Payment Gateway",
+  "支持同时配置多个渠道（如信用卡渠道与 PayPal 组合），系统将保存全部已填写的商品 ID。": "You can configure multiple gateways simultaneously (such as Credit Cards alongside PayPal); all provided product IDs are retained.",
   "月付商品 ID": "Monthly Product ID",
   "年付商品 ID": "Annual Product ID",
   "一次性商品 ID": "One-time Product ID",
