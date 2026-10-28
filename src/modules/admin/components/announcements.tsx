@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useResource } from "@/lib/use-resource";
 import { Loading, Notice, Empty } from "@/components/ui/feedback";
 import { formatDateTime } from "@/lib/date";
-import { Dialog } from "@base-ui/react/dialog";
+import { Modal } from "@/components/ui/modal";
+import { Field, Input, Textarea } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
-import { X, Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 import type { AnnouncementItem } from "../types";
 
 export function AdminAnnouncements() {
@@ -225,218 +226,144 @@ export function AdminAnnouncements() {
       )}
 
       {/* Modal Dialog */}
-      <Dialog.Root open={modalOpen} onOpenChange={setModalOpen}>
-        <Dialog.Portal>
-          <Dialog.Backdrop className="auth-backdrop" />
-          <Dialog.Viewport className="auth-viewport">
-            <Dialog.Popup className="auth-dialog" style={{ maxWidth: "520px", padding: "28px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "20px",
-                }}
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        busy={busy}
+        title={editingItem ? tr("编辑公告") : tr("新建全站公告")}
+        description={tr("发布和管理展示在全站顶部的横幅公告、促销通知与更新提示。")}
+      >
+        {submitError && <Notice kind="error">{tr(submitError)}</Notice>}
+
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "grid", gap: "16px" }}
+        >
+          <Field id="announcement-title" label={tr("公告标题")}>
+            <Input
+              id="announcement-title"
+              type="text"
+              required
+              maxLength={100}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={tr("如：全新 FLUX 图像生成已上线！")}
+            />
+          </Field>
+
+          <Field id="announcement-content" label={tr("公告内容")}>
+            <Textarea
+              id="announcement-content"
+              required
+              rows={3}
+              maxLength={500}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder={tr("简要描述公告或活动详情...")}
+            />
+          </Field>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "12px",
+            }}
+          >
+            <Field id="announcement-type" label={tr("公告类型")}>
+              <Select
+                id="announcement-type"
+                value={type}
+                onValueChange={(val) => setType(val as any)}
               >
-                <h2 style={{ fontSize: "1.2rem", fontWeight: 600, margin: 0 }}>
-                  {editingItem ? tr("编辑公告") : tr("新建全站公告")}
-                </h2>
-                <Dialog.Close
-                  className="auth-close"
-                  aria-label={tr("关闭")}
-                >
-                  <X size={18} />
-                </Dialog.Close>
-              </div>
+                <option value="info">{tr("普通公告 (蓝)")}</option>
+                <option value="promotion">{tr("活动推广 (橙)")}</option>
+                <option value="warning">{tr("重要提醒 (黄)")}</option>
+              </Select>
+            </Field>
 
-              {submitError && <Notice kind="error">{tr(submitError)}</Notice>}
+            <Field id="announcement-link-text" label={tr("链接文案")}>
+              <Input
+                id="announcement-link-text"
+                type="text"
+                maxLength={50}
+                value={linkText}
+                onChange={(e) => setLinkText(e.target.value)}
+                placeholder={tr("如：立即体验 →")}
+              />
+            </Field>
+          </div>
 
-              <form
-                onSubmit={handleSubmit}
-                style={{ display: "flex", flexDirection: "column", gap: "18px" }}
-              >
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      fontSize: "13px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {tr("公告标题")} *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="input full-width"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder={tr("如：全新 FLUX 图像生成已上线！")}
-                  />
-                </div>
+          <Field id="announcement-link-url" label={tr("跳转链接 (选填)")}>
+            <Input
+              id="announcement-link-url"
+              type="text"
+              maxLength={500}
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              placeholder={tr("站内路径如 /pricing 或外部链接")}
+            />
+          </Field>
 
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      fontSize: "13px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {tr("公告内容")} *
-                  </label>
-                  <textarea
-                    required
-                    rows={3}
-                    className="input full-width"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder={tr("简要描述公告或活动详情...")}
-                  />
-                </div>
+          <div
+            style={{
+              display: "flex",
+              gap: "24px",
+              padding: "12px 14px",
+              background: "var(--surface)",
+              borderRadius: "8px",
+              border: "1px solid var(--line)",
+            }}
+          >
+            <label
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                fontSize: "13px",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+              />
+              <span>{tr("立即生效展示")}</span>
+            </label>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "14px",
-                  }}
-                >
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "13px",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {tr("公告类型")}
-                    </label>
-                    <Select
-                      className="full-width"
-                      value={type}
-                      onValueChange={(val) => setType(val as any)}
-                    >
-                      <option value="info">{tr("普通公告 (蓝)")}</option>
-                      <option value="promotion">{tr("活动推广 (橙)")}</option>
-                      <option value="warning">{tr("重要提醒 (黄)")}</option>
-                    </Select>
-                  </div>
+            <label
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                fontSize: "13px",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={dismissible}
+                onChange={(e) => setDismissible(e.target.checked)}
+              />
+              <span>{tr("允许用户手动关闭")}</span>
+            </label>
+          </div>
 
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "13px",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {tr("链接文案")}
-                    </label>
-                    <input
-                      type="text"
-                      className="input full-width"
-                      value={linkText}
-                      onChange={(e) => setLinkText(e.target.value)}
-                      placeholder={tr("如：立即体验 →")}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      fontSize: "13px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {tr("跳转链接 (选填)")}
-                  </label>
-                  <input
-                    type="text"
-                    className="input full-width"
-                    value={linkUrl}
-                    onChange={(e) => setLinkUrl(e.target.value)}
-                    placeholder={tr("站内路径如 /pricing 或外部链接")}
-                  />
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "20px",
-                    flexWrap: "wrap",
-                    padding: "10px 14px",
-                    background: "var(--surface)",
-                    borderRadius: "8px",
-                    border: "1px solid var(--line)",
-                  }}
-                >
-                  <label
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      cursor: "pointer",
-                      fontSize: "13px",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isActive}
-                      onChange={(e) => setIsActive(e.target.checked)}
-                    />
-                    <span>{tr("立即生效展示")}</span>
-                  </label>
-
-                  <label
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      cursor: "pointer",
-                      fontSize: "13px",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={dismissible}
-                      onChange={(e) => setDismissible(e.target.checked)}
-                    />
-                    <span>{tr("允许用户手动关闭")}</span>
-                  </label>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    gap: "10px",
-                    marginTop: "8px",
-                  }}
-                >
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setModalOpen(false)}
-                  >
-                    {tr("取消")}
-                  </Button>
-                  <Button type="submit" variant="primary" disabled={busy}>
-                    {busy ? tr("保存中...") : tr("保存公告")}
-                  </Button>
-                </div>
-              </form>
-            </Dialog.Popup>
-          </Dialog.Viewport>
-        </Dialog.Portal>
-      </Dialog.Root>
+          <div className="modal-actions">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setModalOpen(false)}
+            >
+              {tr("取消")}
+            </Button>
+            <Button type="submit" variant="primary" disabled={busy}>
+              {busy ? tr("保存中...") : tr("保存公告")}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </>
   );
 }
