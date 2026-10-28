@@ -6,7 +6,8 @@ import { useResource } from "@/lib/use-resource";
 import { Loading, Notice, Empty } from "@/components/ui/feedback";
 import { formatDateTime } from "@/lib/date";
 import { Dialog } from "@base-ui/react/dialog";
-import { X, MessageSquare, CheckCircle, Clock, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Select } from "@/components/ui/select";
+import { X, CheckCircle, Clock, AlertTriangle, ShieldCheck } from "lucide-react";
 import {
   feedbackStatuses,
   feedbackTypes,
@@ -76,17 +77,17 @@ export function AdminFeedbacks() {
         description={tr("收集并处理用户提交的功能建议、Bug 缺陷与商务咨询。")}
         action={
           <div className="admin-filter-actions">
-            <select
+            <Select
               className="input"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onValueChange={setStatusFilter}
             >
               <option value="all">{tr("全部状态")}</option>
               <option value="pending">{tr("待处理")}</option>
               <option value="in_progress">{tr("跟进中")}</option>
               <option value="resolved">{tr("已解决")}</option>
               <option value="closed">{tr("已关闭")}</option>
-            </select>
+            </Select>
             <Button variant="secondary" onClick={() => void reload()} disabled={loading}>
               {tr("刷新")}
             </Button>
@@ -183,20 +184,19 @@ export function AdminFeedbacks() {
             <Dialog.Popup className="auth-dialog" style={{ maxWidth: "600px" }}>
               {selectedFeedback && (
                 <>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                    <h2 style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
-                      <MessageSquare size={20} />
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                    <h2 style={{ fontSize: "1.2rem", fontWeight: 600, margin: 0 }}>
                       {tr("反馈详情")}
                     </h2>
-                    <Dialog.Close style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6 }}>
-                      <X size={20} />
+                    <Dialog.Close className="auth-close" aria-label={tr("关闭")}>
+                      <X size={18} />
                     </Dialog.Close>
                   </div>
 
                   {updateError && <Notice kind="error">{tr(updateError)}</Notice>}
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <div style={{ padding: "12px", background: "rgba(255, 255, 255, 0.03)", borderRadius: "8px" }}>
+                    <div style={{ padding: "14px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "8px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                         <span style={{ fontSize: "0.875rem", color: "var(--color-primary, #6366f1)", fontWeight: 600 }}>
                           [{feedbackTypes[selectedFeedback.type] || selectedFeedback.type}]
@@ -205,38 +205,38 @@ export function AdminFeedbacks() {
                           {formatDateTime(selectedFeedback.created_at, locale)}
                         </span>
                       </div>
-                      <h3 style={{ margin: "0 0 8px 0", fontSize: "1.1rem" }}>{selectedFeedback.title}</h3>
-                      <p style={{ margin: 0, whiteSpace: "pre-wrap", lineHeight: 1.6, fontSize: "0.9rem" }}>
+                      <h3 style={{ margin: "0 0 8px 0", fontSize: "1.05rem" }}>{selectedFeedback.title}</h3>
+                      <p style={{ margin: 0, whiteSpace: "pre-wrap", lineHeight: 1.6, fontSize: "0.875rem" }}>
                         {selectedFeedback.content}
                       </p>
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                      <div style={{ padding: "10px", background: "rgba(255, 255, 255, 0.02)", borderRadius: "6px" }}>
+                      <div style={{ padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "6px" }}>
                         <span className="admin-secondary" style={{ fontSize: "0.75rem" }}>{tr("提交用户")}</span>
                         <p style={{ margin: "4px 0 0 0", fontSize: "0.875rem" }}>{selectedFeedback.user_email}</p>
                       </div>
-                      <div style={{ padding: "10px", background: "rgba(255, 255, 255, 0.02)", borderRadius: "6px" }}>
+                      <div style={{ padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "6px" }}>
                         <span className="admin-secondary" style={{ fontSize: "0.75rem" }}>{tr("联系方式")}</span>
                         <p style={{ margin: "4px 0 0 0", fontSize: "0.875rem" }}>{selectedFeedback.contact || "-"}</p>
                       </div>
                     </div>
 
-                    <form onSubmit={handleStatusUpdate} style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "8px" }}>
+                    <form onSubmit={handleStatusUpdate} style={{ display: "flex", flexDirection: "column", gap: "14px", marginTop: "4px" }}>
                       <div>
-                        <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
+                        <label style={{ display: "block", marginBottom: "6px", fontSize: "13px", fontWeight: 500 }}>
                           {tr("处理状态")}
                         </label>
-                        <select
-                          className="input full-width"
+                        <Select
+                          className="full-width"
                           value={newStatus}
-                          onChange={(e) => setNewStatus(e.target.value)}
+                          onValueChange={setNewStatus}
                         >
                           <option value="pending">{tr("待处理")}</option>
                           <option value="in_progress">{tr("跟进中")}</option>
                           <option value="resolved">{tr("已解决")}</option>
                           <option value="closed">{tr("已关闭")}</option>
-                        </select>
+                        </Select>
                       </div>
 
                       <div>

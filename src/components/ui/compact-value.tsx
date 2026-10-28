@@ -32,14 +32,22 @@ export function CompactValue({
           try {
             await navigator.clipboard.writeText(value);
             setMessage("已复制");
+            setTimeout(() => setMessage(""), 2000);
           } catch {
             setMessage("复制失败，请选中文字复制");
           }
         }}
       >
-        {message === tr("已复制") ? <Check size={13} /> : <Copy size={13} />}
-        {copyOnly &&
-          (message === tr("已复制") ? tr("已复制") : tr("复制兑换码"))}
+        {message === "已复制" ? (
+          <Check size={12} style={{ color: "#10b981" }} />
+        ) : (
+          <Copy size={12} />
+        )}
+        {copyOnly && (
+          <span style={{ color: message === "已复制" ? "#10b981" : "inherit" }}>
+            {message === "已复制" ? tr("已复制") : tr("复制")}
+          </span>
+        )}
       </button>
       <span className="compact-copy-status" role="status">
         {tr(message)}

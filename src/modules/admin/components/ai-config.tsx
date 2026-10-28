@@ -675,47 +675,50 @@ export function AdminAiConfig() {
 
         {/* 顶部 Tab 选项卡切换 */}
         <div
-          className="admin-tabs"
-          role="group"
+          className="ai-config-tabs"
+          role="tablist"
           aria-label={tr("AI配置选项卡")}
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "8px",
-            marginBottom: "20px",
-          }}
         >
           {[
             {
               id: "gateway",
               label: tr("聚合网关与密钥"),
+              count: 0,
             },
             {
               id: "text",
-              label: tr("文本模型 ({0})", [textModels.length]),
+              label: tr("文本模型"),
+              count: textModels.length,
             },
             {
               id: "image",
-              label: tr("AI 绘图 ({0})", [imageModels.length]),
+              label: tr("AI 绘图"),
+              count: imageModels.length,
             },
             {
               id: "video",
-              label: tr("AI 视频 ({0})", [videoModels.length]),
+              label: tr("AI 视频"),
+              count: videoModels.length,
             },
             {
               id: "audio",
-              label: tr("AI 音乐 ({0})", [audioModels.length]),
+              label: tr("AI 音乐"),
+              count: audioModels.length,
             },
           ].map((tab) => (
-            <Button
+            <button
               key={tab.id}
               type="button"
-              variant={activeTab === tab.id ? "primary" : "secondary"}
-              aria-pressed={activeTab === tab.id}
+              className="ai-config-tab-btn"
+              role="tab"
+              aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id as any)}
             >
-              {tab.label}
-            </Button>
+              <span>{tab.label}</span>
+              {tab.count > 0 && (
+                <span className="ai-config-tab-badge">{tab.count}</span>
+              )}
+            </button>
           ))}
         </div>
 

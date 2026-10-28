@@ -20,10 +20,16 @@ export function RedemptionRecordCells({ record: r }: { record: UserRecord }) {
       </td>
       <td>
         {r.code ? (
-          <>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <code className="redemption-token">{r.code}</code>
             <CompactValue value={r.code} label={tr("兑换码")} copyOnly />
-          </>
+          </div>
         ) : (
           <>
             <span className="admin-secondary">

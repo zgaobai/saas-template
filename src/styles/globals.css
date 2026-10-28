@@ -4535,12 +4535,24 @@ td {
 }
 .compact-value-copy-only {
   width: auto;
+  display: inline-flex;
 }
 .compact-value-copy-only .compact-copy {
   border: 1px solid var(--line);
-  padding: 8px 12px;
+  padding: 2px 7px;
+  min-height: 22px;
+  min-width: unset;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  gap: 4px;
+  background: var(--surface-raised, rgba(255, 255, 255, 0.04));
+  transition: all 0.15s ease;
+}
+.compact-value-copy-only .compact-copy:hover {
+  border-color: var(--line-strong, rgba(255, 255, 255, 0.2));
   color: var(--ink);
-  font-size: 13px;
+  background: var(--surface);
 }
 .table-reason {
   display: block;
@@ -4830,6 +4842,63 @@ td {
   overflow-wrap: anywhere;
   user-select: all;
 }
+.ai-config-tabs {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+.ai-config-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.ai-config-tab-btn:hover {
+  color: var(--ink);
+  background: var(--surface-raised, rgba(255, 255, 255, 0.04));
+}
+.ai-config-tab-btn[aria-selected="true"] {
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .ai-config-tab-btn[aria-selected="true"] {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+.ai-config-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--line);
+  color: var(--muted);
+}
+.ai-config-tab-btn[aria-selected="true"] .ai-config-tab-badge {
+  background: var(--color-primary, #6366f1);
+  color: #ffffff;
+}
+
 .code-created p {
   font-size: 13px;
   color: var(--muted);

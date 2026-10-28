@@ -78,8 +78,6 @@ export function AdminLedger() {
           redeem: tr("卡密兑换"),
           refund: tr("退款撤回"),
           adjustment: tr("系统调整"),
-          in: tr("全部增加"),
-          out: tr("全部扣减"),
         }}
         searchHint={tr("支持完整邮箱或流水编号。")}
       >

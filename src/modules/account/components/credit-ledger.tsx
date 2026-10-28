@@ -32,7 +32,6 @@ const filters = {
   payment: "充值购买",
   subscription: "周期配额",
   redeem: "卡密兑换",
-  earned: "全部获得",
 };
 function entryKind(entry: LedgerEntry) {
   if (entry.id.startsWith("generation:")) return "任务扣费";

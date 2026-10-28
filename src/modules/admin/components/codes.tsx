@@ -150,14 +150,20 @@ export function AdminCodes() {
                       </td>
                       <td>
                         {c.code ? (
-                          <>
+                          <div
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
                             <code className="redemption-token">{c.code}</code>
                             <CompactValue
                               value={c.code}
                               label={tr("兑换码")}
                               copyOnly
                             />
-                          </>
+                          </div>
                         ) : (
                           <span className="admin-secondary">
                             {c.code_status === "legacy"

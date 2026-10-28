@@ -6,7 +6,8 @@ import { useResource } from "@/lib/use-resource";
 import { Loading, Notice, Empty } from "@/components/ui/feedback";
 import { formatDateTime } from "@/lib/date";
 import { Dialog } from "@base-ui/react/dialog";
-import { X, Megaphone, Plus, Trash2, Edit } from "lucide-react";
+import { Select } from "@/components/ui/select";
+import { X, Plus, Trash2, Edit } from "lucide-react";
 import type { AnnouncementItem } from "../types";
 
 export function AdminAnnouncements() {
@@ -228,22 +229,41 @@ export function AdminAnnouncements() {
         <Dialog.Portal>
           <Dialog.Backdrop className="auth-backdrop" />
           <Dialog.Viewport className="auth-viewport">
-            <Dialog.Popup className="auth-dialog" style={{ maxWidth: "540px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                <h2 style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Megaphone size={20} />
+            <Dialog.Popup className="auth-dialog" style={{ maxWidth: "520px", padding: "28px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "20px",
+                }}
+              >
+                <h2 style={{ fontSize: "1.2rem", fontWeight: 600, margin: 0 }}>
                   {editingItem ? tr("编辑公告") : tr("新建全站公告")}
                 </h2>
-                <Dialog.Close style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6 }}>
-                  <X size={20} />
+                <Dialog.Close
+                  className="auth-close"
+                  aria-label={tr("关闭")}
+                >
+                  <X size={18} />
                 </Dialog.Close>
               </div>
 
               {submitError && <Notice kind="error">{tr(submitError)}</Notice>}
 
-              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <form
+                onSubmit={handleSubmit}
+                style={{ display: "flex", flexDirection: "column", gap: "18px" }}
+              >
                 <div>
-                  <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      fontSize: "13px",
+                      fontWeight: 500,
+                    }}
+                  >
                     {tr("公告标题")} *
                   </label>
                   <input
@@ -257,7 +277,14 @@ export function AdminAnnouncements() {
                 </div>
 
                 <div>
-                  <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      fontSize: "13px",
+                      fontWeight: 500,
+                    }}
+                  >
                     {tr("公告内容")} *
                   </label>
                   <textarea
@@ -270,24 +297,44 @@ export function AdminAnnouncements() {
                   />
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "14px",
+                  }}
+                >
                   <div>
-                    <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
+                    <label
+                      style={{
+                        display: "block",
+                        marginBottom: "6px",
+                        fontSize: "13px",
+                        fontWeight: 500,
+                      }}
+                    >
                       {tr("公告类型")}
                     </label>
-                    <select
-                      className="input full-width"
+                    <Select
+                      className="full-width"
                       value={type}
-                      onChange={(e) => setType(e.target.value as any)}
+                      onValueChange={(val) => setType(val as any)}
                     >
                       <option value="info">{tr("普通公告 (蓝)")}</option>
                       <option value="promotion">{tr("活动推广 (橙)")}</option>
                       <option value="warning">{tr("重要提醒 (黄)")}</option>
-                    </select>
+                    </Select>
                   </div>
 
                   <div>
-                    <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
+                    <label
+                      style={{
+                        display: "block",
+                        marginBottom: "6px",
+                        fontSize: "13px",
+                        fontWeight: 500,
+                      }}
+                    >
                       {tr("链接文案")}
                     </label>
                     <input
@@ -301,7 +348,14 @@ export function AdminAnnouncements() {
                 </div>
 
                 <div>
-                  <label style={{ display: "block", marginBottom: "6px", fontSize: "0.875rem", fontWeight: 500 }}>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      fontSize: "13px",
+                      fontWeight: 500,
+                    }}
+                  >
                     {tr("跳转链接 (选填)")}
                   </label>
                   <input
@@ -313,28 +367,65 @@ export function AdminAnnouncements() {
                   />
                 </div>
 
-                <div style={{ display: "flex", gap: "24px" }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.875rem" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "20px",
+                    flexWrap: "wrap",
+                    padding: "10px 14px",
+                    background: "var(--surface)",
+                    borderRadius: "8px",
+                    border: "1px solid var(--line)",
+                  }}
+                >
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                    }}
+                  >
                     <input
                       type="checkbox"
                       checked={isActive}
                       onChange={(e) => setIsActive(e.target.checked)}
                     />
-                    {tr("立即生效展示")}
+                    <span>{tr("立即生效展示")}</span>
                   </label>
 
-                  <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.875rem" }}>
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                    }}
+                  >
                     <input
                       type="checkbox"
                       checked={dismissible}
                       onChange={(e) => setDismissible(e.target.checked)}
                     />
-                    {tr("允许用户手动关闭")}
+                    <span>{tr("允许用户手动关闭")}</span>
                   </label>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
-                  <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: "10px",
+                    marginTop: "8px",
+                  }}
+                >
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setModalOpen(false)}
+                  >
                     {tr("取消")}
                   </Button>
                   <Button type="submit" variant="primary" disabled={busy}>

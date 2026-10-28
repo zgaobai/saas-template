@@ -278,8 +278,6 @@ export async function listAdminLedger(request: Request) {
     redeem: "卡密兑换",
     refund: "退款撤回",
     adjustment: "系统调整",
-    in: "全部增加",
-    out: "全部扣减",
   }),
     where: string[] = [],
     values: (string | number)[] = [];
@@ -304,8 +302,6 @@ export async function listAdminLedger(request: Request) {
       where.push(
         "l.id NOT LIKE 'generation:%' AND l.id NOT LIKE 'release:%' AND l.id NOT LIKE 'payment:%' AND l.id NOT LIKE 'redeem%' AND l.id NOT LIKE 'installment:%' AND l.id NOT LIKE 'refund:%' AND f.id IS NULL",
       );
-    else if (q.status === "in") where.push("l.amount>0");
-    else if (q.status === "out") where.push("l.amount<0");
   }
   return page<AdminLedger>(
     "SELECT l.id,l.user_id,u.name,u.email,l.amount,l.reason,l.created_at,r.order_id FROM credit_ledger l JOIN user u ON u.id=l.user_id LEFT JOIN refund_events f ON f.id=l.id LEFT JOIN credit_installments i ON i.id=CASE WHEN l.id LIKE 'installment:%' THEN substr(l.id,13) WHEN l.id LIKE 'refund:installment:%' THEN substr(l.id,20) END LEFT JOIN receipts r ON r.id=CASE WHEN l.id LIKE 'payment:%' THEN substr(l.id,9) ELSE COALESCE(f.receipt_id,i.receipt_id) END",
