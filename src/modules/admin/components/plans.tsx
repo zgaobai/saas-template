@@ -478,136 +478,104 @@ function PlanEditor({
             )}
           </p>
 
-          <div className="plan-channel-field-group">
-            <Field
+          <Field
+            id="plan-channel-select"
+            label={tr("选择配置的支付渠道")}
+            hint={tr(
+              "支持同时配置多个渠道（如信用卡渠道与 PayPal 组合），系统将保存全部已填写的商品 ID。",
+            )}
+          >
+            <Select
               id="plan-channel-select"
-              label={tr("选择配置的支付渠道")}
-              hint={tr(
-                "支持同时配置多个渠道（如信用卡渠道与 PayPal 组合），系统将保存全部已填写的商品 ID。",
-              )}
+              value={selectedChannel}
+              onValueChange={(val) =>
+                setSelectedChannel(val as keyof PaymentBindings)
+              }
             >
-              <Select
-                id="plan-channel-select"
-                value={selectedChannel}
-                onValueChange={(val) =>
-                  setSelectedChannel(val as keyof PaymentBindings)
+              {availableChannels.map((c) => {
+                const isActive = activeProvider === c.key;
+                const hasBase = Boolean(form.paymentBindings[c.key]);
+                const hasAnnual = Boolean(
+                  form.annualPaymentBindings?.[c.key],
+                );
+                const isBound = hasBase || hasAnnual;
+                const tag = isActive
+                  ? ` · ${tr("当前启用")}`
+                  : isBound
+                    ? ` · ${tr("已绑定")}`
+                    : "";
+                return (
+                  <option key={c.key} value={c.key}>
+                    {c.name + tag}
+                  </option>
+                );
+              })}
+            </Select>
+          </Field>
+
+          <Field
+            id={`binding-base-${currentChannel.key}`}
+            label={
+              type === "month"
+                ? tr("月付商品 ID")
+                : tr("一次性商品 ID")
+            }
+            hint={currentChannel.hint}
+          >
+            <Input
+              id={`binding-base-${currentChannel.key}`}
+              value={form.paymentBindings[currentChannel.key] || ""}
+              maxLength={200}
+              placeholder={
+                currentChannel.key === "stripe"
+                  ? "price_..."
+                  : currentChannel.key === "paypal"
+                    ? "P-..."
+                    : "prod_..."
+              }
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  paymentBindings: {
+                    ...form.paymentBindings,
+                    [currentChannel.key]: e.target.value.trim(),
+                  },
+                })
+              }
+            />
+          </Field>
+
+          {Boolean(form.annualPrice) && (
+            <Field
+              id={`binding-year-${currentChannel.key}`}
+              label={tr("年付商品 ID")}
+              hint={currentChannel.hint}
+            >
+              <Input
+                id={`binding-year-${currentChannel.key}`}
+                value={
+                  form.annualPaymentBindings?.[currentChannel.key] || ""
                 }
-              >
-                {availableChannels.map((c) => {
-                  const isActive = activeProvider === c.key;
-                  const hasBase = Boolean(form.paymentBindings[c.key]);
-                  const hasAnnual = Boolean(
-                    form.annualPaymentBindings?.[c.key],
-                  );
-                  const isBound = hasBase || hasAnnual;
-                  const tag = isActive
-                    ? ` · ${tr("当前启用")}`
-                    : isBound
-                      ? ` · ${tr("已绑定")}`
-                      : "";
-                  return (
-                    <option key={c.key} value={c.key}>
-                      {c.name + tag}
-                    </option>
-                  );
-                })}
-              </Select>
+                maxLength={200}
+                placeholder={
+                  currentChannel.key === "stripe"
+                    ? "price_..."
+                    : currentChannel.key === "paypal"
+                      ? "P-..."
+                      : "prod_..."
+                }
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    annualPaymentBindings: {
+                      ...(form.annualPaymentBindings ?? {}),
+                      [currentChannel.key]: e.target.value.trim(),
+                    },
+                  })
+                }
+              />
             </Field>
-
-            <div className="plan-channel-card" style={{ marginTop: "14px" }}>
-              <div className="plan-channel-header">
-                <h4>
-                  <span>{currentChannel.name}</span>
-                  {activeProvider === currentChannel.key ? (
-                    <span className="active-badge">
-                      {tr("系统当前结算渠道")}
-                    </span>
-                  ) : (
-                    <span className="optional-badge">
-                      {tr("备用渠道 (选填)")}
-                    </span>
-                  )}
-                </h4>
-                <small className="admin-secondary" style={{ margin: 0 }}>
-                  {activeProvider === currentChannel.key
-                    ? tr("当前系统默认使用此渠道进行收银，建议配置此渠道的商品 ID。")
-                    : tr("未切换至此渠道时可留空。若后续环境变量切换为此提供商，将自动采用此处配置。")}
-                </small>
-              </div>
-
-              {form.mode === "payment" && currentChannel.key === "paypal" ? (
-                <p className="admin-secondary" style={{ margin: "4px 0" }}>
-                  {tr("PayPal 积分包直接创建一次性付款订单，无需 Plan ID。")}
-                </p>
-              ) : (
-                <>
-                  <Field
-                    id={`binding-base-${currentChannel.key}`}
-                    label={
-                      type === "month"
-                        ? tr("月付商品 ID")
-                        : tr("一次性商品 ID")
-                    }
-                    hint={currentChannel.hint}
-                  >
-                    <Input
-                      id={`binding-base-${currentChannel.key}`}
-                      value={form.paymentBindings[currentChannel.key] || ""}
-                      maxLength={200}
-                      placeholder={
-                        currentChannel.key === "stripe"
-                          ? "price_..."
-                          : currentChannel.key === "paypal"
-                            ? "P-..."
-                            : "prod_..."
-                      }
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          paymentBindings: {
-                            ...form.paymentBindings,
-                            [currentChannel.key]: e.target.value.trim(),
-                          },
-                        })
-                      }
-                    />
-                  </Field>
-
-                  {Boolean(form.annualPrice) && (
-                    <Field
-                      id={`binding-year-${currentChannel.key}`}
-                      label={tr("年付商品 ID")}
-                      hint={currentChannel.hint}
-                    >
-                      <Input
-                        id={`binding-year-${currentChannel.key}`}
-                        value={
-                          form.annualPaymentBindings?.[currentChannel.key] || ""
-                        }
-                        maxLength={200}
-                        placeholder={
-                          currentChannel.key === "stripe"
-                            ? "price_..."
-                            : currentChannel.key === "paypal"
-                              ? "P-..."
-                              : "prod_..."
-                        }
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            annualPaymentBindings: {
-                              ...(form.annualPaymentBindings ?? {}),
-                              [currentChannel.key]: e.target.value.trim(),
-                            },
-                          })
-                        }
-                      />
-                    </Field>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+          )}
         </fieldset>
       )}
       <label className="admin-toggle">
