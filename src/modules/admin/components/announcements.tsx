@@ -58,6 +58,17 @@ export function AdminAnnouncements() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      setSubmitError(tr("请输入公告标题"));
+      return;
+    }
+    const trimmedContent = content.trim();
+    if (!trimmedContent) {
+      setSubmitError(tr("请输入公告内容"));
+      return;
+    }
+
     setBusy(true);
     setSubmitError("");
     try {
@@ -66,11 +77,11 @@ export function AdminAnnouncements() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: editingItem?.id,
-          title,
-          content,
+          title: trimmedTitle,
+          content: trimmedContent,
           type,
-          linkUrl,
-          linkText,
+          linkUrl: linkUrl.trim(),
+          linkText: linkText.trim(),
           isActive,
           dismissible,
         }),
@@ -236,6 +247,7 @@ export function AdminAnnouncements() {
         {submitError && <Notice kind="error">{tr(submitError)}</Notice>}
 
         <form
+          noValidate
           onSubmit={handleSubmit}
           style={{ display: "grid", gap: "16px" }}
         >
