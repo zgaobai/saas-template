@@ -24,7 +24,6 @@ import {
   Activity,
   MessageSquare,
   LogOut,
-  ArrowUpRight,
   Menu,
   X,
 } from "lucide-react";
@@ -73,7 +72,6 @@ export function AppShell({
           <Brand />
           <Link to="/" search={{}} className="sidebar-return">
             {tr("返回网站")}
-            <ArrowUpRight size={14} />
           </Link>
           <button
             ref={menuButton}

@@ -2,10 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Menu } from "@base-ui/react/menu";
 import {
-  ChevronDown,
-  Sparkles,
+  LayoutGrid,
   CreditCard,
-  Coins,
+  ReceiptText,
   Settings,
   Shield,
   LogOut,
@@ -69,7 +68,6 @@ export function UserAccountMenu({
           <div className="account-avatar-circle">{initial}</div>
         )}
         <span className="account-trigger-name">{displayName}</span>
-        <ChevronDown size={14} className="account-trigger-chevron" />
       </Menu.Trigger>
 
       <Menu.Portal>
@@ -105,7 +103,7 @@ export function UserAccountMenu({
               className="select-option account-menu-item"
               onClick={() => void navigate({ to: "/" })}
             >
-              <Sparkles size={15} />
+              <LayoutGrid size={15} />
               <span>{tr("AI 工具工作台")}</span>
             </Menu.Item>
 
@@ -123,7 +121,7 @@ export function UserAccountMenu({
               className="select-option account-menu-item"
               onClick={() => void navigate({ to: "/billing" })}
             >
-              <Coins size={15} />
+              <ReceiptText size={15} />
               <span>{tr("积分账单明细")}</span>
             </Menu.Item>
 

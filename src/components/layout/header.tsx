@@ -3,7 +3,7 @@ import { HomeSectionLink } from "@/components/layout/home-section-link";
 import { AuthLink } from "@/modules/auth/components/auth-dialog";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, Menu, UserRound, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Brand } from "./brand";
 import { ThemeToggle } from "./theme-toggle";
 import { authClient, getCachedClientSession } from "@/modules/auth/client";

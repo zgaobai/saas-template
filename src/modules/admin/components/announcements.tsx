@@ -316,7 +316,7 @@ export function AdminAnnouncements() {
                 maxLength={50}
                 value={linkText}
                 onChange={(e) => setLinkText(e.target.value)}
-                placeholder={tr("如：立即体验 →")}
+                placeholder={tr("如：立即体验")}
               />
             </Field>
           </div>

@@ -3,13 +3,11 @@ import { HomeSectionLink } from "@/components/layout/home-section-link";
 import { FeatureOverview } from "./features";
 import { FaqSection } from "./faq";
 import {
-  ArrowRight,
-  ArrowUpRight,
   Check,
   PenLine,
-  History,
-  ShieldCheck,
-  Sparkles,
+  Megaphone,
+  Briefcase,
+  Languages,
 } from "lucide-react";
 import { ProductDemo } from "./product-demo";
 import { ToolCatalog } from "@/modules/tools/components/tool-catalog";
@@ -35,9 +33,6 @@ export function HomePage({
       <section className="saas-hero container">
         <HomeSectionLink section="tools" className="hero-announcement">
           {tr("{0} 款 AI 工具，开启下一次创作", [tools.length])}
-          <span>
-            <ArrowRight size={13} />
-          </span>
         </HomeSectionLink>
         <h1>
           {tr("少一点重复工作，")}
@@ -52,7 +47,6 @@ export function HomePage({
         <div className="saas-hero-actions">
           <HomeSectionLink section="tools" className="button button-primary">
             {tr("开始使用")}
-            <ArrowUpRight size={17} />
           </HomeSectionLink>
           <button
             type="button"
@@ -68,7 +62,6 @@ export function HomePage({
             className="button button-secondary"
           >
             {tr("看看效果")}
-            <ArrowRight size={16} />
           </button>
         </div>
         <div className="hero-proof">
@@ -99,15 +92,15 @@ export function HomePage({
             {tr("内容写作")}
           </span>
           <span>
-            <Sparkles size={18} />
+            <Megaphone size={18} />
             {tr("产品营销")}
           </span>
           <span>
-            <History size={18} />
+            <Briefcase size={18} />
             {tr("效率办公")}
           </span>
           <span>
-            <ShieldCheck size={18} />
+            <Languages size={18} />
             {tr("跨语言表达")}
           </span>
         </div>
@@ -139,7 +132,6 @@ export function HomePage({
         <p>{tr("选一个工具，把脑海中的想法写出来。")}</p>
         <HomeSectionLink section="tools" className="button button-primary">
           {tr("探索 AI 工具")}
-          <ArrowRight size={17} />
         </HomeSectionLink>
       </section>
     </>

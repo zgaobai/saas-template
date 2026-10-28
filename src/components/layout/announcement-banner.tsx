@@ -124,7 +124,7 @@ export function AnnouncementBanner() {
               marginLeft: "4px",
             }}
           >
-            {announcement.link_text || tr("查看详情 →")}
+            {announcement.link_text || tr("查看详情")}
           </Link>
         )}
       </div>

@@ -1,6 +1,5 @@
 import { useI18n } from "@/i18n/react";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight } from "lucide-react";
 import { AuthLink } from "@/modules/auth/components/auth-dialog";
 import { Button } from "@/components/ui/button";
 import { type Plan } from "../plans";
@@ -20,23 +19,20 @@ export function PlanPurchase({
   pending,
   onBuy,
 }: PlanPurchaseProps) {
-  const { t: tr, locale } = useI18n();
+  const { t: tr } = useI18n();
   return plan.mode === "free" ? (
     signedIn ? (
       <Link to="/account" className="button button-secondary">
         {tr("我的账户")}
-        <ArrowUpRight size={16} />
       </Link>
     ) : (
       <AuthLink mode="register" className="button button-secondary">
         {tr("免费开始")}
-        <ArrowUpRight size={16} />
       </AuthLink>
     )
   ) : !signedIn ? (
     <AuthLink className="button button-primary">
       {tr("登录后购买")}
-      <ArrowUpRight size={16} />
     </AuthLink>
   ) : (
     <Button

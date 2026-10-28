@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import {
   Copy,
   Check,
-  ArrowRight,
+  Coins,
   WandSparkles,
   Sparkles,
   Download,
@@ -510,9 +510,8 @@ export function ToolWorkbench({
         </div>
         {signedIn ? (
           <Link to="/billing" className="balance-chip">
-            <Sparkles size={15} />
+            <Coins size={14} />
             {data?.balance ?? "—"} {tr("积分")}
-            <ArrowRight size={14} />
           </Link>
         ) : (
           <span className="tool-cost">{tr("每次成功生成 · 1 积分")}</span>
@@ -538,7 +537,6 @@ export function ToolWorkbench({
               }}
             >
               {tr("试试示例")}
-              <ArrowRight size={14} />
             </button>
           </div>
 
@@ -594,7 +592,7 @@ export function ToolWorkbench({
 
           {signedIn && data && data.balance < 1 && (
             <Link to="/pricing" className="low-credit-link">
-              {tr("积分不足，查看补充方案 →")}
+              {tr("积分不足，查看补充方案")}
             </Link>
           )}
         </form>

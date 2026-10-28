@@ -1,6 +1,5 @@
 import { useI18n } from "@/i18n/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight } from "lucide-react";
 import { PublicLayout } from "@/components/layout/public-layout";
 import { posts } from "@/modules/blog/catalog";
 import { pageHead } from "@/modules/seo/metadata";
@@ -42,7 +41,6 @@ export const Route = createFileRoute("/blog/")({
                     }}
                   >
                     {tr(post.title)}
-                    <ArrowUpRight size={20} aria-hidden="true" />
                   </Link>
                 </h2>
                 <p>{tr(post.description)}</p>

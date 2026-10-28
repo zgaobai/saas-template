@@ -1,12 +1,12 @@
 import { useI18n } from "@/i18n/react";
 import { Link } from "@tanstack/react-router";
-import { PenLine, History, ShieldCheck, ArrowRight } from "lucide-react";
+import { PenLine, Clock, Wallet } from "lucide-react";
 export function FeatureOverview({
   standalone = false,
 }: {
   standalone?: boolean;
 }) {
-  const { t: tr, locale } = useI18n();
+  const { t: tr } = useI18n();
   const Heading = standalone ? "h1" : "h2";
   return (
     <section className="marketing-features container" id="features">
@@ -30,11 +30,10 @@ export function FeatureOverview({
             }}
           >
             {tr("试试文案生成")}
-            <ArrowRight size={14} />
           </Link>
         </article>
         <article>
-          <History size={24} />
+          <Clock size={24} />
           <h3>{tr("每次创作，都能找回来")}</h3>
           <p>
             {tr(
@@ -43,11 +42,10 @@ export function FeatureOverview({
           </p>
           <Link to="/history">
             {tr("查看创作记录")}
-            <ArrowRight size={14} />
           </Link>
         </article>
         <article>
-          <ShieldCheck size={24} />
+          <Wallet size={24} />
           <h3>{tr("积分清楚，使用有数")}</h3>
           <p>
             {tr(
@@ -56,7 +54,6 @@ export function FeatureOverview({
           </p>
           <Link to="/pricing">
             {tr("了解积分方案")}
-            <ArrowRight size={14} />
           </Link>
         </article>
       </div>

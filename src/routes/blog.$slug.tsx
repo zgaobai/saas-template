@@ -1,6 +1,6 @@
 import { useI18n } from "@/i18n/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { PublicLayout } from "@/components/layout/public-layout";
 import { getPost, posts } from "@/modules/blog/catalog";
 import { ArticleBody } from "@/modules/blog/article-body";
@@ -71,7 +71,6 @@ function Article() {
             className="button button-primary"
           >
             {tr(post.toolLabel)}
-            <ArrowRight size={16} />
           </Link>
         </div>
       </article>
@@ -88,7 +87,6 @@ function Article() {
               }}
             >
               {tr(item.title)}
-              <ArrowRight size={16} />
             </Link>
           ))}
       </aside>

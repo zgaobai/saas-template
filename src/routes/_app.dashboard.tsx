@@ -1,6 +1,5 @@
 import { useI18n } from "@/i18n/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight } from "lucide-react";
 import { tools } from "@/modules/tools/catalog";
 import { ToolCard } from "@/modules/tools/components/tool-card";
 import { PageHeading } from "@/components/layout/page-heading";
@@ -34,7 +33,6 @@ function Page() {
         </div>
         <Link to="/billing" className="text-link">
           {tr("积分与账单")}
-          <ArrowUpRight size={16} />
         </Link>
       </div>
       <h2 className="block-title">{tr("开始一次新创作")}</h2>
