@@ -6,7 +6,17 @@ import { balance } from "@/modules/credits/server/service";
 export async function personalLedger(request: Request, userId: string) {
   const p = z
     .object({
-      kind: z.enum(["", "spent", "returned", "earned"]).default(""),
+      kind: z
+        .enum([
+          "",
+          "spent",
+          "returned",
+          "earned",
+          "payment",
+          "subscription",
+          "redeem",
+        ])
+        .default(""),
       cursor: z.string().max(1000).optional(),
       days: z.enum(["7", "30", "90"]).default("30"),
     })
@@ -18,6 +28,11 @@ export async function personalLedger(request: Request, userId: string) {
     values: (string | number)[] = [userId];
   if (q.kind === "spent") where.push("id LIKE 'generation:%'");
   if (q.kind === "returned") where.push("id LIKE 'release:%'");
+  if (q.kind === "payment") where.push("id LIKE 'payment:%'");
+  if (q.kind === "subscription")
+    where.push("(id LIKE 'redeem-month:%' OR id LIKE 'installment:%')");
+  if (q.kind === "redeem")
+    where.push("id LIKE 'redeem:%' AND id NOT LIKE 'redeem-month:%'");
   if (q.kind === "earned") where.push("amount>0 AND id NOT LIKE 'release:%'");
   if (q.cursor) {
     try {

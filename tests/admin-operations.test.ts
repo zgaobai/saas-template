@@ -627,6 +627,16 @@ it("dashboard separates receipt revenue from order totals and counts refunds by 
   ]);
   const ledger = await listAdminLedger(query("search=alice"));
   expect(ledger.items.filter((i) => i.order_id === "o")).toHaveLength(2);
+  const paymentLedger = await listAdminLedger(
+    query("search=alice&status=payment"),
+  );
+  expect(paymentLedger.items).toHaveLength(1);
+  expect(paymentLedger.items[0].id).toBe("payment:r");
+  const refundLedger = await listAdminLedger(
+    query("search=alice&status=refund"),
+  );
+  expect(refundLedger.items).toHaveLength(1);
+  expect(refundLedger.items[0].id).toBe("refund:r");
 });
 it("redemption honors paid subscription expiry and does not grant pack expiry", async () => {
   db.prepare(

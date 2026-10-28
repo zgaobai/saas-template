@@ -27,17 +27,26 @@ type LedgerData = {
 };
 const filters = {
   "": "全部流水",
-  earned: "获得积分",
   spent: "任务扣费",
   returned: "失败退回",
+  payment: "充值购买",
+  subscription: "周期配额",
+  redeem: "卡密兑换",
+  earned: "全部获得",
 };
 function entryKind(entry: LedgerEntry) {
   if (entry.id.startsWith("generation:")) return "任务扣费";
   if (entry.id.startsWith("release:")) return "失败退回";
+  if (entry.id.startsWith("payment:")) return "充值购买";
+  if (entry.id.startsWith("redeem-month:") || entry.id.startsWith("installment:"))
+    return "周期配额";
+  if (entry.id.startsWith("redeem:")) return "卡密兑换";
+  if (entry.id.startsWith("refund:") || entry.reason.includes("退款"))
+    return "退款撤回";
   return entry.amount > 0
-    ? "获得积分"
+    ? "系统增补"
     : entry.amount < 0
-      ? "积分扣减"
+      ? "系统扣除"
       : "积分调整";
 }
 export function CreditLedger() {

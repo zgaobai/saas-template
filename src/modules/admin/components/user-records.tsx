@@ -12,6 +12,7 @@ import { CompactValue } from "@/components/ui/compact-value";
 import { getTool } from "@/modules/tools/catalog";
 import { formatPrice, legacyPlanNames } from "@/modules/billing/plans";
 import { DateTime } from "./list";
+import { getLedgerMeta } from "./ledger";
 import { AdminPagination } from "./pagination";
 import {
   taskStatuses,
@@ -33,7 +34,7 @@ const columns: Record<UserRecordSection, string[]> = {
     "提交 / 完成时间",
     "操作",
   ],
-  ledger: ["原因 / 流水编号", "积分变动", "时间"],
+  ledger: ["流水类型", "积分变动", "状态", "原因 / 流水编号", "时间"],
   orders: [
     "套餐 / 订单编号",
     "订单金额",
@@ -160,28 +161,65 @@ export function UserRecords({
                             </td>
                           </>
                         )}
-                        {section === "ledger" && (
-                          <>
-                            <td>
-                              <span className="table-reason">
-                                {r.reason || "—"}
-                              </span>
-                              <CompactValue
-                                value={r.id}
-                                label={tr("流水编号")}
-                              />
-                            </td>
-                            <td
-                              className={(r.amount ?? 0) > 0 ? "positive" : ""}
-                            >
-                              {(r.amount ?? 0) > 0 ? "+" : ""}
-                              {r.amount ?? 0}
-                            </td>
-                            <td>
-                              <DateTime value={r.created_at ?? 0} />
-                            </td>
-                          </>
-                        )}
+                        {section === "ledger" && (() => {
+                          const meta = getLedgerMeta({
+                            id: r.id,
+                            amount: r.amount ?? 0,
+                            reason: r.reason,
+                          });
+                          return (
+                            <>
+                              <td>
+                                <span
+                                  style={{
+                                    display: "inline-block",
+                                    padding: "2px 8px",
+                                    borderRadius: "999px",
+                                    fontSize: "12px",
+                                    fontWeight: 500,
+                                    background: meta.bg,
+                                    color: meta.color,
+                                  }}
+                                >
+                                  {tr(meta.label)}
+                                </span>
+                              </td>
+                              <td
+                                className={(r.amount ?? 0) > 0 ? "positive" : ""}
+                              >
+                                {(r.amount ?? 0) > 0 ? "+" : ""}
+                                {r.amount ?? 0}
+                              </td>
+                              <td>
+                                <span
+                                  style={{
+                                    display: "inline-block",
+                                    padding: "2px 8px",
+                                    borderRadius: "999px",
+                                    fontSize: "12px",
+                                    fontWeight: 500,
+                                    background: "rgba(16, 185, 129, 0.12)",
+                                    color: "#10b981",
+                                  }}
+                                >
+                                  {tr("已入账")}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="table-reason">
+                                  {r.reason || "—"}
+                                </span>
+                                <CompactValue
+                                  value={r.id}
+                                  label={tr("流水编号")}
+                                />
+                              </td>
+                              <td>
+                                <DateTime value={r.created_at ?? 0} />
+                              </td>
+                            </>
+                          );
+                        })()}
                         {tr(
                           section === "orders" && (
                             <>

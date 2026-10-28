@@ -270,7 +270,17 @@ export async function taskDetail(request: Request, id: string) {
 }
 export async function listAdminLedger(request: Request) {
   await requireAdmin(request);
-  const q = input(request, { in: "增加", out: "扣减" }),
+  const q = input(request, {
+    spent: "任务扣费",
+    returned: "失败退回",
+    payment: "充值购买",
+    subscription: "周期配额",
+    redeem: "卡密兑换",
+    refund: "退款撤回",
+    adjustment: "系统调整",
+    in: "全部增加",
+    out: "全部扣减",
+  }),
     where: string[] = [],
     values: (string | number)[] = [];
   if (q.provider) throw new HttpError(400, "积分流水不支持支付渠道。");
@@ -280,7 +290,23 @@ export async function listAdminLedger(request: Request) {
     );
     values.push(q.search, q.search, q.search);
   }
-  if (q.status) where.push(q.status === "in" ? "l.amount>0" : "l.amount<0");
+  if (q.status) {
+    if (q.status === "spent") where.push("l.id LIKE 'generation:%'");
+    else if (q.status === "returned") where.push("l.id LIKE 'release:%'");
+    else if (q.status === "payment") where.push("l.id LIKE 'payment:%'");
+    else if (q.status === "subscription")
+      where.push("(l.id LIKE 'redeem-month:%' OR l.id LIKE 'installment:%')");
+    else if (q.status === "redeem")
+      where.push("l.id LIKE 'redeem:%' AND l.id NOT LIKE 'redeem-month:%'");
+    else if (q.status === "refund")
+      where.push("(l.id LIKE 'refund:%' OR f.id IS NOT NULL)");
+    else if (q.status === "adjustment")
+      where.push(
+        "l.id NOT LIKE 'generation:%' AND l.id NOT LIKE 'release:%' AND l.id NOT LIKE 'payment:%' AND l.id NOT LIKE 'redeem%' AND l.id NOT LIKE 'installment:%' AND l.id NOT LIKE 'refund:%' AND f.id IS NULL",
+      );
+    else if (q.status === "in") where.push("l.amount>0");
+    else if (q.status === "out") where.push("l.amount<0");
+  }
   return page<AdminLedger>(
     "SELECT l.id,l.user_id,u.name,u.email,l.amount,l.reason,l.created_at,r.order_id FROM credit_ledger l JOIN user u ON u.id=l.user_id LEFT JOIN refund_events f ON f.id=l.id LEFT JOIN credit_installments i ON i.id=CASE WHEN l.id LIKE 'installment:%' THEN substr(l.id,13) WHEN l.id LIKE 'refund:installment:%' THEN substr(l.id,20) END LEFT JOIN receipts r ON r.id=CASE WHEN l.id LIKE 'payment:%' THEN substr(l.id,9) ELSE COALESCE(f.receipt_id,i.receipt_id) END",
     where,
