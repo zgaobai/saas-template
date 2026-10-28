@@ -9,6 +9,8 @@ import { Modal } from "@/components/ui/modal";
 import { Field, Input, Textarea } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
 import { Plus, Trash2, Edit } from "lucide-react";
+import { toast } from "@/components/ui/toast";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import type { AnnouncementItem } from "../types";
 
 export function AdminAnnouncements() {
@@ -90,6 +92,7 @@ export function AdminAnnouncements() {
         const json = (await res.json().catch(() => ({}))) as { message?: string };
         throw new Error(json.message || "保存失败");
       }
+      toast.success(editingItem ? tr("公告已更新") : tr("公告发布成功"));
       setModalOpen(false);
       void reload();
     } catch (err) {
@@ -106,16 +109,28 @@ export function AdminAnnouncements() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, isActive: !current }),
       });
+      toast.success(!current ? tr("公告已启用") : tr("公告已下线"));
       void reload();
-    } catch {}
+    } catch {
+      toast.error(tr("操作失败"));
+    }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm(tr("确定删除此条公告吗？"))) return;
+    const ok = await confirmAction({
+      title: tr("删除公告确认"),
+      description: tr("确定删除此条公告吗？"),
+      confirmText: tr("确认删除"),
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       await fetch(`/api/app/admin/announcements/${id}`, { method: "DELETE" });
+      toast.success(tr("公告已删除"));
       void reload();
-    } catch {}
+    } catch {
+      toast.error(tr("删除失败"));
+    }
   }
 
   const typeLabels = {

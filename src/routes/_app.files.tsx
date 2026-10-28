@@ -7,6 +7,8 @@ import { api } from "@/lib/api";
 import { PageHeading } from "@/components/layout/page-heading";
 import { Button } from "@/components/ui/button";
 import { Empty, Loading, Notice } from "@/components/ui/feedback";
+import { toast } from "@/components/ui/toast";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 type FileRow = {
   id: string;
   name: string;
@@ -36,9 +38,12 @@ function Page() {
         method: "POST",
         body: form,
       });
+      toast.success(tr("文件上传成功"));
       await reload();
     } catch (e) {
-      setIssue(e instanceof Error ? e.message : "上传失败");
+      const msg = e instanceof Error ? e.message : tr("上传失败");
+      setIssue(msg);
+      toast.error(msg);
       await reload();
     } finally {
       setBusy(false);
@@ -103,16 +108,25 @@ function Page() {
                 aria-label={tr("删除 {0}", [f.name])}
                 disabled={busy}
                 onClick={async () => {
-                  if (!window.confirm(`删除“${f.name}”？`)) return;
+                  const ok = await confirmAction({
+                    title: tr("删除文件确认"),
+                    description: tr("确定删除此文件吗？"),
+                    confirmText: tr("确认删除"),
+                    variant: "danger",
+                  });
+                  if (!ok) return;
                   setBusy(true);
                   setIssue("");
                   try {
                     await api(`/api/app/files/${f.id}`, {
                       method: "DELETE",
                     });
+                    toast.success(tr("文件已删除"));
                     await reload();
                   } catch (e) {
-                    setIssue(e instanceof Error ? e.message : "删除失败");
+                    const msg = e instanceof Error ? e.message : tr("删除失败");
+                    setIssue(msg);
+                    toast.error(msg);
                   } finally {
                     setBusy(false);
                   }

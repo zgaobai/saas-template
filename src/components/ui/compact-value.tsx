@@ -1,6 +1,7 @@
 import { useI18n } from "@/i18n/react";
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import { toast } from "./toast";
 
 /** Keep the value on one line; copying never expands or duplicates table rows. */
 export function CompactValue({
@@ -32,9 +33,11 @@ export function CompactValue({
           try {
             await navigator.clipboard.writeText(value);
             setMessage("已复制");
+            toast.success(tr("已复制到剪贴板"));
             setTimeout(() => setMessage(""), 2000);
           } catch {
             setMessage("复制失败，请选中文字复制");
+            toast.error(tr("复制失败，请手动选择内容复制。"));
           }
         }}
       >

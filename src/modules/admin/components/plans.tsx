@@ -16,6 +16,8 @@ import {
   annualSavings,
 } from "@/modules/billing/plans";
 import { Plus, Pencil, RefreshCw } from "lucide-react";
+import { toast } from "@/components/ui/toast";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 export function AdminPlans() {
   const { t: tr, locale } = useI18n();
   const { data, error, loading, reload } = useResource<{
@@ -29,13 +31,15 @@ export function AdminPlans() {
 
   async function handleTogglePayments(enable: boolean) {
     if (!enable) {
-      if (
-        !window.confirm(
-          tr("确定要临时暂停全站支付吗？暂停后前台用户将无法发起新结账。"),
-        )
-      ) {
-        return;
-      }
+      const ok = await confirmAction({
+        title: tr("暂停支付确认"),
+        description: tr(
+          "确定要临时暂停全站支付吗？暂停后前台用户将无法发起新结账。",
+        ),
+        confirmText: tr("确认暂停"),
+        variant: "danger",
+      });
+      if (!ok) return;
     }
     setToggleBusy(true);
     try {
@@ -44,8 +48,11 @@ export function AdminPlans() {
         body: JSON.stringify({ enabled: enable }),
       });
       await reload();
+      toast.success(
+        enable ? tr("全站支付已恢复开放") : tr("全站支付已临时暂停"),
+      );
     } catch (e) {
-      alert(e instanceof Error ? e.message : "操作失败");
+      toast.error(e instanceof Error ? e.message : tr("操作失败"));
     } finally {
       setToggleBusy(false);
     }
@@ -357,6 +364,7 @@ function PlanEditor({
             },
           );
           await onSave();
+          toast.success(tr("套餐保存成功"));
         } catch (e) {
           setError(e instanceof Error ? e.message : "保存失败");
         } finally {
