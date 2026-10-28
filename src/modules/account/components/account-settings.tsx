@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Notice } from "@/components/ui/feedback";
 import { CloseAccount } from "@/modules/account/components/close-account";
-import { AccountEmailAction } from "@/modules/auth/components/account-email-action";
+import { ShieldCheck } from "lucide-react";
 export function AccountSettings({
   user,
-  security,
+  security: _security,
 }: {
   user: {
     name: string;
@@ -26,8 +26,6 @@ export function AccountSettings({
   const { t: tr, locale } = useI18n();
   const router = useRouter();
   const [name, setName] = useState(user.name);
-  const [current, setCurrent] = useState("");
-  const [next, setNext] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -43,8 +41,6 @@ export function AccountSettings({
       const r = await fn();
       if (r.error) throw new Error("更新未完成，请检查输入后重试。");
       setMessage("已保存。");
-      setCurrent("");
-      setNext("");
       await router.invalidate();
     } catch (e) {
       setError(e instanceof Error ? e.message : "更新失败");
@@ -56,7 +52,7 @@ export function AccountSettings({
     <div className="account-page">
       <PageHeading
         title={tr("账户设置")}
-        description={tr("管理个人资料、登录密码和账户安全。")}
+        description={tr("管理个人资料与账户安全。")}
         action={
           <Button
             variant="secondary"
@@ -105,66 +101,20 @@ export function AccountSettings({
             {tr("保存名称")}
           </Button>
         </form>
-        {security.hasPassword ? (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void run(() =>
-                authClient.changePassword({
-                  currentPassword: current,
-                  newPassword: next,
-                  revokeOtherSessions: true,
-                }),
-              );
-            }}
-          >
-            <h2>{tr("修改密码")}</h2>
-            <p>{tr("更新后会退出其他设备上的登录。")}</p>
-            <Field id="current-password" label={tr("当前密码")}>
-              <Input
-                id="current-password"
-                type="password"
-                autoComplete="current-password"
-                value={current}
-                onChange={(e) => setCurrent(e.target.value)}
-                required
-              />
-            </Field>
-            <Field
-              id="new-password"
-              label={tr("新密码")}
-              hint={tr("至少 12 个字符。")}
-            >
-              <Input
-                id="new-password"
-                type="password"
-                minLength={12}
-                maxLength={128}
-                autoComplete="new-password"
-                value={next}
-                onChange={(e) => setNext(e.target.value)}
-                required
-              />
-            </Field>
-            <Button type="submit" variant="secondary" disabled={busy}>
-              {tr("更新密码")}
-            </Button>
-          </form>
-        ) : (
-          <section>
-            <h2>{tr("设置登录密码")}</h2>
-            <p>
-              {tr(
-                "你目前使用第三方账号登录。通过邮箱设置密码后，也可以使用邮箱和密码登录。",
-              )}
-            </p>
-            <AccountEmailAction
-              email={user.email}
-              ready={security.emailReady}
-              kind="password"
-            />
-          </section>
-        )}
+        <section className="account-security-card">
+          <h2>{tr("账户安全")}</h2>
+          <p>{tr("当前账户已启用无密码安全登录体系。")}</p>
+          <div className="security-status-badge">
+            <ShieldCheck size={18} />
+            <span>{tr("免密安全登录")} · {tr("已通过邮箱验证")}</span>
+          </div>
+          <p className="security-note">
+            {tr("无需记忆复杂密码。登录时系统会向你的认证邮箱发送专属安全链接，点击即可直接进入，有效防范撞库与弱密码风险。")}
+          </p>
+          <Field id="security-email" label={tr("认证邮箱")}>
+            <Input id="security-email" value={user.email} readOnly disabled />
+          </Field>
+        </section>
         <CloseAccount email={user.email} />
       </div>
     </div>
