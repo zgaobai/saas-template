@@ -216,5 +216,34 @@ npm run check
    - `npm run check`（TypeScript 严格类型检查 + 335 项测试 + Vite 生产构建 + 密钥防泄露物理扫描）100% 绿灯。
 
 
+## 管理后台四大核心扩展功能联动验证（2026-10-28）
+
+为强化管理后台的运营支撑、服务可用性监测与商业收益核算能力，完成了以下四大模块的新增与联动落地：
+
+1. **全站公告与促销横幅管理（`migrations/0019_announcements_and_feedback.sql`, `/admin/announcements`）**：
+   - 数据库新增 `announcements` 表及激活索引；
+   - 顶部横幅组件 `AnnouncementBanner` 挂载根路由，按类型（普通/推广/提醒）渲染地道渐变色彩，支持免跳出关闭并记入本地状态；
+   - 管理后台提供完整的发布、编辑、即时启闭开关与删除能力。
+
+2. **系统服务与外部集成一键诊断（`/admin/diagnostics`）**：
+   - 一览飞书群通知机器人、Resend 事务邮件、四大支付渠道（Pancake/Stripe/Creem/PayPal）、Google One Tap 及 Cloudflare D1/R2 存储状态；
+   - 内置“发送测试卡片到群”和“发送测试邮件”一键连通性测试按钮，所有秘钥与 Webhook 严格脱敏展示。
+
+3. **用户轻量反馈与工单中心（`/admin/feedbacks`）**：
+   - 数据库新增 `feedbacks` 表及状态流转索引；
+   - 前台侧边栏与账户页内置免跳转反馈弹窗 `FeedbackDialog`，具备每小时 5 次防刷频流控与用户身份自动绑定；
+   - 管理后台支持按状态（待处理/跟进中/已解决/已关闭）过滤、查看详情并记录内部排查备注。
+
+4. **AI 模型 Token 消耗与成本深度精算大盘（`/admin/overview`）**：
+   - 数据总览增加基于 `generations` 聚合统计的底座模型消耗表格；
+   - 详尽统计各模型调用总次数、成功率、Prompt/Completion/Total Tokens、上游微美元折算成本（USD）、扣减积分与端到端平均响应延迟。
+
+5. **工程标准与双语国际化自检**：
+   - 所有新建路由与弹窗全部接入 `src/i18n`，`src/i18n/en.json` 补充 122 个地道专业英文键值；
+   - 新增专项测试套件 `tests/admin-new-features.test.ts`（8 项测试，全量 32 个测试文件 343 项测试 100% 通过）；
+   - 执行 `npm run check`（TypeScript 严格类型检查 + Vitest 测试集 + Vite 生产构建 + 密钥物理防泄漏扫描）全绿通过，生产构建时长优化至 `< 1s`。
+
+
+
 
 

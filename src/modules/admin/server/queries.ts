@@ -21,6 +21,7 @@ import type {
   AdminCode,
   AdminRedemption,
   AdminOverview,
+  AdminAiModelUsage,
 } from "../types";
 import type {
   AdminPage,
@@ -410,6 +411,25 @@ export async function adminOverview(request: Request): Promise<AdminOverview> {
         "SELECT date(created_at/1000,'unixepoch','+8 hours') AS day,COUNT(*) AS count,SUM(status='completed') AS completed FROM generations WHERE created_at>=? AND created_at<=? GROUP BY day ORDER BY day",
       )
       .bind(from, until),
+    db
+      .prepare(
+        `SELECT
+          COALESCE(NULLIF(model,''), 'default') AS model,
+          COUNT(*) AS total_count,
+          COALESCE(SUM(status='completed'),0) AS completed_count,
+          COALESCE(SUM(status='failed'),0) AS failed_count,
+          COALESCE(SUM(prompt_tokens),0) AS prompt_tokens,
+          COALESCE(SUM(completion_tokens),0) AS completion_tokens,
+          COALESCE(SUM(total_tokens),0) AS total_tokens,
+          COALESCE(SUM(cost_micros),0) AS cost_micros,
+          COALESCE(SUM(cost),0) AS credits_charged,
+          AVG(CASE WHEN completed_at IS NOT NULL AND completed_at>=created_at THEN completed_at-created_at ELSE NULL END) AS avg_duration_ms
+        FROM generations
+        WHERE created_at>=? AND created_at<=?
+        GROUP BY model
+        ORDER BY total_count DESC`,
+      )
+      .bind(from, until),
   ]);
   return {
     from,
@@ -420,6 +440,7 @@ export async function adminOverview(request: Request): Promise<AdminOverview> {
     credits: results[3].results[0],
     revenue: results[4].results,
     daily: results[5].results,
+    aiUsage: (results[6]?.results || []) as unknown as AdminAiModelUsage[],
   } as AdminOverview;
 }
 

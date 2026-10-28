@@ -154,6 +154,67 @@ export function AdminOverview() {
                 </Empty>
               )}
             </section>
+            <section className="admin-section">
+              <h2>{tr("AI 模型消耗与 Token 成本精算")}</h2>
+              <p className="admin-secondary">
+                {tr("按底座模型统计调用次数、Token 消耗量、API 成本与积分转化。")}
+              </p>
+              {data.aiUsage && data.aiUsage.length > 0 ? (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{tr("底座模型")}</th>
+                        <th>{tr("调用频次 / 成功率")}</th>
+                        <th>{tr("Token 消耗 (输入 / 输出 / 总计)")}</th>
+                        <th>{tr("API 成本 (USD)")}</th>
+                        <th>{tr("扣减积分")}</th>
+                        <th>{tr("平均耗时")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.aiUsage.map((m) => {
+                        const successRate = m.total_count > 0 ? Math.round((m.completed_count / m.total_count) * 100) : 0;
+                        const costUsd = (m.cost_micros / 1000000).toFixed(4);
+                        const latencyStr = m.avg_duration_ms ? `${(m.avg_duration_ms / 1000).toFixed(2)}s` : "-";
+                        return (
+                          <tr key={m.model}>
+                            <td>
+                              <strong>{m.model}</strong>
+                            </td>
+                            <td>
+                              {m.total_count} {tr("次")}
+                              <small className="admin-secondary" style={{ display: "block" }}>
+                                {tr("成功率")} {successRate}%
+                              </small>
+                            </td>
+                            <td>
+                              <span>{m.total_tokens.toLocaleString()}</span>
+                              <small className="admin-secondary" style={{ display: "block" }}>
+                                {m.prompt_tokens.toLocaleString()} / {m.completion_tokens.toLocaleString()}
+                              </small>
+                            </td>
+                            <td>
+                              <span style={{ color: "var(--color-primary, #6366f1)", fontWeight: 600 }}>
+                                ${costUsd}
+                              </span>
+                            </td>
+                            <td>
+                              <span>{m.credits_charged.toLocaleString()}</span>
+                            </td>
+                            <td>{latencyStr}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <Empty title={tr("该周期暂无 AI 模型消耗记录")}>
+                  {tr("用户使用 AI 工具生成后，这里会自动生成模型成本报表。")}
+                </Empty>
+              )}
+            </section>
             <p className="admin-secondary">
               {tr("数据更新于")}
               {formatDateTime(data.until, locale)}

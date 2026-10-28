@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { AuthDialogProvider } from "@/modules/auth/components/auth-dialog";
 import { GoogleOneTap } from "@/modules/auth/components/google-one-tap";
+import { AnnouncementBanner } from "@/components/layout/announcement-banner";
 import { safeReturnTo } from "@/modules/tools/catalog";
 import stylesheet from "@/styles/globals.css?url";
 import { site } from "@/site";
@@ -167,6 +168,7 @@ function Root() {
       </head>
       <body>
         <I18nProvider locale={locale}>
+          <AnnouncementBanner />
           <button
             type="button"
             className="skip-link"

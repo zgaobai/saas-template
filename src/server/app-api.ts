@@ -42,6 +42,23 @@ import {
   testAdminAiConnection,
   getPublicAiModels,
 } from "@/modules/admin/server/ai-config";
+import {
+  getActiveAnnouncement,
+  listAdminAnnouncements,
+  saveAnnouncement,
+  toggleAnnouncement,
+  deleteAnnouncement,
+} from "@/modules/admin/server/announcements";
+import {
+  getDiagnostics,
+  testFeishuWebhook,
+  testEmailService,
+} from "@/modules/admin/server/diagnostics";
+import {
+  submitFeedback,
+  listAdminFeedbacks,
+  updateFeedbackStatus,
+} from "@/modules/feedback/server/service";
 import { closeAccount } from "@/modules/account/server/close";
 import {
   adminUserDetail,
@@ -58,9 +75,16 @@ import {
   listAdminAudit,
 } from "@/modules/admin/server/queries";
 export async function appApi(request: Request, path: string) {
+  const method = request.method;
+  if (method === "GET" && path === "public/announcements/active") {
+    return { announcement: await getActiveAnnouncement() };
+  }
+  if (method === "POST" && path === "feedback") {
+    assertOrigin(request);
+    return submitFeedback(request);
+  }
   const u = await requireUser(request);
   const db = bindings().DB;
-  const method = request.method;
   if (method !== "GET") {
     assertOrigin(request);
     await limitRequest(u.id, "write", 40, 60000);
@@ -197,6 +221,11 @@ export async function appApi(request: Request, path: string) {
       await limitRequest(u.id, "admin-reconcile", 5, 60000);
       return reconcileOrder(request);
     }
+    if (path === "admin/announcements") return saveAnnouncement(request);
+    if (path === "admin/announcements/toggle") return toggleAnnouncement(request);
+    if (path === "admin/diagnostics/feishu-test") return testFeishuWebhook(request);
+    if (path === "admin/diagnostics/email-test") return testEmailService(request);
+    if (path === "admin/feedbacks/status") return updateFeedbackStatus(request);
   }
   if (method === "GET") {
     if (path === "admin/overview") return adminOverview(request);
@@ -223,6 +252,12 @@ export async function appApi(request: Request, path: string) {
     if (path === "admin/subscriptions") return listAdminSubscriptions(request);
     if (path === "admin/audit") return listAdminAudit(request);
     if (path === "admin/ai-config") return getAdminAiConfig(request);
+    if (path === "admin/announcements") return listAdminAnnouncements(request);
+    if (path === "admin/diagnostics") return getDiagnostics(request);
+    if (path === "admin/feedbacks") return listAdminFeedbacks(request);
+  }
+  if (method === "DELETE" && path.startsWith("admin/announcements/")) {
+    return deleteAnnouncement(request, path.slice(20));
   }
   if (path === "admin/credits" && method === "POST") {
     const admin = await requireAdmin(request);

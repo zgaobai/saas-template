@@ -152,6 +152,18 @@ export type AdminRedemption = {
   expires_at: number;
   created_at: number;
 };
+export type AdminAiModelUsage = {
+  model: string;
+  total_count: number;
+  completed_count: number;
+  failed_count: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  cost_micros: number;
+  credits_charged: number;
+  avg_duration_ms: number | null;
+};
 export type AdminOverview = {
   from: number;
   until: number;
@@ -169,6 +181,7 @@ export type AdminOverview = {
   credits: { issued: number; spent: number };
   revenue: { currency: string; received: number; refunded: number }[];
   daily: { day: string; count: number; completed: number }[];
+  aiUsage?: AdminAiModelUsage[];
 };
 export const taskStatuses = {
   pending: "生成中",
@@ -225,3 +238,46 @@ export const registrationMethods: Record<string, string> = {
   credential: "邮箱注册",
   google: "Google",
 };
+
+export interface AnnouncementItem {
+  id: string;
+  title: string;
+  content: string;
+  type: "info" | "promotion" | "warning";
+  link_url: string;
+  link_text: string;
+  is_active: number;
+  dismissible: number;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface DiagnosticsReport {
+  feishu: {
+    configured: boolean;
+    webhookUrlMasked: string;
+    hasSecret: boolean;
+  };
+  email: {
+    configured: boolean;
+    emailFrom: string;
+    apiKeyMasked: string;
+  };
+  google: {
+    configured: boolean;
+    clientIdMasked: string;
+  };
+  payments: {
+    activeProvider: string;
+    pancake: boolean;
+    stripe: boolean;
+    creem: boolean;
+    paypal: boolean;
+  };
+  storage: {
+    dbOk: boolean;
+    totalFiles: number;
+    totalStorageBytes: number;
+    totalUsers: number;
+  };
+}

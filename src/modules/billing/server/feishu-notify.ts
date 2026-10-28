@@ -2,6 +2,7 @@ import "@tanstack/react-start/server-only";
 import { bindings } from "@/server/env";
 import { site } from "@/site";
 import { formatDateTime } from "@/lib/date";
+import { HttpError } from "@/server/http";
 
 export interface FeishuPaymentNotifyParams {
   orderId: string;
@@ -253,5 +254,127 @@ export async function notifyFeishuPayment(
   } catch (error) {
     console.error("Failed to deliver Feishu payment notification:", error);
     return false;
+  }
+}
+
+export async function sendFeishuTestNotification(
+  adminEmail: string,
+): Promise<{ ok: boolean; message: string }> {
+  const e = bindings();
+  const webhookUrl = e.FEISHU_WEBHOOK_URL;
+  if (!webhookUrl || !webhookUrl.trim()) {
+    throw new HttpError(
+      400,
+      "尚未配置 FEISHU_WEBHOOK_URL。请在环境变量或 Secrets 中填入飞书机器人 Webhook 地址。",
+    );
+  }
+
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const secret = e.FEISHU_WEBHOOK_SECRET;
+
+  const card = {
+    msg_type: "interactive",
+    card: {
+      header: {
+        title: {
+          tag: "plain_text",
+          content: "🧪 飞书机器人连通性测试",
+        },
+        template: "blue",
+      },
+      config: {
+        wide_screen_mode: true,
+      },
+      elements: [
+        {
+          tag: "div",
+          fields: [
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**测试发起人：**\n${maskEmail(adminEmail)}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**服务状态：**\n✅ 连通正常`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**安全签名：**\n${secret ? "🔒 已启用 HMAC-SHA256" : "⚠️ 未配置（免签）"}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**触发时间：**\n${formatDateTime(Date.now(), "zh")}`,
+              },
+            },
+          ],
+        },
+        {
+          tag: "hr",
+        },
+        {
+          tag: "note",
+          elements: [
+            {
+              tag: "plain_text",
+              content: `此消息来自【${site.name}】管理后台系统服务诊断，用于验证到账通知告警通道连通性。`,
+            },
+          ],
+        },
+      ],
+    },
+  };
+
+  const payload: Record<string, unknown> = { ...card };
+  if (secret) {
+    const sign = await signFeishuWebhook(timestamp, secret);
+    payload.timestamp = timestamp;
+    payload.sign = sign;
+  }
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(3000),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      throw new HttpError(
+        502,
+        `飞书服务器返回错误 HTTP ${res.status}: ${errText.slice(0, 200)}`,
+      );
+    }
+
+    const json = (await res.json().catch(() => ({}))) as {
+      code?: number;
+      msg?: string;
+    };
+    if (json.code !== undefined && json.code !== 0) {
+      throw new HttpError(
+        502,
+        `飞书机器人报错 [${json.code}]: ${json.msg || "未知错误，请检查签名密钥"}`,
+      );
+    }
+
+    return { ok: true, message: "测试卡片已成功发送至飞书群！" };
+  } catch (error) {
+    if (error instanceof HttpError) throw error;
+    throw new HttpError(
+      504,
+      `飞书网络连接超时或失败: ${(error as Error).message}`,
+    );
   }
 }

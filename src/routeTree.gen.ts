@@ -37,9 +37,12 @@ import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ToolsToolIdRouteImport } from './routes/tools.$toolId'
 import { Route as AppAdminIndexRouteImport } from './routes/_app.admin.index'
 import { Route as AppAdminAiRouteImport } from './routes/_app.admin.ai'
+import { Route as AppAdminAnnouncementsRouteImport } from './routes/_app.admin.announcements'
 import { Route as AppAdminAuditRouteImport } from './routes/_app.admin.audit'
 import { Route as AppAdminBillingRouteImport } from './routes/_app.admin.billing'
 import { Route as AppAdminCodesRouteImport } from './routes/_app.admin.codes'
+import { Route as AppAdminDiagnosticsRouteImport } from './routes/_app.admin.diagnostics'
+import { Route as AppAdminFeedbacksRouteImport } from './routes/_app.admin.feedbacks'
 import { Route as AppAdminLedgerRouteImport } from './routes/_app.admin.ledger'
 import { Route as AppAdminOverviewRouteImport } from './routes/_app.admin.overview'
 import { Route as AppAdminPlansRouteImport } from './routes/_app.admin.plans'
@@ -189,6 +192,11 @@ const AppAdminAiRoute = AppAdminAiRouteImport.update({
   path: '/ai',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminAnnouncementsRoute = AppAdminAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminAuditRoute = AppAdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -202,6 +210,16 @@ const AppAdminBillingRoute = AppAdminBillingRouteImport.update({
 const AppAdminCodesRoute = AppAdminCodesRouteImport.update({
   id: '/codes',
   path: '/codes',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminDiagnosticsRoute = AppAdminDiagnosticsRouteImport.update({
+  id: '/diagnostics',
+  path: '/diagnostics',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminFeedbacksRoute = AppAdminFeedbacksRouteImport.update({
+  id: '/feedbacks',
+  path: '/feedbacks',
   getParentRoute: () => AppAdminRoute,
 } as any)
 const AppAdminLedgerRoute = AppAdminLedgerRouteImport.update({
@@ -277,9 +295,12 @@ export interface FileRoutesByFullPath {
   '/tools/$toolId': typeof ToolsToolIdRoute
   '/blog/': typeof BlogIndexRoute
   '/admin/ai': typeof AppAdminAiRoute
+  '/admin/announcements': typeof AppAdminAnnouncementsRoute
   '/admin/audit': typeof AppAdminAuditRoute
   '/admin/billing': typeof AppAdminBillingRoute
   '/admin/codes': typeof AppAdminCodesRoute
+  '/admin/diagnostics': typeof AppAdminDiagnosticsRoute
+  '/admin/feedbacks': typeof AppAdminFeedbacksRoute
   '/admin/ledger': typeof AppAdminLedgerRoute
   '/admin/overview': typeof AppAdminOverviewRoute
   '/admin/plans': typeof AppAdminPlansRoute
@@ -317,9 +338,12 @@ export interface FileRoutesByTo {
   '/tools/$toolId': typeof ToolsToolIdRoute
   '/blog': typeof BlogIndexRoute
   '/admin/ai': typeof AppAdminAiRoute
+  '/admin/announcements': typeof AppAdminAnnouncementsRoute
   '/admin/audit': typeof AppAdminAuditRoute
   '/admin/billing': typeof AppAdminBillingRoute
   '/admin/codes': typeof AppAdminCodesRoute
+  '/admin/diagnostics': typeof AppAdminDiagnosticsRoute
+  '/admin/feedbacks': typeof AppAdminFeedbacksRoute
   '/admin/ledger': typeof AppAdminLedgerRoute
   '/admin/overview': typeof AppAdminOverviewRoute
   '/admin/plans': typeof AppAdminPlansRoute
@@ -360,9 +384,12 @@ export interface FileRoutesById {
   '/tools/$toolId': typeof ToolsToolIdRoute
   '/blog/': typeof BlogIndexRoute
   '/_app/admin/ai': typeof AppAdminAiRoute
+  '/_app/admin/announcements': typeof AppAdminAnnouncementsRoute
   '/_app/admin/audit': typeof AppAdminAuditRoute
   '/_app/admin/billing': typeof AppAdminBillingRoute
   '/_app/admin/codes': typeof AppAdminCodesRoute
+  '/_app/admin/diagnostics': typeof AppAdminDiagnosticsRoute
+  '/_app/admin/feedbacks': typeof AppAdminFeedbacksRoute
   '/_app/admin/ledger': typeof AppAdminLedgerRoute
   '/_app/admin/overview': typeof AppAdminOverviewRoute
   '/_app/admin/plans': typeof AppAdminPlansRoute
@@ -403,9 +430,12 @@ export interface FileRouteTypes {
     | '/tools/$toolId'
     | '/blog/'
     | '/admin/ai'
+    | '/admin/announcements'
     | '/admin/audit'
     | '/admin/billing'
     | '/admin/codes'
+    | '/admin/diagnostics'
+    | '/admin/feedbacks'
     | '/admin/ledger'
     | '/admin/overview'
     | '/admin/plans'
@@ -443,9 +473,12 @@ export interface FileRouteTypes {
     | '/tools/$toolId'
     | '/blog'
     | '/admin/ai'
+    | '/admin/announcements'
     | '/admin/audit'
     | '/admin/billing'
     | '/admin/codes'
+    | '/admin/diagnostics'
+    | '/admin/feedbacks'
     | '/admin/ledger'
     | '/admin/overview'
     | '/admin/plans'
@@ -485,9 +518,12 @@ export interface FileRouteTypes {
     | '/tools/$toolId'
     | '/blog/'
     | '/_app/admin/ai'
+    | '/_app/admin/announcements'
     | '/_app/admin/audit'
     | '/_app/admin/billing'
     | '/_app/admin/codes'
+    | '/_app/admin/diagnostics'
+    | '/_app/admin/feedbacks'
     | '/_app/admin/ledger'
     | '/_app/admin/overview'
     | '/_app/admin/plans'
@@ -722,6 +758,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminAiRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/announcements': {
+      id: '/_app/admin/announcements'
+      path: '/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AppAdminAnnouncementsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/audit': {
       id: '/_app/admin/audit'
       path: '/audit'
@@ -741,6 +784,20 @@ declare module '@tanstack/react-router' {
       path: '/codes'
       fullPath: '/admin/codes'
       preLoaderRoute: typeof AppAdminCodesRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/diagnostics': {
+      id: '/_app/admin/diagnostics'
+      path: '/diagnostics'
+      fullPath: '/admin/diagnostics'
+      preLoaderRoute: typeof AppAdminDiagnosticsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/feedbacks': {
+      id: '/_app/admin/feedbacks'
+      path: '/feedbacks'
+      fullPath: '/admin/feedbacks'
+      preLoaderRoute: typeof AppAdminFeedbacksRouteImport
       parentRoute: typeof AppAdminRoute
     }
     '/_app/admin/ledger': {
@@ -811,9 +868,12 @@ declare module '@tanstack/react-router' {
 
 interface AppAdminRouteChildren {
   AppAdminAiRoute: typeof AppAdminAiRoute
+  AppAdminAnnouncementsRoute: typeof AppAdminAnnouncementsRoute
   AppAdminAuditRoute: typeof AppAdminAuditRoute
   AppAdminBillingRoute: typeof AppAdminBillingRoute
   AppAdminCodesRoute: typeof AppAdminCodesRoute
+  AppAdminDiagnosticsRoute: typeof AppAdminDiagnosticsRoute
+  AppAdminFeedbacksRoute: typeof AppAdminFeedbacksRoute
   AppAdminLedgerRoute: typeof AppAdminLedgerRoute
   AppAdminOverviewRoute: typeof AppAdminOverviewRoute
   AppAdminPlansRoute: typeof AppAdminPlansRoute
@@ -825,9 +885,12 @@ interface AppAdminRouteChildren {
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminAiRoute: AppAdminAiRoute,
+  AppAdminAnnouncementsRoute: AppAdminAnnouncementsRoute,
   AppAdminAuditRoute: AppAdminAuditRoute,
   AppAdminBillingRoute: AppAdminBillingRoute,
   AppAdminCodesRoute: AppAdminCodesRoute,
+  AppAdminDiagnosticsRoute: AppAdminDiagnosticsRoute,
+  AppAdminFeedbacksRoute: AppAdminFeedbacksRoute,
   AppAdminLedgerRoute: AppAdminLedgerRoute,
   AppAdminOverviewRoute: AppAdminOverviewRoute,
   AppAdminPlansRoute: AppAdminPlansRoute,

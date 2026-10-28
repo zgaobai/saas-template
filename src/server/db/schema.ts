@@ -407,3 +407,39 @@ export const aiConfigs = sqliteTable("ai_configs", {
   updatedAt: integer("updated_at").notNull(),
   updatedBy: text("updated_by").references(() => user.id),
 });
+
+export const announcements = sqliteTable(
+  "announcements",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    type: text("type").notNull().default("info"), // 'info' | 'promotion' | 'warning'
+    linkUrl: text("link_url").notNull().default(""),
+    linkText: text("link_text").notNull().default(""),
+    isActive: integer("is_active").notNull().default(1),
+    dismissible: integer("dismissible").notNull().default(1),
+    createdAt: integer("created_at").notNull(),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (t) => [index("announcements_active_idx").on(t.isActive, t.createdAt)],
+);
+
+export const feedbacks = sqliteTable(
+  "feedbacks",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+    userEmail: text("user_email").notNull(),
+    type: text("type").notNull().default("suggestion"), // 'suggestion' | 'bug' | 'billing' | 'other'
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    contact: text("contact").notNull().default(""),
+    status: text("status").notNull().default("pending"), // 'pending' | 'in_progress' | 'resolved' | 'closed'
+    adminNotes: text("admin_notes").notNull().default(""),
+    createdAt: integer("created_at").notNull(),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (t) => [index("feedbacks_status_idx").on(t.status, t.createdAt)],
+);
+

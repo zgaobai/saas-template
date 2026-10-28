@@ -19,6 +19,9 @@ import {
   Users,
   Bot,
   ClipboardList,
+  Megaphone,
+  Activity,
+  MessageSquare,
   LogOut,
   ArrowUpRight,
   Menu,
@@ -26,6 +29,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { Brand } from "./brand";
+import { FeedbackDialog } from "./feedback-dialog";
 import { authClient, clearClientSessionCache } from "@/modules/auth/client";
 import { clearResourceCache } from "@/lib/use-resource";
 import { Button } from "@/components/ui/button";
@@ -41,6 +45,7 @@ export function AppShell({
   const { t: tr, locale } = useI18n();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const locationHref = useRouterState({
     select: (state) => state.location.href,
@@ -144,6 +149,28 @@ export function AppShell({
                 <Settings size={18} />
                 {tr("账户设置")}
               </Link>
+              <button
+                type="button"
+                onClick={() => setFeedbackOpen(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  background: "none",
+                  border: "none",
+                  color: "inherit",
+                  cursor: "pointer",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  fontSize: "0.875rem",
+                  width: "100%",
+                  textAlign: "left",
+                  opacity: 0.85,
+                }}
+              >
+                <MessageSquare size={18} />
+                {tr("反馈建议")}
+              </button>
             </>
           )}
           {isAdminPage && (
@@ -234,6 +261,33 @@ export function AppShell({
                 <ClipboardList size={18} />
                 {tr("操作记录")}
               </Link>
+              <Link
+                to="/admin/announcements"
+                activeProps={{
+                  className: "active",
+                }}
+              >
+                <Megaphone size={18} />
+                {tr("全站公告")}
+              </Link>
+              <Link
+                to="/admin/feedbacks"
+                activeProps={{
+                  className: "active",
+                }}
+              >
+                <MessageSquare size={18} />
+                {tr("用户反馈")}
+              </Link>
+              <Link
+                to="/admin/diagnostics"
+                activeProps={{
+                  className: "active",
+                }}
+              >
+                <Activity size={18} />
+                {tr("服务诊断")}
+              </Link>
             </>
           )}
           {user.isAdmin && !isAdminPage && (
@@ -288,6 +342,7 @@ export function AppShell({
           <Outlet />
         </main>
       </div>
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </div>
   );
 }
