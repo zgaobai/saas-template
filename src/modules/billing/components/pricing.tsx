@@ -194,11 +194,6 @@ export function Pricing({
           </div>
         </section>
       )}
-      <p className="pricing-note">
-        {tr(
-          "金额以美元结算。每次成功生成消耗 1 积分，失败自动退回。月付每次到账发放当月积分；年付到账后按月发放，共 12 次。",
-        )}
-      </p>
 
       {selectedPlanForCheckout && (
         <Modal
