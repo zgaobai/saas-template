@@ -33,6 +33,7 @@ import { Brand } from "./brand";
 import { authClient, clearClientSessionCache } from "@/modules/auth/client";
 import { clearResourceCache } from "@/lib/use-resource";
 import { Button } from "@/components/ui/button";
+import { UserAccountMenu } from "./user-account-menu";
 export function AppShell({
   user,
 }: {
@@ -292,7 +293,7 @@ export function AppShell({
         <header className="app-topbar">
           <span>{isAdminPage ? tr("管理控制台") : tr("账户中心")}</span>
           <div className="app-topbar-actions">
-            {isAdminPage && <Link to="/account">{tr("我的账户")}</Link>}
+            <UserAccountMenu user={user} isAdmin={user.isAdmin} />
             <ThemeToggle />
             <LanguageSwitcher />
           </div>

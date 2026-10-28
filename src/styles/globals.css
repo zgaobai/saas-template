@@ -6142,6 +6142,161 @@ html[lang="en"] .plan-heading h2 {
   font-weight: 600;
 }
 
+/* User Account Menu */
+.header-account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 3px 10px 3px 5px;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  text-decoration: none;
+}
+.header-account-trigger:hover,
+.header-account-trigger[data-popup-open] {
+  background: var(--surface-raised);
+  border-color: var(--line-strong, var(--line));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.account-avatar-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary, #6366f1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.account-avatar-circle.large {
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+}
+.account-avatar-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.account-avatar-img.large {
+  width: 36px;
+  height: 36px;
+}
+.account-trigger-name {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.account-trigger-chevron {
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+.header-account-trigger[data-popup-open] .account-trigger-chevron {
+  transform: rotate(180deg);
+}
+.account-menu-popup {
+  width: 220px;
+  padding: 5px;
+  border-radius: 10px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.account-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+}
+.account-menu-user-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.account-menu-user-info strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-menu-user-info small {
+  font-size: 11px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+.account-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  user-select: none;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.account-menu-item:hover,
+.account-menu-item[data-highlighted] {
+  background: var(--surface);
+  color: var(--ink);
+}
+.account-menu-item.is-admin {
+  color: var(--color-primary, #6366f1);
+}
+.account-menu-item.is-logout {
+  color: var(--color-danger, #ef4444);
+}
+.account-menu-item.is-logout:hover,
+.account-menu-item.is-logout[data-highlighted] {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--color-danger, #ef4444);
+}
+
+@media (max-width: 540px) {
+  .account-trigger-name {
+    display: none;
+  }
+  .header-account-trigger {
+    padding-inline: 4px;
+    gap: 4px;
+  }
+}
+
 
 
 

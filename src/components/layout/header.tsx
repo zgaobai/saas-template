@@ -6,10 +6,12 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Menu, UserRound, X } from "lucide-react";
 import { Brand } from "./brand";
 import { ThemeToggle } from "./theme-toggle";
-import { authClient } from "@/modules/auth/client";
+import { authClient, getCachedClientSession } from "@/modules/auth/client";
+import { UserAccountMenu } from "./user-account-menu";
 export function Header() {
   const { t: tr, locale } = useI18n();
   const { data } = authClient.useSession();
+  const cachedUser = getCachedClientSession();
   const [open, setOpen] = useState(false);
   return (
     <header className="site-header">
@@ -31,15 +33,10 @@ export function Header() {
           <ThemeToggle />
           <LanguageSwitcher />
           {data?.user ? (
-            <Link
-              to="/subscriptions"
-              className="button button-secondary button-small header-account"
-              aria-label={tr("我的账户")}
-            >
-              <UserRound size={17} className="header-account-icon" />
-              <span>{tr("我的账户")}</span>
-              <ArrowUpRight size={14} className="header-account-arrow" />
-            </Link>
+            <UserAccountMenu
+              user={data.user}
+              isAdmin={Boolean(cachedUser?.isAdmin)}
+            />
           ) : (
             <AuthLink className="button button-primary button-small header-login">
               {tr("登录")}
