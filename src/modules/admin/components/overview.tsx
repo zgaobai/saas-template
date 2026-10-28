@@ -8,7 +8,7 @@ import { PageHeading } from "@/components/layout/page-heading";
 import { Button } from "@/components/ui/button";
 import { Loading, Notice, Empty } from "@/components/ui/feedback";
 import type { AdminOverview as Overview } from "../types";
-import { formatChannel } from "@/modules/attribution/client";
+import { formatChannel, isAiSearchChannel } from "@/modules/attribution/client";
 export function AdminOverview() {
   const { t: tr, locale } = useI18n();
   const [days, setDays] = useState("7");
@@ -247,7 +247,11 @@ export function AdminOverview() {
                           return (
                             <tr key={c.channel}>
                               <td>
-                                <span className="admin-channel-badge">
+                                <span
+                                  className={`admin-channel-badge ${
+                                    isAiSearchChannel(c.channel) ? "is-ai" : ""
+                                  }`}
+                                >
                                   {formatChannel(c.channel, null, tr)}
                                 </span>
                               </td>

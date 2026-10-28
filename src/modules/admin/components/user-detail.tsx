@@ -10,7 +10,7 @@ import { Notice, Loading } from "@/components/ui/feedback";
 import { UserActions } from "./user-actions";
 import { UserRecords } from "./user-records";
 import { registrationMethods, type AdminUserDetail } from "../types";
-import { formatChannel } from "@/modules/attribution/client";
+import { formatChannel, isAiSearchChannel } from "@/modules/attribution/client";
 export type UserRecordSection =
   "tasks" | "ledger" | "orders" | "subscriptions" | "redemptions";
 export function UserDetail({
@@ -78,13 +78,24 @@ export function UserDetail({
                 <div>
                   <dt>{tr("来源渠道")}</dt>
                   <dd>
-                    {formatChannel(
-                      data.attribution?.channel ||
-                        data.user.attribution_channel,
-                      data.attribution?.source ||
-                        data.user.attribution_source,
-                      tr,
-                    )}
+                    <span
+                      className={`admin-channel-badge ${
+                        isAiSearchChannel(
+                          data.attribution?.channel ||
+                            data.user.attribution_channel,
+                        )
+                          ? "is-ai"
+                          : ""
+                      }`}
+                    >
+                      {formatChannel(
+                        data.attribution?.channel ||
+                          data.user.attribution_channel,
+                        data.attribution?.source ||
+                          data.user.attribution_source,
+                        tr,
+                      )}
+                    </span>
                   </dd>
                 </div>
                 {data.attribution?.medium && (

@@ -6135,6 +6135,12 @@ html[lang="en"] .plan-heading h2 {
   color: var(--ink);
   white-space: nowrap;
 }
+.admin-channel-badge.is-ai {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.35);
+  color: var(--color-primary, #6366f1);
+  font-weight: 600;
+}
 
 
 

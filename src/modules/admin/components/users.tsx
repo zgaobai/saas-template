@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { PageHeading } from "@/components/layout/page-heading";
 import { AdminList, DateTime, Person } from "./list";
 import { registrationMethods, type AdminUser } from "../types";
-import { formatChannel } from "@/modules/attribution/client";
+import { formatChannel, isAiSearchChannel } from "@/modules/attribution/client";
 export function AdminUsers() {
   const { t: tr, locale } = useI18n();
   return (
@@ -55,7 +55,11 @@ function UsersTable({ users }: { users: AdminUser[] }) {
                   <Person name={u.name} email={u.email} />
                 </td>
                 <td>
-                  <span className="admin-channel-badge">
+                  <span
+                    className={`admin-channel-badge ${
+                      isAiSearchChannel(u.attribution_channel) ? "is-ai" : ""
+                    }`}
+                  >
                     {formatChannel(
                       u.attribution_channel,
                       u.attribution_source,

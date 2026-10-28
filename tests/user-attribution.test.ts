@@ -18,6 +18,7 @@ vi.mock("@/server/env", () => ({
 import {
   detectChannel,
   formatChannel,
+  isAiSearchChannel,
 } from "@/modules/attribution/client";
 import {
   parseAttributionFromCookie,
@@ -104,6 +105,42 @@ describe("User Acquisition Channel Attribution", () => {
       });
       expect(r.channel).toBe("google_organic");
       expect(r.medium).toBe("organic");
+    });
+
+    it("detects AI search engines and chatbot citations from referrer", () => {
+      // Perplexity
+      const perplexity = detectChannel({ referrerHost: "www.perplexity.ai" });
+      expect(perplexity.channel).toBe("ai_perplexity");
+      expect(perplexity.medium).toBe("ai_search");
+      expect(isAiSearchChannel(perplexity.channel)).toBe(true);
+
+      // ChatGPT
+      const chatgpt = detectChannel({ referrerHost: "chatgpt.com" });
+      expect(chatgpt.channel).toBe("ai_chatgpt");
+      expect(isAiSearchChannel(chatgpt.channel)).toBe(true);
+
+      // Claude
+      const claude = detectChannel({ referrerHost: "claude.ai" });
+      expect(claude.channel).toBe("ai_claude");
+      expect(isAiSearchChannel(claude.channel)).toBe(true);
+
+      // DeepSeek
+      const deepseek = detectChannel({ referrerHost: "chat.deepseek.com" });
+      expect(deepseek.channel).toBe("ai_deepseek");
+      expect(isAiSearchChannel(deepseek.channel)).toBe(true);
+
+      // Kimi
+      const kimi = detectChannel({ referrerHost: "kimi.moonshot.cn" });
+      expect(kimi.channel).toBe("ai_kimi");
+      expect(isAiSearchChannel(kimi.channel)).toBe(true);
+    });
+
+    it("detects AI search engines from UTM parameters", () => {
+      const perplexityUtm = detectChannel({ utmSource: "perplexity", utmMedium: "ai_search" });
+      expect(perplexityUtm.channel).toBe("ai_perplexity");
+
+      const grokUtm = detectChannel({ utmSource: "grok" });
+      expect(grokUtm.channel).toBe("ai_grok");
     });
 
     it("detects social platforms from referrer or UTM", () => {
