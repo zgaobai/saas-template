@@ -29,7 +29,6 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { Brand } from "./brand";
-import { useFeedbackDialog } from "./feedback-dialog";
 import { authClient, clearClientSessionCache } from "@/modules/auth/client";
 import { clearResourceCache } from "@/lib/use-resource";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,6 @@ export function AppShell({
 }) {
   const { t: tr, locale } = useI18n();
   const navigate = useNavigate();
-  const { openFeedback } = useFeedbackDialog();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const locationHref = useRouterState({
@@ -149,28 +147,6 @@ export function AppShell({
                 <Settings size={18} />
                 {tr("账户设置")}
               </Link>
-              <button
-                type="button"
-                onClick={openFeedback}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  background: "none",
-                  border: "none",
-                  color: "inherit",
-                  cursor: "pointer",
-                  padding: "8px 12px",
-                  borderRadius: "6px",
-                  fontSize: "0.875rem",
-                  width: "100%",
-                  textAlign: "left",
-                  opacity: 0.85,
-                }}
-              >
-                <MessageSquare size={18} />
-                {tr("反馈建议")}
-              </button>
             </>
           )}
           {isAdminPage && (
