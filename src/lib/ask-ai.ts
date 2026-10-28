@@ -10,17 +10,17 @@ export interface AiPlatform {
 
 export function buildAskAiPrompt(
   siteName: string = site.name,
-  siteDescription: string = site.description,
+  origin: string = "",
   locale: Locale = "zh",
 ): string {
+  const cleanOrigin = origin.replace(/\/+$/, "");
+  const llmsUrl = cleanOrigin ? `${cleanOrigin}/llms.txt` : "/llms.txt";
+  const siteWithUrl = cleanOrigin ? `${siteName}（${cleanOrigin}）` : siteName;
+
   if (locale === "zh") {
-    return siteDescription
-      ? `介绍一下 ${siteName}（${siteDescription}）是什么？它有哪些核心功能和特色？`
-      : `介绍一下 ${siteName} 是什么？它有哪些核心功能和特色？`;
+    return `${siteWithUrl}是什么？请介绍它能做什么、怎么收费、适合谁。给 AI 的站点说明：${llmsUrl}`;
   }
-  return siteDescription
-    ? `What is ${siteName} (${siteDescription})? What are its key features and capabilities?`
-    : `What is ${siteName} AI? What are its key features and capabilities?`;
+  return `What is ${siteName}${cleanOrigin ? ` (${cleanOrigin})` : ""}? Please introduce what it does, how it charges, and who it is for. Site documentation for AI: ${llmsUrl}`;
 }
 
 export function getAskAiPlatforms(): AiPlatform[] {

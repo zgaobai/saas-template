@@ -79,14 +79,16 @@ describe("public indexing boundaries", () => {
 });
 
 describe("GEO Ask AI URL builders", () => {
-  it("builds localized ask prompts using project metadata", () => {
-    const zhPrompt = buildAskAiPrompt("启航", "文案与翻译", "zh");
-    expect(zhPrompt).toContain("启航");
-    expect(zhPrompt).toContain("文案与翻译");
+  it("builds localized ask prompts using project metadata and llms.txt reference", () => {
+    const zhPrompt = buildAskAiPrompt("启航", "https://example.com", "zh");
+    expect(zhPrompt).toContain("启航（https://example.com）是什么？");
+    expect(zhPrompt).toContain("请介绍它能做什么、怎么收费、适合谁。");
+    expect(zhPrompt).toContain("给 AI 的站点说明：https://example.com/llms.txt");
 
-    const enPrompt = buildAskAiPrompt("Qihang", "AI Toolkit", "en");
-    expect(enPrompt).toContain("Qihang");
-    expect(enPrompt).toContain("AI Toolkit");
+    const enPrompt = buildAskAiPrompt("Qihang AI", "https://example.com", "en");
+    expect(enPrompt).toContain("What is Qihang AI (https://example.com)?");
+    expect(enPrompt).toContain("Please introduce what it does, how it charges, and who it is for.");
+    expect(enPrompt).toContain("Site documentation for AI: https://example.com/llms.txt");
   });
 
   it("configures the 5 major AI platform query URLs", () => {

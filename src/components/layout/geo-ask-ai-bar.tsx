@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useI18n } from "@/i18n/react";
 import { site } from "@/site";
 import { buildAskAiPrompt, getAskAiPlatforms } from "@/lib/ask-ai";
@@ -111,10 +112,18 @@ const icons: Record<string, React.FC> = {
 
 export function GeoAskAiBar() {
   const { t: tr, locale } = useI18n();
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
   const siteName = tr(site.name);
-  const siteDesc = tr(site.description);
-  const prompt = buildAskAiPrompt(siteName, siteDesc, locale);
+  const prompt = buildAskAiPrompt(siteName, origin, locale);
   const platforms = getAskAiPlatforms();
+  const llmsUrl = origin ? `${origin}/llms.txt` : "/llms.txt";
 
   return (
     <div className="geo-ask-ai-bar">
@@ -122,7 +131,7 @@ export function GeoAskAiBar() {
         <div className="geo-ask-ai-label">
           <span>{tr("AI 与 AGENT 文档")} · </span>
           <a
-            href="/llms.txt"
+            href={llmsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="geo-ask-ai-llms-link"
