@@ -19,11 +19,13 @@ import type { Plan } from "@/modules/billing/plans";
 export function HomePage({
   signedIn,
   paymentsReady,
+  paymentsPaused = false,
   plans,
   paymentProviders = [],
 }: {
   signedIn: boolean;
   paymentsReady: boolean;
+  paymentsPaused?: boolean;
   plans: Plan[];
   paymentProviders?: ("pancake" | "stripe" | "creem" | "paypal")[];
 }) {
@@ -120,6 +122,7 @@ export function HomePage({
         <Pricing
           signedIn={signedIn}
           enabled={paymentsReady}
+          paymentsPaused={paymentsPaused}
           paymentProviders={paymentProviders}
           plans={plans}
         />

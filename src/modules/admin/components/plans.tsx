@@ -21,9 +21,35 @@ export function AdminPlans() {
   const { data, error, loading, reload } = useResource<{
     plans: AdminPlan[];
     activeProvider?: string;
+    paymentsActive?: boolean;
   }>("/api/app/admin/plans");
   const [editing, setEditing] = useState<AdminPlan | "new" | null>(null);
   const [busy, setBusy] = useState(false);
+  const [toggleBusy, setToggleBusy] = useState(false);
+
+  async function handleTogglePayments(enable: boolean) {
+    if (!enable) {
+      if (
+        !window.confirm(
+          tr("确定要临时暂停全站支付吗？暂停后前台用户将无法发起新结账。"),
+        )
+      ) {
+        return;
+      }
+    }
+    setToggleBusy(true);
+    try {
+      await api("/api/app/admin/payments/toggle", {
+        method: "POST",
+        body: JSON.stringify({ enabled: enable }),
+      });
+      await reload();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "操作失败");
+    } finally {
+      setToggleBusy(false);
+    }
+  }
   return (
     <>
       <PageHeading
@@ -54,6 +80,48 @@ export function AdminPlans() {
         )}
       </p>
       {error && <Notice kind="error">{tr(error)}</Notice>}
+      {data && (
+        <div
+          className={`admin-payments-banner ${data.paymentsActive !== false ? "active" : "paused"}`}
+        >
+          <div className="admin-payments-banner-info">
+            <h4>
+              <span>{tr("全站支付通道")}</span>
+              <span
+                className={`admin-payments-status-tag ${data.paymentsActive !== false ? "active" : "paused"}`}
+              >
+                {data.paymentsActive !== false
+                  ? `🟢 ${tr("正常开放")}`
+                  : `🔴 ${tr("维护暂停中")}`}
+              </span>
+            </h4>
+            <p>
+              {data.paymentsActive !== false
+                ? tr("买家可在前台正常发起月付、年付和积分包结账。")
+                : tr("前台已关闭支付通道并拦截新订单，已购订阅续费不受影响。")}
+            </p>
+          </div>
+          <div className="admin-payments-banner-action">
+            {data.paymentsActive !== false ? (
+              <Button
+                variant="secondary"
+                disabled={toggleBusy || loading}
+                onClick={() => handleTogglePayments(false)}
+              >
+                {toggleBusy ? tr("处理中…") : tr("临时暂停支付")}
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                disabled={toggleBusy || loading}
+                onClick={() => handleTogglePayments(true)}
+              >
+                {toggleBusy ? tr("处理中…") : tr("恢复开放支付")}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
       {loading ? (
         <Loading />
       ) : (

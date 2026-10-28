@@ -24,11 +24,13 @@ function PayPalIcon({ size = 20 }: { size?: number }) {
 export function Pricing({
   signedIn,
   enabled,
+  paymentsPaused = false,
   plans,
   paymentProviders = [],
 }: {
   signedIn: boolean;
   enabled: boolean;
+  paymentsPaused?: boolean;
   plans: Plan[];
   paymentProviders?: ("pancake" | "stripe" | "creem" | "paypal")[];
 }) {
@@ -122,12 +124,20 @@ export function Pricing({
   const cardProps = {
     signedIn,
     enabled,
+    paymentsPaused,
     pending,
     onBuy: handleBuyClick,
   };
   return (
     <>
       {error && <Notice kind="error">{tr(error)}</Notice>}
+      {paymentsPaused && (
+        <Notice kind="info">
+          {tr(
+            "支付系统正在维护中，期间暂时无法购买新套餐或积分，已购权益不受影响。",
+          )}
+        </Notice>
+      )}
       {annualPlans.length > 0 && (
         <div
           className="billing-switch"

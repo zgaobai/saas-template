@@ -25,6 +25,12 @@ export async function checkout(
   if (!parsed.success) throw new HttpError(400, "请选择有效套餐。");
   const plan = await getPlan(parsed.data.planId);
   if (plan.mode === "free") throw new HttpError(400, "请选择付费套餐。");
+  const { isPaymentsActive } = await import(
+    "@/modules/admin/server/system-settings"
+  );
+  if (!(await isPaymentsActive())) {
+    throw new HttpError(503, "支付通道维护中，请稍后再试。");
+  }
   const db = bindings().DB;
   const id = parsed.data.requestId.replaceAll("-", "");
   await ensureWallet(u.id);

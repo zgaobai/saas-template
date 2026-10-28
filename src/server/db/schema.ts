@@ -443,3 +443,11 @@ export const feedbacks = sqliteTable(
   (t) => [index("feedbacks_status_idx").on(t.status, t.createdAt)],
 );
 
+export const systemSettings = sqliteTable("system_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+  updatedBy: text("updated_by").references(() => user.id, { onDelete: "set null" }),
+});
+
+

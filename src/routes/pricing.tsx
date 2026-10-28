@@ -37,6 +37,7 @@ function Page() {
       <Pricing
         signedIn={Boolean(user)}
         enabled={caps.payments}
+        paymentsPaused={Boolean(caps.paymentsPaused)}
         paymentProviders={caps.paymentProviders ?? []}
         plans={plans}
       />

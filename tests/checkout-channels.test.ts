@@ -135,4 +135,21 @@ describe("dual-channel checkout", () => {
       }),
     );
   });
+
+  it("blocks checkout when payments are paused via kill switch", async () => {
+    state.env.PAYMENTS_PAUSED = "true";
+    const { checkout } = await import("@/modules/billing/server/service");
+    const req = new Request("https://app.test/api/app/checkout", {
+      method: "POST",
+      body: JSON.stringify({
+        planId: "creator",
+        requestId: "3e5b3218-1f48-4cb2-9d33-1498b5847db2",
+        interval: "month",
+      }),
+    });
+
+    await expect(
+      checkout(req, { id: "user_test", email: "user@example.test" }),
+    ).rejects.toThrow("支付通道维护中，请稍后再试。");
+  });
 });

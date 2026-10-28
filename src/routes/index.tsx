@@ -24,6 +24,7 @@ export const Route = createFileRoute("/")({
     return {
       signedIn: !!user,
       paymentsReady: caps.payments,
+      paymentsPaused: Boolean(caps.paymentsPaused),
       paymentProviders: caps.paymentProviders ?? [],
       plans,
     };

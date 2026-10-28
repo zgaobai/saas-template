@@ -8,6 +8,7 @@ export type PlanPurchaseProps = {
   plan: Plan;
   signedIn: boolean;
   enabled: boolean;
+  paymentsPaused?: boolean;
   pending: string;
   onBuy: (plan: Plan) => void;
 };
@@ -15,6 +16,7 @@ export function PlanPurchase({
   plan,
   signedIn,
   enabled,
+  paymentsPaused = false,
   pending,
   onBuy,
 }: PlanPurchaseProps) {
@@ -37,12 +39,17 @@ export function PlanPurchase({
       <ArrowUpRight size={16} />
     </AuthLink>
   ) : (
-    <Button disabled={!enabled || Boolean(pending)} onClick={() => onBuy(plan)}>
+    <Button
+      disabled={!enabled || paymentsPaused || Boolean(pending)}
+      onClick={() => onBuy(plan)}
+    >
       {pending === plan.id
         ? tr("正在创建订单…")
-        : enabled
-          ? tr("前往付款")
-          : tr("支付暂未开放")}
+        : paymentsPaused
+          ? tr("支付维护中")
+          : enabled
+            ? tr("前往付款")
+            : tr("支付暂未开放")}
     </Button>
   );
 }

@@ -32,18 +32,31 @@ export const capabilities = createServerFn({ method: "GET" }).handler(
   async () => {
     const { publicCapabilities } = await import("@/server/env");
     const caps = publicCapabilities();
+    let paymentsActive = true;
+    try {
+      const { isPaymentsActive } = await import(
+        "@/modules/admin/server/system-settings"
+      );
+      paymentsActive = await isPaymentsActive();
+    } catch {
+      // fallback
+    }
+    let aiActive = caps.ai;
     try {
       const { getActiveAiConfig } = await import(
         "@/modules/admin/server/ai-config"
       );
       const activeAi = await getActiveAiConfig();
-      return {
-        ...caps,
-        ai: Boolean(activeAi) || caps.ai,
-      };
+      aiActive = Boolean(activeAi) || caps.ai;
     } catch {
-      return caps;
+      // fallback
     }
+    return {
+      ...caps,
+      ai: aiActive,
+      payments: paymentsActive && caps.payments,
+      paymentsPaused: !paymentsActive,
+    };
   },
 );
 export const accountSecurity = createServerFn({ method: "GET" }).handler(

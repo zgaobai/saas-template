@@ -213,6 +213,17 @@ export async function appApi(request: Request, path: string) {
     if (path === "admin/user-status") return setUserStatus(request);
     if (path === "admin/plans/create") return updatePlan(request, true);
     if (path === "admin/plans") return updatePlan(request);
+    if (path === "admin/payments/toggle") {
+      const admin = await requireAdmin(request);
+      const input = z
+        .object({ enabled: z.boolean() })
+        .parse(await body(request));
+      const { setPaymentsActive } = await import(
+        "@/modules/admin/server/system-settings"
+      );
+      await setPaymentsActive(input.enabled, admin.id);
+      return { ok: true, paymentsActive: input.enabled };
+    }
     if (path === "admin/ai-config") return saveAdminAiConfig(request);
     if (path === "admin/ai-test") return testAdminAiConnection(request);
     if (path === "admin/codes") return createCode(request);
@@ -237,9 +248,13 @@ export async function appApi(request: Request, path: string) {
     if (path === "admin/redemptions") return listAdminRedemptions(request);
     if (path === "admin/plans") {
       await requireAdmin(request);
+      const { isPaymentsActive } = await import(
+        "@/modules/admin/server/system-settings"
+      );
       return {
         plans: await getPlans(),
         activeProvider: bindings().PAYMENT_PROVIDER || "pancake",
+        paymentsActive: await isPaymentsActive(),
       };
     }
     if (path === "admin/users") return listAdminUsers(request);

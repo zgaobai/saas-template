@@ -5982,6 +5982,54 @@ html[lang="en"] .plan-heading h2 {
   margin-left: 12px;
 }
 
+/* Admin Payments Kill Switch Banner */
+.admin-payments-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+.admin-payments-banner.active {
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.admin-payments-banner.paused {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.admin-payments-banner-info h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.admin-payments-status-tag {
+  font-size: 11.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.admin-payments-status-tag.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--positive, #10b981);
+}
+.admin-payments-status-tag.paused {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+.admin-payments-banner-info p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+
 
 
 
