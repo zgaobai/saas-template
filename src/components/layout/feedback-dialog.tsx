@@ -83,24 +83,6 @@ export function FeedbackDialog({
   );
 }
 
-export function FloatingFeedbackButton() {
-  const { t: tr } = useI18n();
-  const { openFeedback } = useFeedbackDialog();
-
-  return (
-    <button
-      type="button"
-      className="floating-feedback-btn"
-      onClick={openFeedback}
-      aria-label={tr("反馈建议")}
-      title={tr("反馈建议")}
-    >
-      <MessageSquare size={16} />
-      <span className="floating-feedback-label">{tr("反馈建议")}</span>
-    </button>
-  );
-}
-
 export function FeedbackProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 

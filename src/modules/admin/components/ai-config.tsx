@@ -460,7 +460,6 @@ export function AdminAiConfig() {
 
   const renderModelListSection = (
     title: string,
-    icon: React.ReactNode,
     hint: string,
     models: ModelItem[],
     setter: React.Dispatch<React.SetStateAction<ModelItem[]>>,
@@ -479,7 +478,6 @@ export function AdminAiConfig() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            {icon}
             <h3 style={{ fontSize: "15px", fontWeight: 600, margin: 0 }}>
               {title}
             </h3>
@@ -691,27 +689,22 @@ export function AdminAiConfig() {
             {
               id: "gateway",
               label: tr("聚合网关与密钥"),
-              icon: <Zap size={15} />,
             },
             {
               id: "text",
               label: tr("文本模型 ({0})", [textModels.length]),
-              icon: <Bot size={15} />,
             },
             {
               id: "image",
               label: tr("AI 绘图 ({0})", [imageModels.length]),
-              icon: <ImageIcon size={15} />,
             },
             {
               id: "video",
               label: tr("AI 视频 ({0})", [videoModels.length]),
-              icon: <Video size={15} />,
             },
             {
               id: "audio",
               label: tr("AI 音乐 ({0})", [audioModels.length]),
-              icon: <Music size={15} />,
             },
           ].map((tab) => (
             <Button
@@ -720,14 +713,8 @@ export function AdminAiConfig() {
               variant={activeTab === tab.id ? "primary" : "secondary"}
               aria-pressed={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
             >
-              {tab.icon}
-              <span>{tab.label}</span>
+              {tab.label}
             </Button>
           ))}
         </div>
@@ -741,12 +728,9 @@ export function AdminAiConfig() {
                   fontSize: "16px",
                   fontWeight: 600,
                   marginBottom: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
                 }}
               >
-                <Zap size={18} /> {tr("聚合网关与密钥")}
+                {tr("聚合网关与密钥")}
               </h3>
 
               <Field
@@ -932,7 +916,6 @@ export function AdminAiConfig() {
         {activeTab === "text" &&
           renderModelListSection(
             tr("文本主力模型列表 (Text Models)"),
-            <Bot size={18} />,
             tr(
               "负责驱动写作、润色、摘要、地道翻译、邮件与社媒，支持多模型自由切换，星标代表默认主力模型。",
             ),
@@ -947,7 +930,6 @@ export function AdminAiConfig() {
         {activeTab === "image" &&
           renderModelListSection(
             tr("AI 绘图模型列表 (Image Models - 预留)"),
-            <ImageIcon size={18} />,
             tr("为后续图片生成工具预留候选列表，如 FLUX.1、DALL-E 3 或 Midjourney。"),
             imageModels,
             setImageModels,
@@ -959,7 +941,6 @@ export function AdminAiConfig() {
         {activeTab === "video" &&
           renderModelListSection(
             tr("AI 视频模型列表 (Video Models - 预留)"),
-            <Video size={18} />,
             tr("为后续视频生成工具预留候选模型，如可灵 Kling、Runway Gen-3 或 海螺。"),
             videoModels,
             setVideoModels,
@@ -971,7 +952,6 @@ export function AdminAiConfig() {
         {activeTab === "audio" &&
           renderModelListSection(
             tr("AI 音乐模型列表 (Audio Models - 预留)"),
-            <Music size={18} />,
             tr("为后续音乐与配乐工具预留候选模型，如 Suno 或 Udio。"),
             audioModels,
             setAudioModels,
@@ -1005,7 +985,7 @@ export function AdminAiConfig() {
             onClick={() => handleTestConnection()}
             disabled={testing || saving || (!apiKey && !data?.config.hasApiKey)}
           >
-            {testing ? tr("测试连接中…") : tr("🧪 测试连通性")}
+            {testing ? tr("测试连接中…") : tr("测试连通性")}
           </Button>
 
           <Button type="submit" disabled={saving || testing}>

@@ -185,6 +185,7 @@ export function CreditLedger() {
                   <tr>
                     <th>{tr("类型 / 事项")}</th>
                     <th>{tr("积分变动")}</th>
+                    <th>{tr("状态")}</th>
                     <th>{tr("入账时间")}</th>
                     <th>{tr("流水编号")}</th>
                   </tr>
@@ -192,7 +193,7 @@ export function CreditLedger() {
                 <tbody>
                   {!data.items.length && (
                     <TableEmptyRow
-                      columns={4}
+                      columns={5}
                       message={
                         kind ? tr("暂无此类型的积分流水") : tr("暂无积分流水")
                       }
@@ -216,6 +217,21 @@ export function CreditLedger() {
                           {entry.amount.toLocaleString(
                             locale === "en" ? "en-US" : "zh-CN",
                           )}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            padding: "2px 8px",
+                            borderRadius: "999px",
+                            fontSize: "12px",
+                            fontWeight: 500,
+                            background: "rgba(16, 185, 129, 0.12)",
+                            color: "#10b981",
+                          }}
+                        >
+                          {tr("已入账")}
                         </span>
                       </td>
                       <td>{formatDateTime(entry.created_at, locale)}</td>

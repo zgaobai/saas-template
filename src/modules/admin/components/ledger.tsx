@@ -28,22 +28,44 @@ export function AdminLedger() {
               <thead>
                 <tr>
                   <th>{tr("用户")}</th>
+                  <th>{tr("流水类型")}</th>
                   <th>{tr("积分变动")}</th>
+                  <th>{tr("状态")}</th>
                   <th>{tr("原因 / 流水编号")}</th>
                   <th>{tr("时间")}</th>
                   <th>{tr("关联记录")}</th>
                 </tr>
               </thead>
               <tbody>
-                {!rows.length && <TableEmptyRow columns={5} />}
+                {!rows.length && <TableEmptyRow columns={7} />}
                 {rows.map((l) => (
                   <tr key={l.id}>
                     <td>
                       <Person name={l.name} email={l.email} />
                     </td>
+                    <td>
+                      <span className="admin-secondary">
+                        {l.amount > 0 ? tr("增加积分") : tr("扣减积分")}
+                      </span>
+                    </td>
                     <td className={l.amount > 0 ? "positive" : ""}>
                       {l.amount > 0 ? "+" : ""}
                       {l.amount}
+                    </td>
+                    <td>
+                      <span
+                        style={{
+                          display: "inline-block",
+                          padding: "2px 8px",
+                          borderRadius: "999px",
+                          fontSize: "12px",
+                          fontWeight: 500,
+                          background: "rgba(16, 185, 129, 0.12)",
+                          color: "#10b981",
+                        }}
+                      >
+                        {tr("已入账")}
+                      </span>
                     </td>
                     <td>
                       <span className="table-reason" title={l.reason}>

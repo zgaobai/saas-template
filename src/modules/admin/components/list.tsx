@@ -92,7 +92,13 @@ export function AdminList<T>({
         </Field>
         <Field
           id={`status-${endpoint}`}
-          label={endpoint === "audit" ? tr("操作类型") : tr("状态")}
+          label={
+            endpoint === "audit"
+              ? tr("操作类型")
+              : endpoint === "ledger"
+                ? tr("流水类型")
+                : tr("状态")
+          }
         >
           <Select
             className="input"
@@ -100,7 +106,9 @@ export function AdminList<T>({
             value={status}
             onValueChange={(value) => setStatus(value)}
           >
-            <option value="">{tr("全部")}</option>
+            <option value="">
+              {endpoint === "ledger" ? tr("全部流水") : tr("全部")}
+            </option>
             {Object.entries(statuses).map(([value, label]) => (
               <option key={value} value={value}>
                 {tr(label)}
