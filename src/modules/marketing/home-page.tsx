@@ -20,10 +20,12 @@ export function HomePage({
   signedIn,
   paymentsReady,
   plans,
+  paymentProviders = [],
 }: {
   signedIn: boolean;
   paymentsReady: boolean;
   plans: Plan[];
+  paymentProviders?: ("pancake" | "stripe" | "creem" | "paypal")[];
 }) {
   const { t: tr, locale } = useI18n();
   return (
@@ -115,7 +117,12 @@ export function HomePage({
           <h2>{tr("按你的节奏，选择创作空间。")}</h2>
           <p>{tr("从免费积分开始，需要更多时再升级。")}</p>
         </div>
-        <Pricing signedIn={signedIn} enabled={paymentsReady} plans={plans} />
+        <Pricing
+          signedIn={signedIn}
+          enabled={paymentsReady}
+          paymentProviders={paymentProviders}
+          plans={plans}
+        />
       </section>
       <FaqSection
         freeCredits={plans.find((p) => p.mode === "free")?.credits ?? 0}

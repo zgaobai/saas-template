@@ -18,6 +18,7 @@ export async function checkout(
       requestId: z.string().uuid(),
       interval: z.enum(["month", "year"]).optional(),
       planRevision: z.number().int().positive().optional(),
+      provider: z.enum(["pancake", "stripe", "creem", "paypal"]).optional(),
     })
     .strict()
     .safeParse(await body(request));
@@ -46,7 +47,9 @@ export async function checkout(
       checkout_url: string | null;
       status: string;
     }>();
-  const provider = paymentProvider(existing?.provider);
+  const provider = paymentProvider(
+    existing?.provider || parsed.data.provider,
+  );
   if (existing) {
     if (
       existing.user_id !== u.id ||
@@ -115,21 +118,27 @@ export async function checkout(
     if (!plan.enabled) throw new HttpError(409, "此套餐已下架，请重新选择。");
     const unfinished = await db
       .prepare(
-        "SELECT checkout_url,billing_interval FROM orders WHERE user_id=? AND plan_id=? AND status='pending' ORDER BY created_at DESC LIMIT 1",
+        "SELECT checkout_url,billing_interval,provider FROM orders WHERE user_id=? AND plan_id=? AND status='pending' ORDER BY created_at DESC LIMIT 1",
       )
       .bind(u.id, plan.id)
       .first<{
         checkout_url: string | null;
         billing_interval: string | null;
+        provider: string | null;
       }>();
-    if (unfinished && unfinished.billing_interval !== checkoutInput.interval)
-      throw new HttpError(
-        409,
-        "已有其他计费方式的待付款订单，请先在账户中处理。",
-      );
-    if (unfinished?.checkout_url) return { url: unfinished.checkout_url };
-    if (unfinished)
-      throw new HttpError(409, "上一笔订单仍待确认，请稍后查看账单。");
+    if (
+      unfinished &&
+      (!unfinished.provider || unfinished.provider === provider.id)
+    ) {
+      if (unfinished.billing_interval !== checkoutInput.interval)
+        throw new HttpError(
+          409,
+          "已有其他计费方式的待付款订单，请先在账户中处理。",
+        );
+      if (unfinished?.checkout_url) return { url: unfinished.checkout_url };
+      if (unfinished)
+        throw new HttpError(409, "上一笔订单仍待确认，请稍后查看账单。");
+    }
     const pending = await db
       .prepare(
         "SELECT COUNT(*) AS n FROM orders WHERE user_id=? AND created_at>?",

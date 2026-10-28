@@ -18,6 +18,8 @@ export type Plan = {
   features: string[];
   enabled: boolean;
   revision: number;
+  supportedProviders?: ("pancake" | "stripe" | "creem" | "paypal")[];
+  annualSupportedProviders?: ("pancake" | "stripe" | "creem" | "paypal")[];
 };
 export const legacyPlanNames: Record<string, string> = {
   starter: "体验版",

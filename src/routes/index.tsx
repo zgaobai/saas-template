@@ -21,7 +21,12 @@ export const Route = createFileRoute("/")({
       sessionInfo(),
       publicPlans(),
     ]);
-    return { signedIn: !!user, paymentsReady: caps.payments, plans };
+    return {
+      signedIn: !!user,
+      paymentsReady: caps.payments,
+      paymentProviders: caps.paymentProviders ?? [],
+      plans,
+    };
   },
   component: Home,
 });

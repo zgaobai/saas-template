@@ -34,7 +34,12 @@ function Page() {
         <h1>{tr("按你的创作节奏，开始。")}</h1>
         <p>{tr("先免费体验，需要更多时再选择合适的方案。")}</p>
       </div>
-      <Pricing signedIn={Boolean(user)} enabled={caps.payments} plans={plans} />
+      <Pricing
+        signedIn={Boolean(user)}
+        enabled={caps.payments}
+        paymentProviders={caps.paymentProviders ?? []}
+        plans={plans}
+      />
       <PricingFaq
         freeCredits={plans.find((p) => p.mode === "free")?.credits ?? 0}
       />

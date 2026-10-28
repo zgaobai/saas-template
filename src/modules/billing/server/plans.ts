@@ -43,11 +43,22 @@ export async function getPlan(id: string) {
 export async function getPublicPlans() {
   return (await getPlans())
     .filter((p) => p.enabled)
-    .map(
-      ({
-        paymentBindings: _private,
-        annualPaymentBindings: _annualPrivate,
-        ...plan
-      }) => plan,
-    );
+    .map(({ paymentBindings, annualPaymentBindings, ...plan }) => ({
+      ...plan,
+      supportedProviders: (
+        ["pancake", "stripe", "creem", "paypal"] as const
+      ).filter((prov) => {
+        if (prov === "paypal" && plan.mode === "payment") return true;
+        if (prov === "stripe") return true;
+        return Boolean(paymentBindings?.[prov]);
+      }),
+      annualSupportedProviders: (
+        ["pancake", "stripe", "creem", "paypal"] as const
+      ).filter((prov) => {
+        if (prov === "stripe") return true;
+        return Boolean(
+          annualPaymentBindings?.[prov] || paymentBindings?.[prov],
+        );
+      }),
+    }));
 }

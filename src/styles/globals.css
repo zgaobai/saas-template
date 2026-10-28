@@ -5905,6 +5905,83 @@ html[lang="en"] .plan-heading h2 {
   background: #000;
 }
 
+/* Checkout Channels Selection Modal */
+.checkout-channels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 12px 0 6px;
+}
+.checkout-channel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  color: var(--ink);
+}
+.checkout-channel-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--surface-raised);
+  transform: translateY(-1px);
+}
+.checkout-channel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.checkout-channel-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.checkout-channel-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+.checkout-channel-texts h4 {
+  margin: 0 0 3px;
+  font-size: 14.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.checkout-channel-texts p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.checkout-channel-badge {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.checkout-channel-loading {
+  font-size: 12px;
+  color: var(--color-primary);
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
 
 
 

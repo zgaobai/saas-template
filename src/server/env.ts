@@ -69,13 +69,29 @@ export function paymentConfigured(
 // Explicit boolean allowlist: never spread bindings into a loader or API response.
 export function publicCapabilities() {
   const e = bindings();
+  const primary = (e.PAYMENT_PROVIDER || "pancake") as
+    | "pancake"
+    | "stripe"
+    | "creem"
+    | "paypal";
+  const primaryReady = paymentConfigured(primary);
+  const paypalReady = paymentConfigured("paypal");
+  const paymentProviders: ("pancake" | "stripe" | "creem" | "paypal")[] = [];
+  if (primaryReady) {
+    paymentProviders.push(primary);
+  }
+  if (paypalReady && !paymentProviders.includes("paypal")) {
+    paymentProviders.push("paypal");
+  }
+
   return {
     auth: configured("auth"),
     email: configured("email"),
     google: configured("google"),
     googleClientId: e.GOOGLE_CLIENT_ID || undefined,
     ai: configured("ai"),
-    payments: paymentConfigured(),
+    payments: paymentProviders.length > 0 || paymentConfigured(),
+    paymentProviders,
     local: e.APP_ENV === "development",
   };
 }
