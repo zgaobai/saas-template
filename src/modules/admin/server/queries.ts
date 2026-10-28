@@ -104,8 +104,10 @@ async function page<T extends { id: string }>(
 const userSelect = `SELECT u.id,u.name,u.email,u.email_verified,u.created_at,u.closed_at,u.disabled_at,COALESCE(w.balance,0) AS balance,
  (SELECT provider_id FROM account WHERE user_id=u.id ORDER BY created_at,id LIMIT 1) AS registration_provider,
  EXISTS(SELECT 1 FROM account WHERE user_id=u.id AND provider_id='google') AS has_google,
- EXISTS(SELECT 1 FROM account WHERE user_id=u.id AND provider_id='credential') AS has_password
- FROM user u LEFT JOIN wallets w ON u.id=w.user_id`;
+ EXISTS(SELECT 1 FROM account WHERE user_id=u.id AND provider_id='credential') AS has_password,
+ ua.channel AS attribution_channel,
+ ua.source AS attribution_source
+ FROM user u LEFT JOIN wallets w ON u.id=w.user_id LEFT JOIN user_attributions ua ON u.id=ua.user_id`;
 
 export async function listAdminUsers(request: Request) {
   await requireAdmin(request);
@@ -452,6 +454,18 @@ export async function adminOverview(request: Request): Promise<AdminOverview> {
         ORDER BY total_count DESC`,
       )
       .bind(from, until),
+    db
+      .prepare(
+        `SELECT
+          COALESCE(NULLIF(channel, ''), 'direct') AS channel,
+          COUNT(*) AS count
+        FROM user_attributions
+        WHERE created_at >= ? AND created_at <= ?
+        GROUP BY channel
+        ORDER BY count DESC
+        LIMIT 10`,
+      )
+      .bind(from, until),
   ]);
   return {
     from,
@@ -463,6 +477,7 @@ export async function adminOverview(request: Request): Promise<AdminOverview> {
     revenue: results[4].results,
     daily: results[5].results,
     aiUsage: (results[6]?.results || []) as unknown as AdminAiModelUsage[],
+    channels: (results[7]?.results || []) as unknown as { channel: string; count: number }[],
   } as AdminOverview;
 }
 
@@ -478,11 +493,23 @@ export async function adminUserDetail(
     .bind(userId)
     .first<AdminUser>();
   if (!user) throw new HttpError(404, "用户不存在。");
-  const [entitlement, starter] = await Promise.all([
+  const [entitlement, starter, attribution] = await Promise.all([
     currentEntitlement(userId),
     getPlan("starter"),
+    bindings()
+      .DB.prepare(
+        "SELECT id, user_id, channel, source, medium, campaign, content, term, ref_code, landing_path, referrer_url, created_at FROM user_attributions WHERE user_id = ?",
+      )
+      .bind(userId)
+      .first<import("@/modules/attribution/types").UserAttributionRecord>()
+      .catch(() => null),
   ]);
-  return { user, entitlement, freePlanName: starter.name };
+  return {
+    user,
+    entitlement,
+    freePlanName: starter.name,
+    attribution: attribution ?? null,
+  };
 }
 export async function adminUserRecords(
   request: Request,

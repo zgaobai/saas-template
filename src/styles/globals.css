@@ -6123,6 +6123,19 @@ html[lang="en"] .plan-heading h2 {
   background: var(--surface);
 }
 
+.admin-channel-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
 
 
 

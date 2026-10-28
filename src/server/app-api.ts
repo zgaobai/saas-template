@@ -209,6 +209,14 @@ export async function appApi(request: Request, path: string) {
     if (clientIp) await limitRequest(clientIp, "redeem-ip", 30, 60000);
     return redeem(request, u.id);
   }
+  if (method === "POST" && path === "attribution") {
+    const payload = (await body(request).catch(() => ({}))) as any;
+    const { recordUserAttribution } = await import(
+      "@/modules/attribution/server/service"
+    );
+    await recordUserAttribution(u.id, payload);
+    return { ok: true };
+  }
   if (method === "POST") {
     if (path === "admin/user-status") return setUserStatus(request);
     if (path === "admin/plans/create") return updatePlan(request, true);

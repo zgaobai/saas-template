@@ -450,4 +450,28 @@ export const systemSettings = sqliteTable("system_settings", {
   updatedBy: text("updated_by").references(() => user.id, { onDelete: "set null" }),
 });
 
+export const userAttributions = sqliteTable(
+  "user_attributions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    channel: text("channel").notNull().default("direct"),
+    source: text("source"),
+    medium: text("medium"),
+    campaign: text("campaign"),
+    content: text("content"),
+    term: text("term"),
+    refCode: text("ref_code"),
+    landingPath: text("landing_path"),
+    referrerUrl: text("referrer_url"),
+    createdAt: integer("created_at").notNull(),
+  },
+  (t) => [
+    uniqueIndex("user_attribution_user_idx").on(t.userId),
+    index("user_attribution_channel_idx").on(t.channel, t.createdAt),
+  ],
+);
+
 

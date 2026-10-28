@@ -11,6 +11,8 @@ export type AdminUser = {
   closed_at: number | null;
   disabled_at: number | null;
   balance: number;
+  attribution_channel?: string | null;
+  attribution_source?: string | null;
 };
 export type AdminOrder = {
   billing_interval: string | null;
@@ -182,6 +184,7 @@ export type AdminOverview = {
   revenue: { currency: string; received: number; refunded: number }[];
   daily: { day: string; count: number; completed: number }[];
   aiUsage?: AdminAiModelUsage[];
+  channels?: { channel: string; count: number }[];
 };
 export const taskStatuses = {
   pending: "生成中",
@@ -205,6 +208,7 @@ export type AdminUserDetail = {
     paid_until: number;
     status: string;
   } | null;
+  attribution?: import("../attribution/types").UserAttributionRecord | null;
 };
 export type UserRecord = {
   billing_interval?: string | null;

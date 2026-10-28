@@ -8,6 +8,7 @@ import { PageHeading } from "@/components/layout/page-heading";
 import { Button } from "@/components/ui/button";
 import { Loading, Notice, Empty } from "@/components/ui/feedback";
 import type { AdminOverview as Overview } from "../types";
+import { formatChannel } from "@/modules/attribution/client";
 export function AdminOverview() {
   const { t: tr, locale } = useI18n();
   const [days, setDays] = useState("7");
@@ -212,6 +213,96 @@ export function AdminOverview() {
               ) : (
                 <Empty title={tr("该周期暂无 AI 模型消耗记录")}>
                   {tr("用户使用 AI 工具生成后，这里会自动生成模型成本报表。")}
+                </Empty>
+              )}
+            </section>
+            <section className="admin-section">
+              <h2>{tr("用户来源渠道分布")}</h2>
+              <p className="admin-secondary">
+                {tr(
+                  "按引荐来源、自然搜索与推广活动统计新增注册转化分布。",
+                )}
+              </p>
+              {data.channels && data.channels.length > 0 ? (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{tr("来源渠道")}</th>
+                        <th>{tr("注册用户数")}</th>
+                        <th>{tr("占比")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const total = data.channels.reduce(
+                          (acc, c) => acc + c.count,
+                          0,
+                        );
+                        return data.channels.map((c) => {
+                          const pct =
+                            total > 0
+                              ? Math.round((c.count / total) * 100)
+                              : 0;
+                          return (
+                            <tr key={c.channel}>
+                              <td>
+                                <span className="admin-channel-badge">
+                                  {formatChannel(c.channel, null, tr)}
+                                </span>
+                              </td>
+                              <td>
+                                <strong>{c.count}</strong> {tr("人")}
+                              </td>
+                              <td style={{ width: "40%" }}>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      flex: 1,
+                                      height: "8px",
+                                      background:
+                                        "var(--border-color, #e5e7eb)",
+                                      borderRadius: "4px",
+                                      overflow: "hidden",
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: `${pct}%`,
+                                        height: "100%",
+                                        background:
+                                          "var(--color-primary, #6366f1)",
+                                        borderRadius: "4px",
+                                      }}
+                                    />
+                                  </div>
+                                  <span
+                                    style={{
+                                      minWidth: "40px",
+                                      fontSize: "12px",
+                                      color: "var(--text-secondary)",
+                                    }}
+                                  >
+                                    {pct}%
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        });
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <Empty title={tr("该周期暂无新注册渠道数据")}>
+                  {tr("访客进入并完成注册后，将自动统计渠道转化。")}
                 </Empty>
               )}
             </section>

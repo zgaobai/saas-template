@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { PageHeading } from "@/components/layout/page-heading";
 import { AdminList, DateTime, Person } from "./list";
 import { registrationMethods, type AdminUser } from "../types";
+import { formatChannel } from "@/modules/attribution/client";
 export function AdminUsers() {
   const { t: tr, locale } = useI18n();
   return (
@@ -37,6 +38,7 @@ function UsersTable({ users }: { users: AdminUser[] }) {
           <thead>
             <tr>
               <th>{tr("邮箱 / 昵称")}</th>
+              <th>{tr("来源渠道")}</th>
               <th>{tr("注册方式")}</th>
               <th>{tr("邮箱验证")}</th>
               <th>{tr("账号状态")}</th>
@@ -46,11 +48,20 @@ function UsersTable({ users }: { users: AdminUser[] }) {
             </tr>
           </thead>
           <tbody>
-            {!users.length && <TableEmptyRow columns={7} />}
+            {!users.length && <TableEmptyRow columns={8} />}
             {users.map((u) => (
               <tr key={u.id}>
                 <td>
                   <Person name={u.name} email={u.email} />
+                </td>
+                <td>
+                  <span className="admin-channel-badge">
+                    {formatChannel(
+                      u.attribution_channel,
+                      u.attribution_source,
+                      tr,
+                    )}
+                  </span>
                 </td>
                 <td>
                   {registrationMethods[u.registration_provider || ""] ||

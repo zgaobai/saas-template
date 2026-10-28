@@ -10,6 +10,7 @@ import { Notice, Loading } from "@/components/ui/feedback";
 import { UserActions } from "./user-actions";
 import { UserRecords } from "./user-records";
 import { registrationMethods, type AdminUserDetail } from "../types";
+import { formatChannel } from "@/modules/attribution/client";
 export type UserRecordSection =
   "tasks" | "ledger" | "orders" | "subscriptions" | "redemptions";
 export function UserDetail({
@@ -74,6 +75,59 @@ export function UserDetail({
                 <UserActions user={data.user} onChanged={refresh} />
               </div>
               <dl className="user-profile-facts">
+                <div>
+                  <dt>{tr("来源渠道")}</dt>
+                  <dd>
+                    {formatChannel(
+                      data.attribution?.channel ||
+                        data.user.attribution_channel,
+                      data.attribution?.source ||
+                        data.user.attribution_source,
+                      tr,
+                    )}
+                  </dd>
+                </div>
+                {data.attribution?.medium && (
+                  <div>
+                    <dt>{tr("推广媒介")}</dt>
+                    <dd>{data.attribution.medium}</dd>
+                  </div>
+                )}
+                {data.attribution?.campaign && (
+                  <div>
+                    <dt>{tr("推广活动")}</dt>
+                    <dd>{data.attribution.campaign}</dd>
+                  </div>
+                )}
+                {data.attribution?.ref_code && (
+                  <div>
+                    <dt>{tr("邀请/渠道代码")}</dt>
+                    <dd>{data.attribution.ref_code}</dd>
+                  </div>
+                )}
+                {data.attribution?.landing_path && (
+                  <div>
+                    <dt>{tr("首次访问页")}</dt>
+                    <dd style={{ wordBreak: "break-all" }}>
+                      {data.attribution.landing_path}
+                    </dd>
+                  </div>
+                )}
+                {data.attribution?.referrer_url && (
+                  <div>
+                    <dt>{tr("引荐网址")}</dt>
+                    <dd style={{ wordBreak: "break-all" }}>
+                      <a
+                        href={data.attribution.referrer_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ textDecoration: "underline" }}
+                      >
+                        {data.attribution.referrer_url}
+                      </a>
+                    </dd>
+                  </div>
+                )}
                 <div>
                   <dt>{tr("注册方式")}</dt>
                   <dd>

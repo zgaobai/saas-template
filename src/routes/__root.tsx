@@ -14,6 +14,7 @@ import { GoogleOneTap } from "@/modules/auth/components/google-one-tap";
 import { AnnouncementBanner } from "@/components/layout/announcement-banner";
 import { Toaster } from "@/components/ui/toast";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { AttributionTracker } from "@/modules/attribution/client";
 import { safeReturnTo } from "@/modules/tools/catalog";
 import stylesheet from "@/styles/globals.css?url";
 import { site } from "@/site";
@@ -189,6 +190,7 @@ function Root() {
             <AuthDialogProvider>
               <FeedbackProvider>
                 <ConfirmProvider>
+                  <AttributionTracker />
                   <GoogleOneTap />
                   <Toaster />
                   <Outlet />

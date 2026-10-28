@@ -66,6 +66,23 @@ export function auth() {
         : []),
     ],
     rateLimit: { enabled: true, storage: "database", modelName: "rateLimit" },
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (createdUser, context) => {
+            try {
+              const cookie = context?.headers?.get("cookie");
+              const { recordUserAttribution, parseAttributionFromCookie } =
+                await import("@/modules/attribution/server/service");
+              const attr = parseAttributionFromCookie(cookie);
+              await recordUserAttribution(createdUser.id, attr || undefined);
+            } catch {
+              // Non-blocking attribution hook
+            }
+          },
+        },
+      },
+    },
     advanced: {
       database: { generateId: shortId },
       useSecureCookies: !local,
