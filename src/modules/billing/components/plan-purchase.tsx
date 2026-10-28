@@ -22,7 +22,7 @@ export function PlanPurchase({
   const { t: tr } = useI18n();
   return plan.mode === "free" ? (
     signedIn ? (
-      <Link to="/account" className="button button-secondary">
+      <Link to="/subscriptions" className="button button-secondary">
         {tr("我的账户")}
       </Link>
     ) : (

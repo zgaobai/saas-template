@@ -16,7 +16,7 @@ import {
   Package,
   Settings,
   Shield,
-  Sparkles,
+  Clock,
   Users,
   Bot,
   ClipboardList,
@@ -102,7 +102,7 @@ export function AppShell({
                   className: "active",
                 }}
               >
-                <Sparkles size={18} />
+                <Clock size={18} />
                 {tr("生成历史")}
               </Link>
               <Link
