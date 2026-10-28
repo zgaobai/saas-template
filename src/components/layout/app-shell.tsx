@@ -291,9 +291,9 @@ export function AppShell({
         <header className="app-topbar">
           <span>{isAdminPage ? tr("管理控制台") : tr("账户中心")}</span>
           <div className="app-topbar-actions">
-            <UserAccountMenu user={user} isAdmin={user.isAdmin} />
             <ThemeToggle />
             <LanguageSwitcher />
+            <UserAccountMenu user={user} isAdmin={user.isAdmin} />
           </div>
         </header>
         <main className="app-main">
