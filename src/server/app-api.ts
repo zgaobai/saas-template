@@ -237,7 +237,10 @@ export async function appApi(request: Request, path: string) {
     if (path === "admin/redemptions") return listAdminRedemptions(request);
     if (path === "admin/plans") {
       await requireAdmin(request);
-      return { plans: await getPlans() };
+      return {
+        plans: await getPlans(),
+        activeProvider: bindings().PAYMENT_PROVIDER || "pancake",
+      };
     }
     if (path === "admin/users") return listAdminUsers(request);
     const userPath =

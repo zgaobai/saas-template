@@ -20,6 +20,7 @@ export function AdminPlans() {
   const { t: tr, locale } = useI18n();
   const { data, error, loading, reload } = useResource<{
     plans: AdminPlan[];
+    activeProvider?: string;
   }>("/api/app/admin/plans");
   const [editing, setEditing] = useState<AdminPlan | "new" | null>(null);
   const [busy, setBusy] = useState(false);
@@ -141,6 +142,7 @@ export function AdminPlans() {
           <PlanEditor
             key={editing === "new" ? "new" : editing.id}
             plan={editing === "new" ? null : editing}
+            activeProvider={data?.activeProvider || "pancake"}
             onBusy={setBusy}
             onSave={async () => {
               setEditing(null);
@@ -154,10 +156,12 @@ export function AdminPlans() {
 }
 function PlanEditor({
   plan,
+  activeProvider = "pancake",
   onSave,
   onBusy,
 }: {
   plan: AdminPlan | null;
+  activeProvider?: string;
   onSave: () => Promise<void>;
   onBusy: (v: boolean) => void;
 }) {
@@ -189,20 +193,57 @@ function PlanEditor({
     [error, setError] = useState("");
   const type =
     form.mode === "subscription" ? form.interval || "month" : form.mode;
-  const fields: Array<[keyof PaymentBindings, string, string]> = [
-    [
-      "pancake",
-      "Waffo Pancake 商品 ID",
-      "订阅绑定对应月付或年付商品；积分包绑定一次性商品。",
-    ],
-    [
-      "stripe",
-      "Stripe Price ID",
-      "填写 price_ 开头的价格 ID，不是 prod_ 商品 ID；留空可按站内价格动态创建。",
-    ],
-    ["creem", "Creem 商品 ID", "商品币种、价格和计费周期需与此套餐一致。"],
-    ["paypal", "PayPal Plan ID", "填写 P- 开头的月付或年付计划 ID。"],
+
+  const [selectedChannel, setSelectedChannel] = useState<keyof PaymentBindings>(
+    () => {
+      if (
+        activeProvider &&
+        (activeProvider === "pancake" ||
+          activeProvider === "stripe" ||
+          activeProvider === "creem" ||
+          activeProvider === "paypal")
+      ) {
+        return activeProvider as keyof PaymentBindings;
+      }
+      return "pancake";
+    },
+  );
+
+  const channelList: Array<{
+    key: keyof PaymentBindings;
+    name: string;
+    hint: string;
+  }> = [
+    {
+      key: "pancake",
+      name: "Waffo Pancake",
+      hint: tr("订阅绑定对应月付或年付商品；积分包绑定一次性商品。"),
+    },
+    {
+      key: "stripe",
+      name: "Stripe",
+      hint: tr(
+        "填写 price_ 开头的价格 ID，不是 prod_ 商品 ID；留空可按站内价格动态创建。",
+      ),
+    },
+    {
+      key: "creem",
+      name: "Creem",
+      hint: tr("商品币种、价格和计费周期需与此套餐一致。"),
+    },
+    {
+      key: "paypal",
+      name: "PayPal",
+      hint: tr("填写 P- 开头的月付或年付计划 ID。"),
+    },
   ];
+
+  const availableChannels = channelList.filter(
+    (c) => c.key !== "paypal" || form.mode === "subscription",
+  );
+  const currentChannel =
+    availableChannels.find((c) => c.key === selectedChannel) ||
+    availableChannels[0];
   return (
     <form
       className="admin-plan"
@@ -436,56 +477,152 @@ function PlanEditor({
               "填写当前环境的商品 ID；API 密钥仍只在服务端环境配置中保存。支付前会回查商品；请先在支付平台创建对应商品。",
             )}
           </p>
-          {[false, ...(form.annualPrice ? [true] : [])].map((annual) => (
-            <div key={String(annual)}>
-              <h3>
-                {annual
-                  ? tr("年付商品绑定")
-                  : type === "month"
-                    ? tr("月付商品绑定")
-                    : tr("商品绑定")}
-              </h3>
-              {fields
-                .filter(
-                  ([key]) => key !== "paypal" || form.mode === "subscription",
-                )
-                .map(([key, label, hint]) => {
-                  const mappings = annual
-                    ? (form.annualPaymentBindings ?? {})
-                    : form.paymentBindings;
-                  return (
+
+          <div className="plan-channel-field-group">
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 600,
+                color: "var(--ink)",
+                marginBottom: "6px",
+              }}
+            >
+              {tr("选择支付渠道：")}
+            </label>
+            <div
+              className="plan-channel-tabs"
+              role="tablist"
+              aria-label={tr("选择支付渠道：")}
+            >
+              {availableChannels.map((c) => {
+                const isSelected = currentChannel.key === c.key;
+                const isActive = activeProvider === c.key;
+                const hasBase = Boolean(form.paymentBindings[c.key]);
+                const hasAnnual = Boolean(form.annualPaymentBindings?.[c.key]);
+                const isBound = hasBase || hasAnnual;
+                return (
+                  <button
+                    key={c.key}
+                    type="button"
+                    role="tab"
+                    aria-selected={isSelected}
+                    className={`plan-channel-tab-btn ${isSelected ? "selected" : ""}`}
+                    onClick={() => setSelectedChannel(c.key)}
+                  >
+                    <span>{c.name}</span>
+                    {isActive && (
+                      <span className="plan-channel-active-tag">
+                        {tr("当前启用")}
+                      </span>
+                    )}
+                    {isBound && (
+                      <span
+                        className="plan-channel-bound-tag"
+                        title={tr("已绑定")}
+                      >
+                        {tr("已绑定")}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="plan-channel-card">
+              <div className="plan-channel-header">
+                <h4>
+                  <span>{currentChannel.name}</span>
+                  {activeProvider === currentChannel.key ? (
+                    <span className="active-badge">
+                      {tr("系统当前结算渠道")}
+                    </span>
+                  ) : (
+                    <span className="optional-badge">
+                      {tr("备用渠道 (选填)")}
+                    </span>
+                  )}
+                </h4>
+                <small className="admin-secondary" style={{ margin: 0 }}>
+                  {activeProvider === currentChannel.key
+                    ? tr("当前系统默认使用此渠道进行收银，建议配置此渠道的商品 ID。")
+                    : tr("未切换至此渠道时可留空。若后续环境变量切换为此提供商，将自动采用此处配置。")}
+                </small>
+              </div>
+
+              {form.mode === "payment" && currentChannel.key === "paypal" ? (
+                <p className="admin-secondary" style={{ margin: "4px 0" }}>
+                  {tr("PayPal 积分包直接创建一次性付款订单，无需 Plan ID。")}
+                </p>
+              ) : (
+                <>
+                  <Field
+                    id={`binding-base-${currentChannel.key}`}
+                    label={
+                      type === "month"
+                        ? tr("月付商品 ID")
+                        : tr("一次性商品 ID")
+                    }
+                    hint={currentChannel.hint}
+                  >
+                    <Input
+                      id={`binding-base-${currentChannel.key}`}
+                      value={form.paymentBindings[currentChannel.key] || ""}
+                      maxLength={200}
+                      placeholder={
+                        currentChannel.key === "stripe"
+                          ? "price_..."
+                          : currentChannel.key === "paypal"
+                            ? "P-..."
+                            : "prod_..."
+                      }
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          paymentBindings: {
+                            ...form.paymentBindings,
+                            [currentChannel.key]: e.target.value.trim(),
+                          },
+                        })
+                      }
+                    />
+                  </Field>
+
+                  {Boolean(form.annualPrice) && (
                     <Field
-                      key={key}
-                      id={`binding-${annual ? "year" : "base"}-${key}`}
-                      label={tr(label)}
-                      hint={tr(hint)}
+                      id={`binding-year-${currentChannel.key}`}
+                      label={tr("年付商品 ID")}
+                      hint={currentChannel.hint}
                     >
                       <Input
-                        id={`binding-${annual ? "year" : "base"}-${key}`}
-                        value={mappings[key] || ""}
+                        id={`binding-year-${currentChannel.key}`}
+                        value={
+                          form.annualPaymentBindings?.[currentChannel.key] || ""
+                        }
                         maxLength={200}
+                        placeholder={
+                          currentChannel.key === "stripe"
+                            ? "price_..."
+                            : currentChannel.key === "paypal"
+                              ? "P-..."
+                              : "prod_..."
+                        }
                         onChange={(e) =>
                           setForm({
                             ...form,
-                            [annual
-                              ? "annualPaymentBindings"
-                              : "paymentBindings"]: {
-                              ...mappings,
-                              [key]: e.target.value,
+                            annualPaymentBindings: {
+                              ...(form.annualPaymentBindings ?? {}),
+                              [currentChannel.key]: e.target.value.trim(),
                             },
                           })
                         }
                       />
                     </Field>
-                  );
-                })}
+                  )}
+                </>
+              )}
             </div>
-          ))}
-          {form.mode === "payment" && (
-            <p className="admin-secondary">
-              {tr("PayPal 积分包直接创建一次性付款订单，无需 Plan ID。")}
-            </p>
-          )}
+          </div>
         </fieldset>
       )}
       <label className="admin-toggle">
