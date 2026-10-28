@@ -16,6 +16,7 @@ import {
   Package,
   Settings,
   Shield,
+  Sparkles,
   Users,
   Bot,
   ClipboardList,
@@ -97,13 +98,13 @@ export function AppShell({
           {!isAdminPage && (
             <>
               <Link
-                to="/account"
+                to="/history"
                 activeProps={{
                   className: "active",
                 }}
               >
-                <LayoutDashboard size={18} />
-                {tr("账户概览")}
+                <Sparkles size={18} />
+                {tr("生成历史")}
               </Link>
               <Link
                 to="/subscriptions"
@@ -118,25 +119,7 @@ export function AppShell({
                 }}
               >
                 <CreditCard size={18} />
-                {tr("套餐与订单")}
-              </Link>
-              <Link
-                to="/billing"
-                activeProps={{
-                  className: "active",
-                }}
-              >
-                <Coins size={18} />
-                {tr("积分流水")}
-              </Link>
-              <Link
-                to="/history"
-                activeProps={{
-                  className: "active",
-                }}
-              >
-                <ListChecks size={18} />
-                {tr("任务列表")}
+                {tr("会员与积分")}
               </Link>
               <Link
                 to="/settings"

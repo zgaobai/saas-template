@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_app/admin")({
         : undefined,
   }),
   beforeLoad: ({ context }) => {
-    if (!context.user.isAdmin) throw redirect({ to: "/account" });
+    if (!context.user.isAdmin) throw redirect({ to: "/subscriptions" });
   },
   component: Outlet,
 });

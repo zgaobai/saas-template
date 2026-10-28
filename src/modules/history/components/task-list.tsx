@@ -42,8 +42,8 @@ export function TaskList() {
   return (
     <div className="account-page">
       <PageHeading
-        title={tr("任务列表")}
-        description={tr("查看每次生成的内容、结果、状态和积分退回情况。")}
+        title={tr("生成历史")}
+        description={tr("查看与管理你历史生成的 AI 内容与作品。")}
         action={
           <Link to="/" className="button button-primary">
             {tr("开始新创作")}
@@ -118,7 +118,7 @@ export function TaskList() {
         data && (
           <div className="table-wrap account-task-table">
             <table>
-              <caption className="sr-only">{tr("生成任务列表")}</caption>
+              <caption className="sr-only">{tr("生成历史列表")}</caption>
               <thead>
                 <tr>
                   <th>{tr("任务编号")}</th>
@@ -267,7 +267,7 @@ export function TaskList() {
           </div>
         )}
       </Modal>
-      <nav className="admin-pagination" aria-label={tr("任务列表分页")}>
+      <nav className="admin-pagination" aria-label={tr("生成历史分页")}>
         <span>{tr("第 {0} 页 · 每页 20 条", [cursors.length])}</span>
         <Button
           variant="secondary"

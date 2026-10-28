@@ -67,6 +67,11 @@ export function CreditLedger() {
       <PageHeading
         title={tr("积分流水")}
         description={tr("查看可用积分，以及每一笔获得、扣费和退回。")}
+        action={
+          <Link to="/subscriptions" className="button button-secondary">
+            {tr("返回会员与积分")}
+          </Link>
+        }
       />
       <section className="ledger-balance" aria-label={tr("当前积分余额")}>
         <div>

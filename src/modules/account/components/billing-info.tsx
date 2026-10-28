@@ -80,7 +80,7 @@ export function BillingInfo({
   return (
     <div className="account-page">
       <PageHeading
-        title={tr("套餐与订单")}
+        title={tr("会员与积分")}
         description={tr("管理套餐续费，查看购买和兑换记录。")}
         action={
           <div className="account-heading-actions">
@@ -140,6 +140,13 @@ export function BillingInfo({
                       {tr(label)}
                     </Button>
                   ))}
+                  <Link
+                    to="/billing"
+                    className="button button-ghost"
+                    style={{ textDecoration: "none" }}
+                  >
+                    {tr("积分明细")}
+                  </Link>
                 </div>
                 <div className="account-heading-actions">
                   <Button

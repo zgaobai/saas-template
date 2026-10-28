@@ -32,7 +32,7 @@ export function Header() {
           <LanguageSwitcher />
           {data?.user ? (
             <Link
-              to="/account"
+              to="/subscriptions"
               className="button button-secondary button-small header-account"
               aria-label={tr("我的账户")}
             >
