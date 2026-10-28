@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Menu } from "@base-ui/react/menu";
 import {
-  LayoutGrid,
+  Clock,
   CreditCard,
   ReceiptText,
   Settings,
@@ -101,10 +101,10 @@ export function UserAccountMenu({
             <Menu.Item
               closeOnClick
               className="account-menu-item"
-              onClick={() => void navigate({ to: "/" })}
+              onClick={() => void navigate({ to: "/history" })}
             >
-              <LayoutGrid size={15} />
-              <span>{tr("AI 工具工作台")}</span>
+              <Clock size={15} />
+              <span>{tr("生成历史")}</span>
             </Menu.Item>
 
             <Menu.Item
@@ -128,10 +128,10 @@ export function UserAccountMenu({
             <Menu.Item
               closeOnClick
               className="account-menu-item"
-              onClick={() => void navigate({ to: "/account" })}
+              onClick={() => void navigate({ to: "/settings" })}
             >
               <Settings size={15} />
-              <span>{tr("账户安全设置")}</span>
+              <span>{tr("账户设置")}</span>
             </Menu.Item>
 
             {(isAdmin || user.isAdmin) && (
