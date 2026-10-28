@@ -1,5 +1,5 @@
 import { useI18n } from "@/i18n/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Gift } from "lucide-react";
 import { useResource } from "@/lib/use-resource";
@@ -16,6 +16,7 @@ import {
   type BillingSection,
 } from "./billing-records";
 import type { AccountBilling, BillingRecordPage } from "../types";
+import { trackPurchase, trackRedeemCode } from "@/modules/analytics/events";
 export function BillingInfo({
   section,
   onSection,
@@ -45,6 +46,20 @@ export function BillingInfo({
   const refresh = async () => {
     await Promise.all([reload(), records.reload()]);
   };
+
+  useEffect(() => {
+    if (!data?.orders) return;
+    for (const order of data.orders) {
+      if (order.status === "paid") {
+        trackPurchase({
+          transactionId: order.id,
+          planId: order.plan_id,
+          planName: order.plan_name,
+          amountCents: order.amount,
+        });
+      }
+    }
+  }, [data?.orders]);
   const firstPage = () =>
     setPages({
       subscriptions: [""],
@@ -226,6 +241,7 @@ export function BillingInfo({
           <RedeemCode
             onBusyChange={setRedeemBusy}
             onRedeem={async () => {
+              trackRedeemCode();
               firstPage();
               await refresh();
               onSection("redemptions");

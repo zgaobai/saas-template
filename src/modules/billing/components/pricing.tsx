@@ -1,5 +1,5 @@
 import { useI18n } from "@/i18n/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type Plan, supportsAnnual, annualSavings } from "../plans";
 import { Button } from "@/components/ui/button";
 import { Notice } from "@/components/ui/feedback";
@@ -8,6 +8,11 @@ import { CreditCard } from "lucide-react";
 import { api } from "@/lib/api";
 import { PlanCard } from "./plan-card";
 import { CreditPackCard } from "./credit-pack-card";
+import {
+  trackViewPricing,
+  trackSelectPlan,
+  trackBeginCheckout,
+} from "@/modules/analytics/events";
 
 function PayPalIcon({ size = 20 }: { size?: number }) {
   return (
@@ -57,6 +62,10 @@ export function Pricing({
   const [error, setError] = useState("");
   const [requests] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    trackViewPricing("pricing_page");
+  }, []);
+
   function getViableProviders(targetPlan: Plan) {
     if (targetPlan.mode === "free") return [];
     const configured =
@@ -75,6 +84,16 @@ export function Pricing({
   }
 
   function handleBuyClick(plan: Plan) {
+    const priceCents =
+      selectedInterval === "year" && plan.annualPrice
+        ? plan.annualPrice
+        : plan.price;
+    trackSelectPlan({
+      planId: plan.id,
+      planName: plan.name,
+      interval: selectedInterval,
+      priceCents,
+    });
     const viable = getViableProviders(plan);
     if (viable.length > 1) {
       setSelectedPlanForCheckout(plan);
@@ -90,9 +109,18 @@ export function Pricing({
     setPending(plan.id);
     if (provider) setSubmittingProvider(provider);
     setError("");
+    const period =
+      plan.mode === "subscription" ? selectedInterval : undefined;
+    const priceCents =
+      period === "year" && plan.annualPrice ? plan.annualPrice : plan.price;
+    trackBeginCheckout({
+      planId: plan.id,
+      planName: plan.name,
+      interval: period,
+      priceCents,
+      provider: provider || "default",
+    });
     try {
-      const period =
-        plan.mode === "subscription" ? selectedInterval : undefined;
       const requestKey = `${plan.id}:${period ?? "payment"}:${provider || "default"}`;
       requests[requestKey] ??= crypto.randomUUID();
       const r = await api<{

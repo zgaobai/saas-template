@@ -18,7 +18,7 @@ export function Analytics({ site }: { site?: PublicSite }) {
           />
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaMeasurementId.replace(/'/g, "\\'")}',{send_page_view:true});`,
+              __html: `window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){(window.dataLayer=window.dataLayer||[]).push(arguments);};gtag('js',new Date());gtag('config','${gaMeasurementId.replace(/'/g, "\\'")}',{send_page_view:true});`,
             }}
           />
         </>

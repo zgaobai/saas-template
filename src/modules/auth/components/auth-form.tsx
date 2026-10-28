@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Notice } from "@/components/ui/feedback";
 import { authClient } from "../client";
+import { trackSignUp, trackLogin } from "@/modules/analytics/events";
 export type AuthMode = "login" | "register" | "forgot" | "reset";
 export function AuthForm({
   mode,
@@ -63,6 +64,7 @@ export function AuthForm({
           password,
         });
         if (r.error) throw new Error("邮箱或密码不正确，或邮箱尚未验证。");
+        trackLogin({ method: "email" });
         await success();
       } else if (mode === "register") {
         const r = await authClient.signUp.email({
@@ -75,6 +77,7 @@ export function AuthForm({
           throw new Error(
             r.error.message || "注册未完成，请检查邮箱或稍后重试。",
           );
+        trackSignUp({ method: "email" });
         if (caps.local) await success();
         else setMessage("请查收验证邮件，验证后即可登录。");
       } else if (mode === "forgot") {
@@ -138,6 +141,7 @@ export function AuthForm({
             onClick={async () => {
               setBusy("google");
               setError("");
+              trackLogin({ method: "google" });
               try {
                 const r = await authClient.signIn.social({
                   provider: "google",

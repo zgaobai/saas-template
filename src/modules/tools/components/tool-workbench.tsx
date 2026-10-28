@@ -22,6 +22,10 @@ import { useResource } from "@/lib/use-resource";
 import type { Overview } from "@/modules/tools/types";
 import type { Tool } from "../catalog";
 import { ToolIcon } from "./tool-icon";
+import {
+  trackToolGenerate,
+  trackAuthModalOpen,
+} from "@/modules/analytics/events";
 
 const tones = ["自然清晰", "专业简洁", "轻松有趣"] as const;
 
@@ -90,6 +94,7 @@ export function ToolWorkbench({
           }),
         );
       } catch {}
+      trackAuthModalOpen("workbench_generate");
       openAuth("login", `/tools/${tool.id}`);
       return;
     }
@@ -99,6 +104,13 @@ export function ToolWorkbench({
     setSample(false);
     setOutput("");
     setCopied(false);
+
+    trackToolGenerate({
+      toolId: tool.id,
+      modality,
+      tone,
+      promptLength: prompt.length,
+    });
 
     try {
       if (modality === "text") {
