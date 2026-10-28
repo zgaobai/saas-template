@@ -85,8 +85,9 @@ export function CloseAccount({ email }: { email: string }) {
           {error.includes(tr("重新登录")) && (
             <p>
               <Link
-                to="/login"
+                to="/"
                 search={{
+                  auth: "login",
                   next: "/settings",
                 }}
               >

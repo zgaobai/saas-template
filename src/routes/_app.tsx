@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_app")({
       setCachedClientSession(user);
     }
     if (!user)
-      throw redirect({ to: "/login", search: { next: location.pathname } });
+      throw redirect({ to: "/", search: { auth: "login", next: location.pathname } });
     return { user };
   },
   head: () => ({ meta: [{ name: "robots", content: "noindex,nofollow" }] }),

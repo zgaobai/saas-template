@@ -193,10 +193,13 @@ export function AuthLink({
     select: (location) => location.pathname,
   });
   const target = safeReturnTo(next ?? pathname);
-  const path = mode === "forgot" ? "/forgot-password" : `/${mode}`;
+  const href = localizedPath(
+    `/?auth=${mode}&next=${encodeURIComponent(target)}`,
+    locale,
+  );
   return (
     <a
-      href={localizedPath(`${path}?next=${encodeURIComponent(target)}`, locale)}
+      href={href}
       className={className}
       onClick={(event) => {
         if (

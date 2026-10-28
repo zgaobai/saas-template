@@ -12,22 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as FeedbackRouteImport } from './routes/feedback'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as AppAccountRouteImport } from './routes/_app.account'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
-import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppFilesRouteImport } from './routes/_app.files'
 import { Route as AppHistoryRouteImport } from './routes/_app.history'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
@@ -68,11 +62,6 @@ const FeedbackRoute = FeedbackRouteImport.update({
   path: '/feedback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const GuideRoute = GuideRouteImport.update({
   id: '/guide',
   path: '/guide',
@@ -88,11 +77,6 @@ const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
   path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -101,16 +85,6 @@ const PricingRoute = PricingRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -128,11 +102,6 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppAccountRoute = AppAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -141,11 +110,6 @@ const AppAdminRoute = AppAdminRouteImport.update({
 const AppBillingRoute = AppBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDashboardRoute = AppDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppFilesRoute = AppFilesRouteImport.update({
@@ -277,22 +241,16 @@ const AppAdminUsersUserIdRoute = AppAdminUsersUserIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/feedback': typeof FeedbackRoute
-  '/forgot-password': typeof ForgotPasswordRoute
   '/guide': typeof GuideRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
-  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
-  '/register': typeof RegisterRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/account': typeof AppAccountRoute
   '/admin': typeof AppAdminRouteWithChildren
   '/billing': typeof AppBillingRoute
-  '/dashboard': typeof AppDashboardRoute
   '/files': typeof AppFilesRoute
   '/history': typeof AppHistoryRoute
   '/settings': typeof AppSettingsRoute
@@ -322,21 +280,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/feedback': typeof FeedbackRoute
-  '/forgot-password': typeof ForgotPasswordRoute
   '/guide': typeof GuideRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
-  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
-  '/register': typeof RegisterRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/account': typeof AppAccountRoute
   '/billing': typeof AppBillingRoute
-  '/dashboard': typeof AppDashboardRoute
   '/files': typeof AppFilesRoute
   '/history': typeof AppHistoryRoute
   '/settings': typeof AppSettingsRoute
@@ -368,22 +320,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/feedback': typeof FeedbackRoute
-  '/forgot-password': typeof ForgotPasswordRoute
   '/guide': typeof GuideRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
-  '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
-  '/register': typeof RegisterRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/_app/account': typeof AppAccountRoute
   '/_app/admin': typeof AppAdminRouteWithChildren
   '/_app/billing': typeof AppBillingRoute
-  '/_app/dashboard': typeof AppDashboardRoute
   '/_app/files': typeof AppFilesRoute
   '/_app/history': typeof AppHistoryRoute
   '/_app/settings': typeof AppSettingsRoute
@@ -415,22 +361,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/feedback'
-    | '/forgot-password'
     | '/guide'
     | '/llms-full.txt'
     | '/llms.txt'
-    | '/login'
     | '/pricing'
     | '/privacy'
-    | '/register'
-    | '/reset-password'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/terms'
-    | '/account'
     | '/admin'
     | '/billing'
-    | '/dashboard'
     | '/files'
     | '/history'
     | '/settings'
@@ -460,21 +400,15 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/feedback'
-    | '/forgot-password'
     | '/guide'
     | '/llms-full.txt'
     | '/llms.txt'
-    | '/login'
     | '/pricing'
     | '/privacy'
-    | '/register'
-    | '/reset-password'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/terms'
-    | '/account'
     | '/billing'
-    | '/dashboard'
     | '/files'
     | '/history'
     | '/settings'
@@ -505,22 +439,16 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/feedback'
-    | '/forgot-password'
     | '/guide'
     | '/llms-full.txt'
     | '/llms.txt'
-    | '/login'
     | '/pricing'
     | '/privacy'
-    | '/register'
-    | '/reset-password'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/terms'
-    | '/_app/account'
     | '/_app/admin'
     | '/_app/billing'
-    | '/_app/dashboard'
     | '/_app/files'
     | '/_app/history'
     | '/_app/settings'
@@ -552,15 +480,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   FeedbackRoute: typeof FeedbackRoute
-  ForgotPasswordRoute: typeof ForgotPasswordRoute
   GuideRoute: typeof GuideRoute
   LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
-  LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
-  RegisterRoute: typeof RegisterRoute
-  ResetPasswordRoute: typeof ResetPasswordRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
@@ -596,13 +520,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/guide': {
       id: '/guide'
       path: '/guide'
@@ -624,13 +541,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
@@ -643,20 +553,6 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -680,13 +576,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/account': {
-      id: '/_app/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof AppAccountRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/admin': {
       id: '/_app/admin'
       path: '/admin'
@@ -699,13 +588,6 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/billing'
       preLoaderRoute: typeof AppBillingRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/dashboard': {
-      id: '/_app/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/files': {
@@ -925,10 +807,8 @@ const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
-  AppAccountRoute: typeof AppAccountRoute
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppBillingRoute: typeof AppBillingRoute
-  AppDashboardRoute: typeof AppDashboardRoute
   AppFilesRoute: typeof AppFilesRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppSettingsRoute: typeof AppSettingsRoute
@@ -936,10 +816,8 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAccountRoute: AppAccountRoute,
   AppAdminRoute: AppAdminRouteWithChildren,
   AppBillingRoute: AppBillingRoute,
-  AppDashboardRoute: AppDashboardRoute,
   AppFilesRoute: AppFilesRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppSettingsRoute: AppSettingsRoute,
@@ -952,15 +830,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   FeedbackRoute: FeedbackRoute,
-  ForgotPasswordRoute: ForgotPasswordRoute,
   GuideRoute: GuideRoute,
   LlmsFullDottxtRoute: LlmsFullDottxtRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
-  LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
-  RegisterRoute: RegisterRoute,
-  ResetPasswordRoute: ResetPasswordRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,

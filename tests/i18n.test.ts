@@ -185,7 +185,7 @@ describe("localized dates and public metadata", () => {
     expect(sitemapXml(environment)).toContain("/en/");
     expect(
       pageHead(
-        { title: "登录", description: "登录", path: "/login" },
+        { title: "价格方案", description: "价格方案", path: "/pricing" },
         { ...environment, indexable: false },
       ).links,
     ).toEqual([]);

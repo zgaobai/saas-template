@@ -123,12 +123,6 @@ export function robotsText(environment: PublicSite) {
     ...[
       "/api/",
       "/_server/",
-      "/login",
-      "/register",
-      "/forgot-password",
-      "/reset-password",
-      "/dashboard",
-      "/account",
       "/subscriptions",
       "/history",
       "/files",
