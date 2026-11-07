@@ -19,12 +19,15 @@ import {
   detectChannel,
   formatChannel,
   isAiSearchChannel,
+  countryCodeToFlag,
+  formatCountry,
 } from "@/modules/attribution/client";
 import {
   parseAttributionFromCookie,
   recordUserAttribution,
   getUserAttribution,
   getChannelStats,
+  updateUserLocationIfMissing,
 } from "@/modules/attribution/server/service";
 
 let db: DatabaseSync;
@@ -219,6 +222,33 @@ describe("User Acquisition Channel Attribution", () => {
       expect(unchanged?.channel).toBe("google_organic");
     });
 
+    it("records registration IP and country and updates missing location", async () => {
+      await recordUserAttribution("u1", {
+        channel: "google_organic",
+        ip: "203.0.113.195",
+        country: "JP",
+      });
+
+      const rec = await getUserAttribution("u1");
+      expect(rec?.ip).toBe("203.0.113.195");
+      expect(rec?.country).toBe("JP");
+
+      // u2 without initial IP/country
+      await recordUserAttribution("u2", {
+        channel: "direct",
+      });
+      let u2Rec = await getUserAttribution("u2");
+      expect(u2Rec?.ip).toBeNull();
+      expect(u2Rec?.country).toBeNull();
+
+      // Later session updates missing location
+      await updateUserLocationIfMissing("u2", "198.51.100.42", "US");
+      u2Rec = await getUserAttribution("u2");
+      expect(u2Rec?.channel).toBe("direct"); // channel unchanged
+      expect(u2Rec?.ip).toBe("198.51.100.42");
+      expect(u2Rec?.country).toBe("US");
+    });
+
     it("aggregates channel statistics", async () => {
       await recordUserAttribution("u1", { channel: "google_organic" });
       await recordUserAttribution("u2", { channel: "google_organic" });
@@ -238,6 +268,27 @@ describe("User Acquisition Channel Attribution", () => {
       expect(formatChannel("google_ads")).toBe("Google 广告");
       expect(formatChannel("affiliate", "alex123")).toBe("推广邀请: alex123");
       expect(formatChannel("referral", "producthunt.com")).toBe("外部引荐: producthunt.com");
+    });
+  });
+
+  describe("Country flag and localized name formatting", () => {
+    it("converts 2-letter ISO codes to regional indicator flag emojis", () => {
+      expect(countryCodeToFlag("US")).toBe("🇺🇸");
+      expect(countryCodeToFlag("cn")).toBe("🇨🇳");
+      expect(countryCodeToFlag("JP")).toBe("🇯🇵");
+      expect(countryCodeToFlag(null)).toBe("🌐");
+      expect(countryCodeToFlag("")).toBe("🌐");
+      expect(countryCodeToFlag("INVALID")).toBe("🌐");
+    });
+
+    it("formats country with localized names and flags", () => {
+      expect(formatCountry("CN", "zh")).toContain("🇨🇳");
+      expect(formatCountry("CN", "zh")).toContain("中国");
+      expect(formatCountry("US", "zh")).toContain("🇺🇸");
+      expect(formatCountry("US", "zh")).toContain("美国");
+      expect(formatCountry("JP", "en")).toContain("🇯🇵");
+      expect(formatCountry("JP", "en")).toContain("Japan");
+      expect(formatCountry(null)).toBe("");
     });
   });
 });

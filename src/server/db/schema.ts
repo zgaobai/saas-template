@@ -466,6 +466,8 @@ export const userAttributions = sqliteTable(
     refCode: text("ref_code"),
     landingPath: text("landing_path"),
     referrerUrl: text("referrer_url"),
+    ip: text("ip"),
+    country: text("country"),
     createdAt: integer("created_at").notNull(),
   },
   (t) => [

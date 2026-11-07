@@ -96,13 +96,77 @@ export function auth() {
         create: {
           after: async (createdUser, context) => {
             try {
-              const cookie = context?.headers?.get("cookie");
+              const getHeader = (name: string): string | null => {
+                if (!context?.headers) return null;
+                if (typeof (context.headers as any).get === "function") {
+                  return (context.headers as any).get(name) || null;
+                }
+                return (context.headers as any)[name] || null;
+              };
+
+              const cookie = getHeader("cookie");
+              const rawIp =
+                getHeader("cf-connecting-ip") ||
+                getHeader("x-real-ip") ||
+                (typeof getHeader("x-forwarded-for") === "string"
+                  ? getHeader("x-forwarded-for")!.split(",")[0]?.trim()
+                  : null) ||
+                null;
+              const rawCountry = getHeader("cf-ipcountry");
+              const country =
+                rawCountry && rawCountry !== "XX" && rawCountry !== "T1"
+                  ? rawCountry.toUpperCase().trim()
+                  : null;
+
               const { recordUserAttribution, parseAttributionFromCookie } =
                 await import("@/modules/attribution/server/service");
               const attr = parseAttributionFromCookie(cookie);
-              await recordUserAttribution(createdUser.id, attr || undefined);
+              await recordUserAttribution(createdUser.id, {
+                ...attr,
+                ip: attr?.ip || rawIp,
+                country: attr?.country || country,
+              });
             } catch {
               // Non-blocking attribution hook
+            }
+          },
+        },
+      },
+      session: {
+        create: {
+          after: async (createdSession, context) => {
+            try {
+              const getHeader = (name: string): string | null => {
+                if (!context?.headers) return null;
+                if (typeof (context.headers as any).get === "function") {
+                  return (context.headers as any).get(name) || null;
+                }
+                return (context.headers as any)[name] || null;
+              };
+
+              const rawIp =
+                createdSession.ipAddress ||
+                getHeader("cf-connecting-ip") ||
+                getHeader("x-real-ip") ||
+                null;
+              const rawCountry = getHeader("cf-ipcountry");
+              const country =
+                rawCountry && rawCountry !== "XX" && rawCountry !== "T1"
+                  ? rawCountry.toUpperCase().trim()
+                  : null;
+
+              if (createdSession.userId && (rawIp || country)) {
+                const { updateUserLocationIfMissing } = await import(
+                  "@/modules/attribution/server/service"
+                );
+                await updateUserLocationIfMissing(
+                  createdSession.userId,
+                  rawIp,
+                  country,
+                );
+              }
+            } catch {
+              // Non-blocking location update
             }
           },
         },

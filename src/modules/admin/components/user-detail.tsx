@@ -10,7 +10,11 @@ import { Notice, Loading } from "@/components/ui/feedback";
 import { UserActions } from "./user-actions";
 import { UserRecords } from "./user-records";
 import { registrationMethods, type AdminUserDetail } from "../types";
-import { formatChannel, isAiSearchChannel } from "@/modules/attribution/client";
+import {
+  formatChannel,
+  isAiSearchChannel,
+  formatCountry,
+} from "@/modules/attribution/client";
 export type UserRecordSection =
   "tasks" | "ledger" | "orders" | "subscriptions" | "redemptions";
 export function UserDetail({
@@ -139,6 +143,33 @@ export function UserDetail({
                     </dd>
                   </div>
                 )}
+                <div>
+                  <dt>{tr("国家 / 地区")}</dt>
+                  <dd>
+                    {data.attribution?.country || data.user.country ? (
+                      <span className="admin-geo-pill">
+                        {formatCountry(
+                          data.attribution?.country || data.user.country,
+                          locale,
+                        )}
+                      </span>
+                    ) : (
+                      tr("暂无记录")
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{tr("注册 / 登录 IP")}</dt>
+                  <dd>
+                    {data.attribution?.ip || data.user.ip ? (
+                      <code className="admin-ip-code">
+                        {data.attribution?.ip || data.user.ip}
+                      </code>
+                    ) : (
+                      tr("暂无记录")
+                    )}
+                  </dd>
+                </div>
                 <div>
                   <dt>{tr("注册方式")}</dt>
                   <dd>

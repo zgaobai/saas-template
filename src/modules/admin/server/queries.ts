@@ -106,7 +106,9 @@ const userSelect = `SELECT u.id,u.name,u.email,u.email_verified,u.created_at,u.c
  EXISTS(SELECT 1 FROM account WHERE user_id=u.id AND provider_id='google') AS has_google,
  EXISTS(SELECT 1 FROM account WHERE user_id=u.id AND provider_id='credential') AS has_password,
  ua.channel AS attribution_channel,
- ua.source AS attribution_source
+ ua.source AS attribution_source,
+ ua.ip AS ip,
+ ua.country AS country
  FROM user u LEFT JOIN wallets w ON u.id=w.user_id LEFT JOIN user_attributions ua ON u.id=ua.user_id`;
 
 export async function listAdminUsers(request: Request) {
@@ -493,17 +495,29 @@ export async function adminUserDetail(
     .bind(userId)
     .first<AdminUser>();
   if (!user) throw new HttpError(404, "用户不存在。");
-  const [entitlement, starter, attribution] = await Promise.all([
+  const [entitlement, starter, attribution, sessionRow] = await Promise.all([
     currentEntitlement(userId),
     getPlan("starter"),
     bindings()
       .DB.prepare(
-        "SELECT id, user_id, channel, source, medium, campaign, content, term, ref_code, landing_path, referrer_url, created_at FROM user_attributions WHERE user_id = ?",
+        "SELECT id, user_id, channel, source, medium, campaign, content, term, ref_code, landing_path, referrer_url, ip, country, created_at FROM user_attributions WHERE user_id = ?",
       )
       .bind(userId)
       .first<import("@/modules/attribution/types").UserAttributionRecord>()
       .catch(() => null),
+    !user.ip
+      ? bindings()
+          .DB.prepare(
+            "SELECT ip_address FROM session WHERE user_id = ? AND ip_address IS NOT NULL ORDER BY created_at DESC LIMIT 1",
+          )
+          .bind(userId)
+          .first<{ ip_address: string }>()
+          .catch(() => null)
+      : null,
   ]);
+  if (!user.ip && sessionRow?.ip_address) {
+    user.ip = sessionRow.ip_address;
+  }
   return {
     user,
     entitlement,

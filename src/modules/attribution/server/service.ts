@@ -58,14 +58,20 @@ export async function recordUserAttribution(
   const refCode = payload?.refCode?.trim() || null;
   const landingPath = payload?.landingPath?.slice(0, 300) || null;
   const referrerUrl = payload?.referrerUrl?.slice(0, 500) || null;
+  const ip = payload?.ip ? String(payload.ip).trim().slice(0, 64) : null;
+  const country = payload?.country
+    ? String(payload.country).trim().toUpperCase().slice(0, 8)
+    : null;
 
   try {
     await db
       .prepare(
         `INSERT INTO user_attributions (
-          id, user_id, channel, source, medium, campaign, content, term, ref_code, landing_path, referrer_url, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(user_id) DO NOTHING`,
+          id, user_id, channel, source, medium, campaign, content, term, ref_code, landing_path, referrer_url, ip, country, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+          ip = COALESCE(user_attributions.ip, excluded.ip),
+          country = COALESCE(user_attributions.country, excluded.country)`,
       )
       .bind(
         id,
@@ -79,11 +85,50 @@ export async function recordUserAttribution(
         refCode,
         landingPath,
         referrerUrl,
+        ip,
+        country,
         now,
       )
       .run();
   } catch {
     // Safe failure if database is down or table does not exist
+  }
+}
+
+/**
+ * Update user's IP and Country if not already recorded.
+ * Safe no-op if already set.
+ */
+export async function updateUserLocationIfMissing(
+  userId: string,
+  ip?: string | null,
+  country?: string | null,
+): Promise<void> {
+  if (!userId || (!ip && !country)) return;
+  const db = bindings().DB;
+  if (!db) return;
+
+  const validIp = ip ? String(ip).trim().slice(0, 64) : null;
+  const validCountry = country
+    ? String(country).trim().toUpperCase().slice(0, 8)
+    : null;
+
+  try {
+    const id = crypto.randomUUID();
+    const now = Date.now();
+    await db
+      .prepare(
+        `INSERT INTO user_attributions (
+          id, user_id, channel, source, medium, campaign, content, term, ref_code, landing_path, referrer_url, ip, country, created_at
+        ) VALUES (?, ?, 'direct', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, ?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+          ip = COALESCE(user_attributions.ip, excluded.ip),
+          country = COALESCE(user_attributions.country, excluded.country)`,
+      )
+      .bind(id, userId, validIp, validCountry, now)
+      .run();
+  } catch {
+    // Safe failure
   }
 }
 
@@ -99,7 +144,7 @@ export async function getUserAttribution(
   try {
     const row = await db
       .prepare(
-        `SELECT id, user_id, channel, source, medium, campaign, content, term, ref_code, landing_path, referrer_url, created_at
+        `SELECT id, user_id, channel, source, medium, campaign, content, term, ref_code, landing_path, referrer_url, ip, country, created_at
          FROM user_attributions WHERE user_id = ?`,
       )
       .bind(userId)

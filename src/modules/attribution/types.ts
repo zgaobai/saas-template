@@ -8,6 +8,8 @@ export interface AttributionPayload {
   refCode?: string;
   landingPath?: string;
   referrerUrl?: string;
+  ip?: string | null;
+  country?: string | null;
   capturedAt: number;
 }
 
@@ -23,6 +25,8 @@ export interface UserAttributionRecord {
   ref_code: string | null;
   landing_path: string | null;
   referrer_url: string | null;
+  ip: string | null;
+  country: string | null;
   created_at: number;
 }
 

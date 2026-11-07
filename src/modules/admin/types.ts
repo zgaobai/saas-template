@@ -13,6 +13,8 @@ export type AdminUser = {
   balance: number;
   attribution_channel?: string | null;
   attribution_source?: string | null;
+  ip?: string | null;
+  country?: string | null;
 };
 export type AdminOrder = {
   billing_interval: string | null;

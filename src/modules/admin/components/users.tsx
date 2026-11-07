@@ -4,7 +4,12 @@ import { Link } from "@tanstack/react-router";
 import { PageHeading } from "@/components/layout/page-heading";
 import { AdminList, DateTime, Person } from "./list";
 import { registrationMethods, type AdminUser } from "../types";
-import { formatChannel, isAiSearchChannel } from "@/modules/attribution/client";
+import {
+  formatChannel,
+  isAiSearchChannel,
+  countryCodeToFlag,
+  formatCountry,
+} from "@/modules/attribution/client";
 export function AdminUsers() {
   const { t: tr, locale } = useI18n();
   return (
@@ -39,6 +44,7 @@ function UsersTable({ users }: { users: AdminUser[] }) {
             <tr>
               <th>{tr("邮箱 / 昵称")}</th>
               <th>{tr("来源渠道")}</th>
+              <th>{tr("国家 / IP")}</th>
               <th>{tr("注册方式")}</th>
               <th>{tr("邮箱验证")}</th>
               <th>{tr("账号状态")}</th>
@@ -48,7 +54,7 @@ function UsersTable({ users }: { users: AdminUser[] }) {
             </tr>
           </thead>
           <tbody>
-            {!users.length && <TableEmptyRow columns={8} />}
+            {!users.length && <TableEmptyRow columns={9} />}
             {users.map((u) => (
               <tr key={u.id}>
                 <td>
@@ -66,6 +72,28 @@ function UsersTable({ users }: { users: AdminUser[] }) {
                       tr,
                     )}
                   </span>
+                </td>
+                <td>
+                  <div className="admin-geo-ip">
+                    {u.country ? (
+                      <span
+                        className="admin-geo-pill"
+                        title={formatCountry(u.country, locale)}
+                      >
+                        <span className="admin-country-flag">
+                          {countryCodeToFlag(u.country)}
+                        </span>
+                        <span className="admin-country-code">{u.country}</span>
+                      </span>
+                    ) : (
+                      <span className="text-muted">-</span>
+                    )}
+                    {u.ip ? (
+                      <span className="admin-ip-code" title={u.ip}>
+                        {u.ip}
+                      </span>
+                    ) : null}
+                  </div>
                 </td>
                 <td>
                   {registrationMethods[u.registration_provider || ""] ||

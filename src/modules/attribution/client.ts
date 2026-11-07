@@ -306,6 +306,47 @@ export function isAiSearchChannel(channel?: string | null): boolean {
 }
 
 /**
+ * Convert 2-letter ISO country code (e.g. "US", "CN", "JP") to regional indicator flag emoji
+ */
+export function countryCodeToFlag(code?: string | null): string {
+  if (!code || typeof code !== "string" || code.trim().length !== 2) {
+    return "🌐";
+  }
+  const upper = code.trim().toUpperCase();
+  const first = 0x1f1e6 + upper.charCodeAt(0) - 65;
+  const second = 0x1f1e6 + upper.charCodeAt(1) - 65;
+  if (
+    first >= 0x1f1e6 &&
+    first <= 0x1f1ff &&
+    second >= 0x1f1e6 &&
+    second <= 0x1f1ff
+  ) {
+    return String.fromCodePoint(first, second);
+  }
+  return "🌐";
+}
+
+/**
+ * Format ISO country code with localized display name and flag
+ * e.g. "🇨🇳 中国 (CN)" or "🇺🇸 United States (US)"
+ */
+export function formatCountry(code?: string | null, locale = "zh"): string {
+  if (!code || typeof code !== "string" || !code.trim()) return "";
+  const upper = code.trim().toUpperCase();
+  const flag = countryCodeToFlag(upper);
+  try {
+    const dn = new Intl.DisplayNames([locale || "zh"], { type: "region" });
+    const name = dn.of(upper);
+    if (name && name !== upper) {
+      return `${flag} ${name} (${upper})`;
+    }
+  } catch {
+    // Fall back to flag + code
+  }
+  return `${flag} ${upper}`;
+}
+
+/**
  * Client component mounted at root to handle first-touch capture and post-login sync
  */
 export function AttributionTracker() {
