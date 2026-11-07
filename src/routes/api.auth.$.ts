@@ -16,7 +16,8 @@ async function handleAuthPost(request: Request) {
   if (
     path.endsWith("/sign-up/email") ||
     path.endsWith("/sign-in/email") ||
-    path.endsWith("/forget-password")
+    path.endsWith("/forget-password") ||
+    path.includes("/magic-link")
   ) {
     try {
       const cloned = request.clone();
@@ -28,15 +29,15 @@ async function handleAuthPost(request: Request) {
       if (body && typeof body.email === "string" && body.email.trim()) {
         const rawEmail = body.email.trim();
 
-        if (path.endsWith("/sign-up/email")) {
-          // 1. IP rate limiting: max 10 sign-ups per hour per IP (Cloudflare edge headers)
+        if (path.endsWith("/sign-up/email") || path.includes("/magic-link")) {
+          // 1. IP rate limiting: max 15 requests per hour per IP (Cloudflare edge headers)
           const clientIp =
             request.headers.get("cf-connecting-ip") ||
             request.headers.get("x-real-ip") ||
             (bindings().APP_ENV === "development" ? null : "anonymous");
           if (clientIp) {
             try {
-              await limitRequest(clientIp, "auth:sign-up-ip", 10, 3600000);
+              await limitRequest(clientIp, "auth:sign-up-ip", 15, 3600000);
             } catch {
               const tr = createTranslator(localeFromRequest(request));
               return new Response(
