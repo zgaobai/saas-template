@@ -277,6 +277,7 @@ export interface DiagnosticsReport {
     stripe: boolean;
     creem: boolean;
     paypal: boolean;
+    anyway: boolean;
   };
   storage: {
     dbOk: boolean;

@@ -31,5 +31,9 @@
     "PANCAKE_PRIVATE_KEY",
     "PANCAKE_WEBHOOK_PUBLIC_KEY",
     "PANCAKE_STORE_ID"
+  ],
+  "anyway": [
+    "ANYWAY_API_KEY",
+    "ANYWAY_WEBHOOK_SECRET"
   ]
 }

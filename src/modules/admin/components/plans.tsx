@@ -276,7 +276,8 @@ function PlanEditor({
         (activeProvider === "pancake" ||
           activeProvider === "stripe" ||
           activeProvider === "creem" ||
-          activeProvider === "paypal")
+          activeProvider === "paypal" ||
+          activeProvider === "anyway")
       ) {
         return activeProvider as keyof PaymentBindings;
       }
@@ -310,6 +311,11 @@ function PlanEditor({
       key: "paypal",
       name: "PayPal",
       hint: tr("填写 P- 开头的月付或年付计划 ID。"),
+    },
+    {
+      key: "anyway",
+      name: "Anyway",
+      hint: tr("填写 Anyway 产品 ID（可在 Anyway 控制台查看）。"),
     },
   ];
 

@@ -210,6 +210,7 @@ export function AdminDiagnostics() {
                 { id: "stripe", name: "Stripe (信用卡订阅)", ready: data.payments.stripe },
                 { id: "creem", name: "Creem (轻量 MoR)", ready: data.payments.creem },
                 { id: "paypal", name: "PayPal (电子钱包)", ready: data.payments.paypal },
+                { id: "anyway", name: "Anyway (开发者 MoR)", ready: data.payments.anyway },
               ].map((p) => {
                 const isActive = p.id === data.payments.activeProvider;
                 return (

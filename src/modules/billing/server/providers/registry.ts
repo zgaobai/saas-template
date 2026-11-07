@@ -5,12 +5,14 @@ import { pancakeProvider } from "./pancake";
 import { stripeProvider } from "./stripe";
 import { creemProvider } from "./creem";
 import { paypalProvider } from "./paypal";
+import { anywayProvider } from "./anyway";
 import type { PaymentProviderId } from "./contract";
 const providers = {
   pancake: pancakeProvider,
   stripe: stripeProvider,
   creem: creemProvider,
   paypal: paypalProvider,
+  anyway: anywayProvider,
 };
 export function paymentProvider(
   id: string = bindings().PAYMENT_PROVIDER || "pancake",

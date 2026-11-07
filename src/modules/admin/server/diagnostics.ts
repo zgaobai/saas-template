@@ -62,6 +62,7 @@ export async function getDiagnostics(request: Request): Promise<DiagnosticsRepor
       stripe: paymentConfigured("stripe"),
       creem: paymentConfigured("creem"),
       paypal: paymentConfigured("paypal"),
+      anyway: paymentConfigured("anyway"),
     },
     storage: {
       dbOk: true,

@@ -752,6 +752,7 @@
   "Creem 商品 ID": "Creem Product ID",
   "商品币种、价格和计费周期需与此套餐一致。": "The product currency, price and billing period must match this plan.",
   "填写 P- 开头的月付或年付计划 ID。": "Enter a monthly or annual plan ID starting with P-.",
+  "填写 Anyway 产品 ID（可在 Anyway 控制台查看）。": "Enter the Anyway product ID from your Anyway dashboard.",
   "保存失败": "Save failed",
   "比逐月支付一年节省 {0}。": "Save {0} compared with twelve monthly payments.",
   "兑换人邮箱": "Redeemer email",

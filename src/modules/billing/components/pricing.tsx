@@ -37,7 +37,13 @@ export function Pricing({
   enabled: boolean;
   paymentsPaused?: boolean;
   plans: Plan[];
-  paymentProviders?: ("pancake" | "stripe" | "creem" | "paypal")[];
+  paymentProviders?: (
+    | "pancake"
+    | "stripe"
+    | "creem"
+    | "paypal"
+    | "anyway"
+  )[];
 }) {
   const { t: tr, locale } = useI18n();
   const [pending, setPending] = useState("");
@@ -72,7 +78,9 @@ export function Pricing({
       paymentProviders.length > 0
         ? paymentProviders
         : enabled
-          ? (["pancake"] as ("pancake" | "stripe" | "creem" | "paypal")[])
+          ? ([
+              "pancake",
+            ] as ("pancake" | "stripe" | "creem" | "paypal" | "anyway")[])
           : [];
     const supported =
       selectedInterval === "year"
@@ -104,7 +112,7 @@ export function Pricing({
 
   async function executeCheckout(
     plan: Plan,
-    provider?: "pancake" | "stripe" | "creem" | "paypal",
+    provider?: "pancake" | "stripe" | "creem" | "paypal" | "anyway",
   ) {
     setPending(plan.id);
     if (provider) setSubmittingProvider(provider);

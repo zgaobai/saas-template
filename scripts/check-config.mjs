@@ -13,7 +13,7 @@ export function inspectConfig(values, requirements, production = false) {
   const errors = [];
   const warnings = [];
   const provider = values.PAYMENT_PROVIDER || "pancake";
-  if (!["pancake", "stripe", "creem", "paypal"].includes(provider))
+  if (!["pancake", "stripe", "creem", "paypal", "anyway"].includes(provider))
     errors.push("PAYMENT_PROVIDER: unsupported value");
   for (const [key, allowed] of Object.entries({
     APP_ENV: ["development", "staging", "production"],
@@ -22,6 +22,7 @@ export function inspectConfig(values, requirements, production = false) {
     MODERATION_PROVIDER: ["pancake", "creem", "disabled"],
     CREEM_ENVIRONMENT: ["test", "production"],
     PAYPAL_ENVIRONMENT: ["sandbox", "production"],
+    ANYWAY_ENVIRONMENT: ["staging", "production"],
   }))
     if (present(key) && !allowed.includes(values[key]))
       errors.push(key + ": unsupported value");
@@ -41,6 +42,7 @@ export function inspectConfig(values, requirements, production = false) {
     "STRIPE_BASE_URL",
     "CREEM_BASE_URL",
     "PAYPAL_BASE_URL",
+    "ANYWAY_BASE_URL",
   ])
     if (present(key)) {
       try {

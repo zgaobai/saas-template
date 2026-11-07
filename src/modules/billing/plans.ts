@@ -5,6 +5,7 @@ export type PaymentBindings = {
   stripe?: string;
   creem?: string;
   paypal?: string;
+  anyway?: string;
 };
 export type Plan = {
   annualPrice?: number | null;
@@ -18,8 +19,20 @@ export type Plan = {
   features: string[];
   enabled: boolean;
   revision: number;
-  supportedProviders?: ("pancake" | "stripe" | "creem" | "paypal")[];
-  annualSupportedProviders?: ("pancake" | "stripe" | "creem" | "paypal")[];
+  supportedProviders?: (
+    | "pancake"
+    | "stripe"
+    | "creem"
+    | "paypal"
+    | "anyway"
+  )[];
+  annualSupportedProviders?: (
+    | "pancake"
+    | "stripe"
+    | "creem"
+    | "paypal"
+    | "anyway"
+  )[];
 };
 export const legacyPlanNames: Record<string, string> = {
   starter: "体验版",
@@ -42,6 +55,7 @@ export const paymentChannels = [
   { id: "stripe", name: "Stripe", implemented: true },
   { id: "creem", name: "Creem", implemented: true },
   { id: "paypal", name: "PayPal", implemented: true },
+  { id: "anyway", name: "Anyway", implemented: true },
 ] as const;
 
 export type AdminPlan = Plan & {

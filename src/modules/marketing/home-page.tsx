@@ -25,7 +25,13 @@ export function HomePage({
   paymentsReady: boolean;
   paymentsPaused?: boolean;
   plans: Plan[];
-  paymentProviders?: ("pancake" | "stripe" | "creem" | "paypal")[];
+  paymentProviders?: (
+    | "pancake"
+    | "stripe"
+    | "creem"
+    | "paypal"
+    | "anyway"
+  )[];
 }) {
   const { t: tr, locale } = useI18n();
   return (

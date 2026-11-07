@@ -1,5 +1,10 @@
 import "@tanstack/react-start/server-only";
-export type PaymentProviderId = "pancake" | "stripe" | "creem" | "paypal";
+export type PaymentProviderId =
+  | "pancake"
+  | "stripe"
+  | "creem"
+  | "paypal"
+  | "anyway";
 export interface CheckoutInput {
   orderId: string;
   planId: string;

@@ -16,11 +16,17 @@ export interface Bindings {
   AI_MODEL?: string;
   AI_BASE_URL?: string;
   AI_API_STYLE?: "responses" | "chat";
-  PAYMENT_PROVIDER?: "pancake" | "stripe" | "creem" | "paypal";
+  PAYMENT_PROVIDER?: "pancake" | "stripe" | "creem" | "paypal" | "anyway";
   PANCAKE_BASE_URL?: string;
   STRIPE_BASE_URL?: string;
   CREEM_BASE_URL?: string;
   PAYPAL_BASE_URL?: string;
+  ANYWAY_BASE_URL?: string;
+  ANYWAY_API_KEY?: string;
+  ANYWAY_WEBHOOK_SECRET?: string;
+  ANYWAY_ENVIRONMENT?: "staging" | "production";
+  ANYWAY_CREATOR_PRODUCT_ID?: string;
+  ANYWAY_PACK_PRODUCT_ID?: string;
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
   CREEM_API_KEY?: string;
@@ -62,9 +68,11 @@ function configured(group: keyof typeof requirements) {
 export function paymentConfigured(
   provider: string = bindings().PAYMENT_PROVIDER || "pancake",
 ) {
-  if (!["pancake", "stripe", "creem", "paypal"].includes(provider))
+  if (!["pancake", "stripe", "creem", "paypal", "anyway"].includes(provider))
     return false;
-  return configured(provider as "pancake" | "stripe" | "creem" | "paypal");
+  return configured(
+    provider as "pancake" | "stripe" | "creem" | "paypal" | "anyway",
+  );
 }
 // Explicit boolean allowlist: never spread bindings into a loader or API response.
 export function publicCapabilities() {
@@ -73,10 +81,17 @@ export function publicCapabilities() {
     | "pancake"
     | "stripe"
     | "creem"
-    | "paypal";
+    | "paypal"
+    | "anyway";
   const primaryReady = paymentConfigured(primary);
   const paypalReady = paymentConfigured("paypal");
-  const paymentProviders: ("pancake" | "stripe" | "creem" | "paypal")[] = [];
+  const paymentProviders: (
+    | "pancake"
+    | "stripe"
+    | "creem"
+    | "paypal"
+    | "anyway"
+  )[] = [];
   if (primaryReady) {
     paymentProviders.push(primary);
   }

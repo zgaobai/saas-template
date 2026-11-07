@@ -31,6 +31,12 @@ export function paymentReference(
       : planId === "pack"
         ? e.CREEM_PACK_PRODUCT_ID
         : undefined;
+  if (provider === "anyway")
+    return planId === "creator"
+      ? e.ANYWAY_CREATOR_PRODUCT_ID
+      : planId === "pack"
+        ? e.ANYWAY_PACK_PRODUCT_ID
+        : undefined;
   if (provider === "paypal" && planId === "creator")
     return e.PAYPAL_CREATOR_PLAN_ID;
   return undefined;
