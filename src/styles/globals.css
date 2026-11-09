@@ -6185,6 +6185,12 @@ html[lang="en"] .plan-heading h2 {
   gap: 2px;
   min-width: 90px;
 }
+.admin-geo-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
 .admin-geo-pill {
   display: inline-flex;
   align-items: center;

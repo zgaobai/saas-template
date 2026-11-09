@@ -7,8 +7,7 @@ import { registrationMethods, type AdminUser } from "../types";
 import {
   formatChannel,
   isAiSearchChannel,
-  countryCodeToFlag,
-  formatCountry,
+  formatRegion,
 } from "@/modules/attribution/client";
 export function AdminUsers() {
   const { t: tr, locale } = useI18n();
@@ -44,7 +43,7 @@ function UsersTable({ users }: { users: AdminUser[] }) {
             <tr>
               <th>{tr("邮箱 / 昵称")}</th>
               <th>{tr("来源渠道")}</th>
-              <th>{tr("国家 / IP")}</th>
+              <th>{tr("地区 / IP")}</th>
               <th>{tr("注册方式")}</th>
               <th>{tr("邮箱验证")}</th>
               <th>{tr("账号状态")}</th>
@@ -76,14 +75,8 @@ function UsersTable({ users }: { users: AdminUser[] }) {
                 <td>
                   <div className="admin-geo-ip">
                     {u.country ? (
-                      <span
-                        className="admin-geo-pill"
-                        title={formatCountry(u.country, locale)}
-                      >
-                        <span className="admin-country-flag">
-                          {countryCodeToFlag(u.country)}
-                        </span>
-                        <span className="admin-country-code">{u.country}</span>
+                      <span className="admin-geo-text">
+                        {formatRegion(u.country, locale)}
                       </span>
                     ) : (
                       <span className="text-muted">-</span>

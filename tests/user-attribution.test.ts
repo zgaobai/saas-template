@@ -20,6 +20,7 @@ import {
   formatChannel,
   isAiSearchChannel,
   countryCodeToFlag,
+  formatRegion,
   formatCountry,
 } from "@/modules/attribution/client";
 import {
@@ -271,24 +272,21 @@ describe("User Acquisition Channel Attribution", () => {
     });
   });
 
-  describe("Country flag and localized name formatting", () => {
-    it("converts 2-letter ISO codes to regional indicator flag emojis", () => {
-      expect(countryCodeToFlag("US")).toBe("🇺🇸");
-      expect(countryCodeToFlag("cn")).toBe("🇨🇳");
-      expect(countryCodeToFlag("JP")).toBe("🇯🇵");
-      expect(countryCodeToFlag(null)).toBe("🌐");
-      expect(countryCodeToFlag("")).toBe("🌐");
-      expect(countryCodeToFlag("INVALID")).toBe("🌐");
-    });
+  describe("Region concise formatting without flags", () => {
+    it("formats region concisely like 香港(HK) without flag emojis", () => {
+      expect(formatRegion("HK", "zh")).toBe("香港(HK)");
+      expect(formatRegion("CN", "zh")).toBe("中国(CN)");
+      expect(formatRegion("US", "zh")).toBe("美国(US)");
+      expect(formatRegion("JP", "zh")).toBe("日本(JP)");
+      expect(formatRegion("HK", "en")).toBe("Hong Kong (HK)");
+      expect(formatRegion("US", "en")).toBe("United States (US)");
+      expect(formatRegion(null)).toBe("");
+      expect(formatRegion("")).toBe("");
 
-    it("formats country with localized names and flags", () => {
-      expect(formatCountry("CN", "zh")).toContain("🇨🇳");
-      expect(formatCountry("CN", "zh")).toContain("中国");
-      expect(formatCountry("US", "zh")).toContain("🇺🇸");
-      expect(formatCountry("US", "zh")).toContain("美国");
-      expect(formatCountry("JP", "en")).toContain("🇯🇵");
-      expect(formatCountry("JP", "en")).toContain("Japan");
-      expect(formatCountry(null)).toBe("");
+      // Confirm no flag emojis are present
+      expect(formatRegion("HK", "zh")).not.toContain("🇭🇰");
+      expect(formatRegion("CN", "zh")).not.toContain("🇨🇳");
+      expect(formatRegion("US", "zh")).not.toContain("🇺🇸");
     });
   });
 });

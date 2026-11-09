@@ -13,7 +13,7 @@ import { registrationMethods, type AdminUserDetail } from "../types";
 import {
   formatChannel,
   isAiSearchChannel,
-  formatCountry,
+  formatRegion,
 } from "@/modules/attribution/client";
 export type UserRecordSection =
   "tasks" | "ledger" | "orders" | "subscriptions" | "redemptions";
@@ -144,11 +144,11 @@ export function UserDetail({
                   </div>
                 )}
                 <div>
-                  <dt>{tr("国家 / 地区")}</dt>
+                  <dt>{tr("地区")}</dt>
                   <dd>
                     {data.attribution?.country || data.user.country ? (
-                      <span className="admin-geo-pill">
-                        {formatCountry(
+                      <span className="admin-geo-text">
+                        {formatRegion(
                           data.attribution?.country || data.user.country,
                           locale,
                         )}

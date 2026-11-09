@@ -305,6 +305,76 @@ export function isAiSearchChannel(channel?: string | null): boolean {
   return Boolean(channel && channel.startsWith("ai_"));
 }
 
+const COMMON_ZH_REGIONS: Record<string, string> = {
+  HK: "香港",
+  MO: "澳门",
+  TW: "台湾",
+  CN: "中国",
+  US: "美国",
+  GB: "英国",
+  JP: "日本",
+  KR: "韩国",
+  SG: "新加坡",
+  MY: "马来西亚",
+  DE: "德国",
+  FR: "法国",
+  CA: "加拿大",
+  AU: "澳大利亚",
+  RU: "俄罗斯",
+  IN: "印度",
+};
+
+const COMMON_EN_REGIONS: Record<string, string> = {
+  HK: "Hong Kong",
+  MO: "Macao",
+  TW: "Taiwan",
+  CN: "China",
+  US: "United States",
+  GB: "United Kingdom",
+  JP: "Japan",
+  KR: "South Korea",
+  SG: "Singapore",
+  MY: "Malaysia",
+  DE: "Germany",
+  FR: "France",
+  CA: "Canada",
+  AU: "Australia",
+  RU: "Russia",
+  IN: "India",
+};
+
+/**
+ * Format ISO region/country code concisely without flags, e.g. "香港(HK)" or "Hong Kong (HK)"
+ */
+export function formatRegion(code?: string | null, locale = "zh"): string {
+  if (!code || typeof code !== "string" || !code.trim()) return "";
+  const upper = code.trim().toUpperCase();
+  const isZh = (locale || "zh").toLowerCase().startsWith("zh");
+  const commonMap = isZh ? COMMON_ZH_REGIONS : COMMON_EN_REGIONS;
+  let name = commonMap[upper];
+  if (!name) {
+    try {
+      const dn = new Intl.DisplayNames([locale || "zh"], { type: "region" });
+      const raw = dn.of(upper);
+      if (raw) {
+        name = raw
+          .replace(/特别行政区|特別行政區/g, "")
+          .replace(/\s*SAR(\s*China)?/gi, "")
+          .trim();
+      }
+    } catch {
+      // Fall back
+    }
+  }
+  name = name || upper;
+  return isZh ? `${name}(${upper})` : `${name} (${upper})`;
+}
+
+/**
+ * Backward compatibility alias
+ */
+export const formatCountry = formatRegion;
+
 /**
  * Convert 2-letter ISO country code (e.g. "US", "CN", "JP") to regional indicator flag emoji
  */
@@ -324,26 +394,6 @@ export function countryCodeToFlag(code?: string | null): string {
     return String.fromCodePoint(first, second);
   }
   return "🌐";
-}
-
-/**
- * Format ISO country code with localized display name and flag
- * e.g. "🇨🇳 中国 (CN)" or "🇺🇸 United States (US)"
- */
-export function formatCountry(code?: string | null, locale = "zh"): string {
-  if (!code || typeof code !== "string" || !code.trim()) return "";
-  const upper = code.trim().toUpperCase();
-  const flag = countryCodeToFlag(upper);
-  try {
-    const dn = new Intl.DisplayNames([locale || "zh"], { type: "region" });
-    const name = dn.of(upper);
-    if (name && name !== upper) {
-      return `${flag} ${name} (${upper})`;
-    }
-  } catch {
-    // Fall back to flag + code
-  }
-  return `${flag} ${upper}`;
 }
 
 /**
