@@ -263,10 +263,14 @@ describe("User Acquisition Channel Attribution", () => {
   });
 
   describe("formatChannel human-readable formatting", () => {
-    it("formats known channels properly", () => {
+    it("formats known channels properly without icons", () => {
       expect(formatChannel("direct")).toBe("直接访问");
       expect(formatChannel("google_organic")).toBe("Google 搜索");
       expect(formatChannel("google_ads")).toBe("Google 广告");
+      expect(formatChannel("reddit")).toBe("Reddit");
+      expect(formatChannel("ai_chatgpt")).toBe("ChatGPT 引用");
+      expect(formatChannel("ai_chatgpt")).not.toContain("✨");
+      expect(formatChannel("ai_perplexity")).toBe("Perplexity AI 搜索");
       expect(formatChannel("affiliate", "alex123")).toBe("推广邀请: alex123");
       expect(formatChannel("referral", "producthunt.com")).toBe("外部引荐: producthunt.com");
     });

@@ -231,31 +231,31 @@ export function formatChannel(
     case "direct":
       return t("直接访问");
     case "ai_perplexity":
-      return `✨ ${t("Perplexity AI 搜索")}`;
+      return t("Perplexity AI 搜索");
     case "ai_chatgpt":
-      return `✨ ${t("ChatGPT 引用")}`;
+      return t("ChatGPT 引用");
     case "ai_claude":
-      return `✨ ${t("Claude AI 引用")}`;
+      return t("Claude AI 引用");
     case "ai_gemini":
-      return `✨ ${t("Gemini AI 搜索")}`;
+      return t("Gemini AI 搜索");
     case "ai_grok":
-      return `✨ ${t("Grok AI 搜索")}`;
+      return t("Grok AI 搜索");
     case "ai_copilot":
-      return `✨ ${t("Copilot AI 搜索")}`;
+      return t("Copilot AI 搜索");
     case "ai_deepseek":
-      return `✨ ${t("DeepSeek AI 搜索")}`;
+      return t("DeepSeek AI 搜索");
     case "ai_kimi":
-      return `✨ ${t("Kimi AI 搜索")}`;
+      return t("Kimi AI 搜索");
     case "ai_felo":
-      return `✨ ${t("Felo AI 搜索")}`;
+      return t("Felo AI 搜索");
     case "ai_genspark":
-      return `✨ ${t("Genspark AI 搜索")}`;
+      return t("Genspark AI 搜索");
     case "ai_metaso":
-      return `✨ ${t("秘塔 AI 搜索")}`;
+      return t("秘塔 AI 搜索");
     case "ai_you":
-      return `✨ ${t("You.com AI 搜索")}`;
+      return t("You.com AI 搜索");
     case "ai_phind":
-      return `✨ ${t("Phind AI 搜索")}`;
+      return t("Phind AI 搜索");
     case "google_organic":
       return t("Google 搜索");
     case "google_ads":
@@ -283,6 +283,8 @@ export function formatChannel(
       return "Facebook 广告";
     case "reddit":
       return "Reddit";
+    case "reddit_ads":
+      return t("Reddit 广告");
     case "github":
       return "GitHub";
     case "v2ex":
