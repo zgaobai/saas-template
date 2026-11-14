@@ -264,6 +264,27 @@ npm run check
    - 全量 32 个测试文件、345 项测试全部通过，`npm run check` 全绿。
 
 
+## 飞书支付异常与订阅续费逾期即时告警接入（2026-11-14）
+
+在原有的支付到账通知基础上，补齐对账与业务异常监控告警体系：
+
+1. **Webhook 履约与对账异常告警（`src/routes/api.webhooks.$provider.ts` & `src/modules/billing/server/feishu-notify.ts`）**：
+   - 原生支持飞书交互式红色警报卡片 `🚨 支付 Webhook 处理异常`；
+   - 捕获 Webhook 验签、解析或 `applyReconciliation` 对账阶段发生的所有异常，展示渠道（Pancake/Stripe/Creem/PayPal）、异常阶段、关联订单号、脱敏用户邮箱及错误详情代码块；
+   - 在向调用方返回 HTTP 错误前优先完成告警投递，方便开发者和管理员第一时间发现漏单或配置异常并人工介入补单。
+2. **周期订阅自动续费失败 / 逾期告警（`src/modules/billing/server/reconciliation.ts`）**：
+   - 原生支持飞书交互式橙色提醒卡片 `⚠️ 订阅自动续费失败 / 账户逾期`；
+   - 监听订阅状态流转，当订阅首次进入 `PAST_DUE`（逾期未付）状态时触发推送，展示套餐名称、支付网关、脱敏用户邮箱、外部订阅 ID 与更新时间；
+   - 采用幂等校验，状态未变化或收到乱序/旧时间戳事件时自动去重，避免重复告警刷屏。
+3. **架构健壮性与安全隔离**：
+   - 统一抽象 `postFeishuCard`，继承 Web Crypto HMAC-SHA256 签名、2.5 秒网络超时保护与全局异常捕获，确保告警通知永远不影响核心支付主链路。
+4. **测试与双语国际化自检**：
+   - 扩充 `tests/feishu-notify.test.ts`，增加红卡、橙卡格式断言及环境注入签名投递测试；
+   - 在 `tests/reconciliation.test.ts` 增加状态变更为 `PAST_DUE` 时的自动报警与防重复测试；
+   - 管理后台系统诊断页面文案更新并接入 `src/i18n/en.json`；
+   - 全量 37 个测试文件、374 项测试 100% 通过，`npm run check` 全绿交付。
+
+
 
 
 

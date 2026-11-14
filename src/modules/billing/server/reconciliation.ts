@@ -1,7 +1,10 @@
 import "@tanstack/react-start/server-only";
 import { installmentStatements } from "./installments";
 import { orderMode } from "./plan-contract";
-import { notifyFeishuPayment } from "./feishu-notify";
+import {
+  notifyFeishuPayment,
+  notifyFeishuSubscriptionPastDue,
+} from "./feishu-notify";
 import { z } from "zod";
 import { bindings } from "@/server/env";
 import type { PaymentProviderId, Reconciliation } from "./providers/contract";
@@ -91,9 +94,11 @@ export async function applyReconciliation(
     if (orderMode(order) !== "subscription")
       throw new Error("Unexpected subscription");
     const old = await db
-      .prepare("SELECT provider_id FROM subscriptions WHERE id=?")
+      .prepare(
+        "SELECT provider_id, status, updated_at FROM subscriptions WHERE id=?",
+      )
       .bind(order.id)
-      .first<{ provider_id: string }>();
+      .first<{ provider_id: string; status: string; updated_at: number }>();
     if (old && old.provider_id !== s.subscriptionId)
       throw new Error("Subscription identity conflict");
     await db
@@ -113,6 +118,26 @@ export async function applyReconciliation(
         s.updatedAt,
       )
       .run();
+    if (
+      s.status === "PAST_DUE" &&
+      (!old || old.status !== "PAST_DUE") &&
+      (!old || old.updated_at <= s.updatedAt) &&
+      bindings().FEISHU_WEBHOOK_URL
+    ) {
+      try {
+        await notifyFeishuSubscriptionPastDue({
+          orderId: order.id,
+          userId: order.user_id,
+          subscriptionId: s.subscriptionId,
+          provider,
+          planId: order.plan_id,
+          status: "PAST_DUE",
+          updatedAt: s.updatedAt,
+        });
+      } catch (err) {
+        console.error("Feishu subscription past_due notification failed:", err);
+      }
+    }
   }
   for (const s of events.subscriptions) {
     if (["CANCELED", "EXPIRED"].includes(s.status)) {

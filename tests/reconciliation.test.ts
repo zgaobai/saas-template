@@ -382,3 +382,51 @@ it("rolls back annual schedules with ledger failure and rejects missing confirme
     clock.mockRestore();
   }
 });
+
+it("notifies Feishu when a subscription transitions to PAST_DUE", async () => {
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValue(new Response("ok", { status: 200 }));
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = fetchMock;
+  state.env.FEISHU_WEBHOOK_URL =
+    "https://open.feishu.cn/open-apis/bot/v2/hook/xxx";
+
+  try {
+    order("stripe", "creator"); // mode subscription
+    await applyReconciliation("stripe", {
+      subscriptions: [
+        {
+          orderId: "o",
+          userId: "u",
+          subscriptionId: "sub_1",
+          status: "PAST_DUE",
+          updatedAt: 100,
+        },
+      ],
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const sentBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(sentBody.card.header.title.content).toBe(
+      "⚠️ 订阅自动续费失败 / 账户逾期",
+    );
+
+    // Replaying same status does not notify again
+    await applyReconciliation("stripe", {
+      subscriptions: [
+        {
+          orderId: "o",
+          userId: "u",
+          subscriptionId: "sub_1",
+          status: "PAST_DUE",
+          updatedAt: 200,
+        },
+      ],
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  } finally {
+    globalThis.fetch = originalFetch;
+    delete state.env.FEISHU_WEBHOOK_URL;
+  }
+});

@@ -1337,6 +1337,7 @@
   "正在发送...": "Sending...",
   "正在投递...": "Delivering...",
   "每当有新订单支付入账后，自动向飞书群推送绿色标题交互式卡片通知。": "Instantly pushes interactive rich cards to your Feishu group whenever a customer completes checkout.",
+  "自动向飞书群推送订单支付成功（绿色）、订阅续费逾期（橙色）及 Webhook 对账异常（红色）卡片通知。": "Pushes rich cards to Feishu for successful checkouts (green), renewal past-due alerts (orange), and webhook reconciliation errors (red).",
   "注册用户总数": "Registered Users",
   "活动": "Promo",
   "活动推广": "Promotion",

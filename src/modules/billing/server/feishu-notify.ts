@@ -3,6 +3,7 @@ import { bindings } from "@/server/env";
 import { site } from "@/site";
 import { formatDateTime } from "@/lib/date";
 import { HttpError } from "@/server/http";
+import { legacyPlanNames } from "@/modules/billing/plans";
 
 export interface FeishuPaymentNotifyParams {
   orderId: string;
@@ -12,6 +13,25 @@ export interface FeishuPaymentNotifyParams {
   credits: number;
   provider: string;
   paymentId: string;
+}
+
+export interface FeishuWebhookErrorNotifyParams {
+  provider: string;
+  errorMessage: string;
+  stage: "webhook_handling" | "reconciliation";
+  orderId?: string;
+  userId?: string;
+  paymentId?: string;
+}
+
+export interface FeishuSubscriptionPastDueNotifyParams {
+  orderId: string;
+  userId: string;
+  subscriptionId: string;
+  provider: string;
+  planId?: string;
+  status: "PAST_DUE";
+  updatedAt: number;
 }
 
 export function maskEmail(email: string): string {
@@ -177,12 +197,274 @@ export function buildFeishuCard(params: {
   };
 }
 
-export async function notifyFeishuPayment(
-  params: FeishuPaymentNotifyParams,
+export function buildFeishuWebhookErrorCard(params: {
+  provider: string;
+  stage: "webhook_handling" | "reconciliation";
+  errorMessage: string;
+  orderId?: string;
+  userId?: string;
+  userEmail?: string;
+  paymentId?: string;
+  occurredAt: number;
+}) {
+  const providerLabel = getProviderLabel(params.provider);
+  const stageLabel =
+    params.stage === "webhook_handling"
+      ? "Webhook 接收与验签"
+      : "数据对账与履约入账";
+  const maskedEmail = params.userEmail
+    ? maskEmail(params.userEmail)
+    : params.userId
+      ? `用户ID: ${params.userId}`
+      : "未关联用户";
+  const timeStr = formatDateTime(params.occurredAt, "zh");
+
+  return {
+    msg_type: "interactive",
+    card: {
+      config: {
+        wide_screen_mode: true,
+      },
+      header: {
+        title: {
+          tag: "plain_text",
+          content: "🚨 支付 Webhook 处理异常",
+        },
+        template: "red",
+      },
+      elements: [
+        {
+          tag: "div",
+          fields: [
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**💳 支付渠道：**\n${providerLabel}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**⚙️ 异常阶段：**\n${stageLabel}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**🆔 关联订单：**\n${params.orderId || "无 / 解析前异常"}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**📧 关联用户：**\n${maskedEmail}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**🧾 交易凭据：**\n${params.paymentId || "无"}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**🕒 发生时间：**\n${timeStr}`,
+              },
+            },
+          ],
+        },
+        {
+          tag: "hr",
+        },
+        {
+          tag: "div",
+          text: {
+            tag: "lark_md",
+            content: `**❌ 错误信息：**\n\`\`\`\n${params.errorMessage.slice(0, 500)}\n\`\`\``,
+          },
+        },
+        {
+          tag: "note",
+          elements: [
+            {
+              tag: "plain_text",
+              content: `此告警表示支付回调或对账未成功完成，用户权益未下发。请排查密钥配置、网络对账或在管理后台进行手动对账。`,
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
+export function buildFeishuSubscriptionPastDueCard(params: {
+  orderId: string;
+  userId: string;
+  subscriptionId: string;
+  provider: string;
+  planId?: string;
+  updatedAt: number;
+  userEmail?: string;
+  registeredAt?: number;
+}) {
+  const providerLabel = getProviderLabel(params.provider);
+  const maskedEmail = params.userEmail
+    ? maskEmail(params.userEmail)
+    : `用户ID: ${params.userId}`;
+  const registeredTimeStr = params.registeredAt
+    ? formatDateTime(params.registeredAt, "zh")
+    : "未知";
+  const updatedTimeStr = formatDateTime(params.updatedAt, "zh");
+  const planDisplay = params.planId
+    ? legacyPlanNames[params.planId] || params.planId
+    : "周期订阅";
+
+  return {
+    msg_type: "interactive",
+    card: {
+      config: {
+        wide_screen_mode: true,
+      },
+      header: {
+        title: {
+          tag: "plain_text",
+          content: "⚠️ 订阅自动续费失败 / 账户逾期",
+        },
+        template: "orange",
+      },
+      elements: [
+        {
+          tag: "div",
+          fields: [
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**📦 订阅计划：**\n${planDisplay}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**💳 支付渠道：**\n${providerLabel}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**📧 用户邮箱：**\n${maskedEmail}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**🕒 用户注册时间：**\n${registeredTimeStr}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**🆔 外部订阅号：**\n${params.subscriptionId}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**🚨 订阅状态：**\n⚠️ 扣款失败 (PAST_DUE)`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**🧾 关联订单：**\n${params.orderId}`,
+              },
+            },
+            {
+              is_short: true,
+              text: {
+                tag: "lark_md",
+                content: `**🕒 更新时间：**\n${updatedTimeStr}`,
+              },
+            },
+          ],
+        },
+        {
+          tag: "hr",
+        },
+        {
+          tag: "note",
+          elements: [
+            {
+              tag: "plain_text",
+              content: `此提醒表示周期订阅自动扣费未能成功完成，用户积分或权益可能即将暂停，请运营注意跟进。`,
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
+export async function postFeishuCard(
+  cardPayload: Record<string, unknown>,
 ): Promise<boolean> {
   const env = bindings();
   const webhookUrl = env.FEISHU_WEBHOOK_URL?.trim();
   if (!webhookUrl) return false;
+
+  try {
+    let body: Record<string, unknown> = cardPayload;
+    const secret = env.FEISHU_WEBHOOK_SECRET?.trim();
+    if (secret) {
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const sign = await signFeishuWebhook(timestamp, secret);
+      body = {
+        timestamp,
+        sign,
+        ...cardPayload,
+      };
+    }
+
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(2500),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(
+        `Feishu webhook delivery failed with status ${res.status}:`,
+        text,
+      );
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Failed to deliver Feishu notification:", error);
+    return false;
+  }
+}
+
+export async function notifyFeishuPayment(
+  params: FeishuPaymentNotifyParams,
+): Promise<boolean> {
+  const env = bindings();
+  if (!env.FEISHU_WEBHOOK_URL?.trim()) return false;
 
   try {
     const db = env.DB;
@@ -222,39 +504,67 @@ export async function notifyFeishuPayment(
       paidAt,
     });
 
-    let body: Record<string, unknown> = cardPayload;
-    const secret = env.FEISHU_WEBHOOK_SECRET?.trim();
-    if (secret) {
-      const timestamp = Math.floor(Date.now() / 1000).toString();
-      const sign = await signFeishuWebhook(timestamp, secret);
-      body = {
-        timestamp,
-        sign,
-        ...cardPayload,
-      };
-    }
-
-    // Enforce a strict 2.5s network timeout to guarantee payment webhooks never hang
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(2500),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error(
-        `Feishu webhook delivery failed with status ${res.status}:`,
-        text,
-      );
-      return false;
-    }
-    return true;
+    return await postFeishuCard(cardPayload);
   } catch (error) {
     console.error("Failed to deliver Feishu payment notification:", error);
     return false;
   }
+}
+
+export async function notifyFeishuWebhookError(
+  params: FeishuWebhookErrorNotifyParams,
+): Promise<boolean> {
+  const env = bindings();
+  if (!env.FEISHU_WEBHOOK_URL?.trim()) return false;
+
+  let userEmail: string | undefined;
+  if (params.userId) {
+    try {
+      const u = await env.DB.prepare("SELECT email FROM user WHERE id=?")
+        .bind(params.userId)
+        .first<{ email: string }>();
+      userEmail = u?.email;
+    } catch {
+      // non-critical
+    }
+  }
+
+  const cardPayload = buildFeishuWebhookErrorCard({
+    ...params,
+    userEmail,
+    occurredAt: Date.now(),
+  });
+
+  return await postFeishuCard(cardPayload);
+}
+
+export async function notifyFeishuSubscriptionPastDue(
+  params: FeishuSubscriptionPastDueNotifyParams,
+): Promise<boolean> {
+  const env = bindings();
+  if (!env.FEISHU_WEBHOOK_URL?.trim()) return false;
+
+  let userEmail: string | undefined;
+  let registeredAt: number | undefined;
+  try {
+    const u = await env.DB.prepare(
+      "SELECT email, created_at FROM user WHERE id=?",
+    )
+      .bind(params.userId)
+      .first<{ email: string; created_at: number }>();
+    userEmail = u?.email;
+    registeredAt = u?.created_at;
+  } catch {
+    // non-critical
+  }
+
+  const cardPayload = buildFeishuSubscriptionPastDueCard({
+    ...params,
+    userEmail,
+    registeredAt,
+  });
+
+  return await postFeishuCard(cardPayload);
 }
 
 export async function sendFeishuTestNotification(

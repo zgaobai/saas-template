@@ -103,7 +103,7 @@ export function AdminDiagnostics() {
                   </span>
                 </h3>
                 <p className="admin-secondary" style={{ margin: 0, fontSize: "13px" }}>
-                  {tr("每当有新订单支付入账后，自动向飞书群推送绿色标题交互式卡片通知。")}
+                  {tr("自动向飞书群推送订单支付成功（绿色）、订阅续费逾期（橙色）及 Webhook 对账异常（红色）卡片通知。")}
                 </p>
               </div>
 
