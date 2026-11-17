@@ -67,6 +67,16 @@ export async function generate(request: Request, userId: string) {
       ).bind(`generation:${id}`, userId, "生成预扣", Date.now()),
     ]);
   } catch {
+    const { getFreeQuotaStatus } = await import(
+      "@/modules/credits/server/service"
+    );
+    const quota = await getFreeQuotaStatus();
+    if (quota.isCappedToday || !quota.enabled) {
+      throw new HttpError(
+        409,
+        "积分不足。今日免费体验额度已派发完毕，将于明日恢复，欢迎升级套餐获取更多积分。",
+      );
+    }
     throw new HttpError(
       409,
       "积分不足或已有任务正在生成，请查看余额和历史记录。",

@@ -2,6 +2,7 @@ import "@tanstack/react-start/server-only";
 import { decryptCode } from "@/modules/redemption/server/code-vault";
 import { codeHash } from "@/modules/redemption/server/service";
 import { currentEntitlement } from "@/modules/entitlements/server/service";
+import { getFreeQuotaStatus } from "@/modules/credits/server/service";
 import { getPlan } from "@/modules/billing/server/plans";
 import type { AdminUserDetail, UserRecord } from "../types";
 import { z } from "zod";
@@ -147,9 +148,9 @@ export async function listAdminOrders(request: Request) {
     values: (string | number)[] = [];
   if (q.search) {
     where.push(
-      "(o.id=? OR o.provider_id=? OR o.user_id=? OR o.user_id IN (SELECT id FROM user WHERE email=?))",
+      "(o.id=? OR o.provider_id=? OR o.user_id=? OR o.user_id IN (SELECT id FROM user WHERE email=? OR attribution_channel=? OR attribution_source=?))",
     );
-    values.push(q.search, q.search, q.search, q.search);
+    values.push(q.search, q.search, q.search, q.search, q.search, q.search);
   }
   if (q.status) {
     where.push("o.status=?");
@@ -160,7 +161,7 @@ export async function listAdminOrders(request: Request) {
     values.push(q.provider);
   }
   return page<AdminOrder>(
-    "SELECT o.id,o.user_id,u.name,u.email,o.plan_id,o.plan_name,o.billing_interval,o.provider,o.provider_id,o.amount,o.currency,o.credits,o.status,o.created_at FROM orders o JOIN user u ON u.id=o.user_id",
+    "SELECT o.id,o.user_id,u.name,u.email,o.plan_id,o.plan_name,o.billing_interval,o.provider,o.provider_id,o.amount,o.currency,o.credits,o.status,o.created_at,COALESCE(ua.channel, u.attribution_channel, 'direct') AS attribution_channel,COALESCE(ua.source, u.attribution_source) AS attribution_source,COALESCE(ua.landing_path, u.attribution_landing_path) AS attribution_landing_path,COALESCE(ua.referrer_url, u.attribution_referrer_url) AS attribution_referrer_url FROM orders o JOIN user u ON u.id=o.user_id LEFT JOIN user_attributions ua ON ua.user_id=o.user_id",
     where,
     values,
     "o.created_at",
@@ -468,7 +469,84 @@ export async function adminOverview(request: Request): Promise<AdminOverview> {
         LIMIT 10`,
       )
       .bind(from, until),
+    db
+      .prepare(
+        `SELECT COUNT(*) AS count
+        FROM user_attributions
+        WHERE (channel = 'ai_chatgpt' OR source LIKE '%chatgpt%')
+          AND created_at >= ? AND created_at <= ?`,
+      )
+      .bind(from, until),
+    db
+      .prepare(
+        `SELECT
+          COUNT(DISTINCT o.user_id) AS paying_users,
+          COUNT(o.id) AS paid_orders,
+          COALESCE(SUM(o.amount), 0) AS revenue,
+          o.currency
+        FROM orders o
+        JOIN user_attributions ua ON ua.user_id = o.user_id
+        WHERE (ua.channel = 'ai_chatgpt' OR ua.source LIKE '%chatgpt%')
+          AND o.status = 'paid'
+          AND o.created_at >= ? AND o.created_at <= ?
+        GROUP BY o.currency`,
+      )
+      .bind(from, until),
+    db
+      .prepare(
+        `SELECT landing_path, COUNT(*) AS count
+        FROM user_attributions
+        WHERE (channel = 'ai_chatgpt' OR source LIKE '%chatgpt%')
+          AND created_at >= ? AND created_at <= ?
+          AND landing_path IS NOT NULL
+        GROUP BY landing_path
+        ORDER BY count DESC
+        LIMIT 5`,
+      )
+      .bind(from, until),
+    db
+      .prepare(
+        `SELECT COUNT(*) AS count
+        FROM user_attributions
+        WHERE channel = 'ai_chatgpt' OR source LIKE '%chatgpt%'`,
+      ),
+    db
+      .prepare(
+        `SELECT COUNT(o.id) AS count
+        FROM orders o
+        JOIN user_attributions ua ON ua.user_id = o.user_id
+        WHERE (ua.channel = 'ai_chatgpt' OR ua.source LIKE '%chatgpt%')
+          AND o.status = 'paid'`,
+      ),
   ]);
+
+  const freeQuota = await getFreeQuotaStatus();
+
+  const chatgptUsersCount = (results[8]?.results[0] as any)?.count ?? 0;
+  const chatgptOrdersRows = (results[9]?.results || []) as any[];
+  const chatgptPaidOrdersCount = chatgptOrdersRows.reduce(
+    (acc, r) => acc + (r.paid_orders || 0),
+    0,
+  );
+  const chatgptPayingUsersCount = chatgptOrdersRows.reduce(
+    (acc, r) => acc + (r.paying_users || 0),
+    0,
+  );
+  const chatgptRevenue = chatgptOrdersRows.map((r) => ({
+    currency: r.currency,
+    amount: r.revenue || 0,
+  }));
+  const conversionRate =
+    chatgptUsersCount > 0
+      ? `${((chatgptPayingUsersCount / chatgptUsersCount) * 100).toFixed(1)}%`
+      : "0%";
+  const chatgptLandingPages = (results[10]?.results || []) as {
+    landing_path: string;
+    count: number;
+  }[];
+  const allTimeUsers = (results[11]?.results[0] as any)?.count ?? 0;
+  const allTimePaidOrders = (results[12]?.results[0] as any)?.count ?? 0;
+
   return {
     from,
     until,
@@ -480,6 +558,23 @@ export async function adminOverview(request: Request): Promise<AdminOverview> {
     daily: results[5].results,
     aiUsage: (results[6]?.results || []) as unknown as AdminAiModelUsage[],
     channels: (results[7]?.results || []) as unknown as { channel: string; count: number }[],
+    chatgptStats: {
+      usersCount: chatgptUsersCount,
+      payingUsersCount: chatgptPayingUsersCount,
+      paidOrdersCount: chatgptPaidOrdersCount,
+      revenue: chatgptRevenue,
+      conversionRate,
+      landingPages: chatgptLandingPages,
+      allTimeUsers,
+      allTimePaidOrders,
+    },
+    freeQuota: {
+      enabled: freeQuota.enabled,
+      dailyLimit: freeQuota.dailyLimit,
+      todayGranted: freeQuota.todayGranted,
+      remainingToday: freeQuota.remainingToday,
+      isCappedToday: freeQuota.isCappedToday,
+    },
   } as AdminOverview;
 }
 

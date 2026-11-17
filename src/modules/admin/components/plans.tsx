@@ -24,10 +24,71 @@ export function AdminPlans() {
     plans: AdminPlan[];
     activeProvider?: string;
     paymentsActive?: boolean;
+    freeQuota?: {
+      enabled: boolean;
+      dailyLimit: number;
+      todayGranted: number;
+      remainingToday: number;
+      isCappedToday: boolean;
+    };
   }>("/api/app/admin/plans");
   const [editing, setEditing] = useState<AdminPlan | "new" | null>(null);
   const [busy, setBusy] = useState(false);
   const [toggleBusy, setToggleBusy] = useState(false);
+  const [quotaBusy, setQuotaBusy] = useState(false);
+  const [isEditingLimit, setIsEditingLimit] = useState(false);
+  const [limitInput, setLimitInput] = useState("");
+
+  async function handleToggleFreeQuota(enable: boolean) {
+    if (!enable) {
+      const ok = await confirmAction({
+        title: tr("暂停免费额度发放"),
+        description: tr(
+          "确定要暂停发放每日免费额度吗？暂停后新注册用户将不会自动获得免费积分。",
+        ),
+        confirmText: tr("确认暂停"),
+        variant: "danger",
+      });
+      if (!ok) return;
+    }
+    setQuotaBusy(true);
+    try {
+      await api("/api/app/admin/free-quota", {
+        method: "POST",
+        body: JSON.stringify({ enabled: enable }),
+      });
+      await reload();
+      toast.success(
+        enable ? tr("每日免费额度已恢复发放") : tr("每日免费额度已暂停发放"),
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : tr("操作失败"));
+    } finally {
+      setQuotaBusy(false);
+    }
+  }
+
+  async function handleSaveDailyLimit() {
+    const num = parseInt(limitInput, 10);
+    if (isNaN(num) || num < 0) {
+      toast.error(tr("请输入有效的数字上限"));
+      return;
+    }
+    setQuotaBusy(true);
+    try {
+      await api("/api/app/admin/free-quota", {
+        method: "POST",
+        body: JSON.stringify({ dailyLimit: num }),
+      });
+      await reload();
+      setIsEditingLimit(false);
+      toast.success(tr("每日发放总上限已更新"));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : tr("保存失败"));
+    } finally {
+      setQuotaBusy(false);
+    }
+  }
 
   async function handleTogglePayments(enable: boolean) {
     if (!enable) {
@@ -88,9 +149,10 @@ export function AdminPlans() {
       </p>
       {error && <Notice kind="error">{tr(error)}</Notice>}
       {data && (
-        <div
-          className={`admin-payments-banner ${data.paymentsActive !== false ? "active" : "paused"}`}
-        >
+        <>
+          <div
+            className={`admin-payments-banner ${data.paymentsActive !== false ? "active" : "paused"}`}
+          >
           <div className="admin-payments-banner-info">
             <h4>
               <span>{tr("全站支付通道")}</span>
@@ -128,7 +190,125 @@ export function AdminPlans() {
             )}
           </div>
         </div>
-      )}
+        <div
+          className={`admin-payments-banner ${
+            data.freeQuota?.enabled
+              ? data.freeQuota.isCappedToday
+                ? "paused"
+                : "active"
+              : "paused"
+          }`}
+          style={{ marginTop: "16px" }}
+        >
+          <div className="admin-payments-banner-info">
+            <h4>
+              <span>{tr("每日免费额度总上限与开关")}</span>
+              <span
+                className={`admin-payments-status-tag ${
+                  !data.freeQuota?.enabled
+                    ? "paused"
+                    : data.freeQuota.isCappedToday
+                      ? "paused"
+                      : "active"
+                }`}
+              >
+                {!data.freeQuota?.enabled
+                  ? `🔴 ${tr("已暂停发放")}`
+                  : data.freeQuota.isCappedToday
+                    ? `🟡 ${tr("今日已达上限")}`
+                    : `🟢 ${tr("正常赠送中")}`}
+              </span>
+            </h4>
+            <p>
+              {tr(
+                "今日已赠送 {0} / 上限 {1} 份（剩余 {2} 份）。到达每日上限后当天自动停止赠送，次日恢复。前台不展示具体总数，仅在此后台监控与控制。",
+                [
+                  data.freeQuota?.todayGranted ?? 0,
+                  data.freeQuota?.dailyLimit ?? 100,
+                  data.freeQuota?.remainingToday ?? 0,
+                ],
+              )}
+            </p>
+            {isEditingLimit && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginTop: "10px",
+                }}
+              >
+                <label htmlFor="daily-limit-input" style={{ fontSize: "13px" }}>
+                  {tr("设置每日总上限 (份)")}：
+                </label>
+                <input
+                  id="daily-limit-input"
+                  type="number"
+                  min="0"
+                  max="1000000"
+                  value={limitInput}
+                  onChange={(e) => setLimitInput(e.target.value)}
+                  style={{
+                    width: "100px",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    border: "1px solid var(--border-color)",
+                  }}
+                />
+                <Button
+                  size="small"
+                  variant="primary"
+                  disabled={quotaBusy}
+                  onClick={handleSaveDailyLimit}
+                >
+                  {tr("保存上限")}
+                </Button>
+                <Button
+                  size="small"
+                  variant="secondary"
+                  disabled={quotaBusy}
+                  onClick={() => setIsEditingLimit(false)}
+                >
+                  {tr("取消")}
+                </Button>
+              </div>
+            )}
+          </div>
+          <div
+            className="admin-payments-banner-action"
+            style={{ display: "flex", gap: "8px", alignItems: "center" }}
+          >
+            <Button
+              variant={data.freeQuota?.enabled ? "secondary" : "primary"}
+              disabled={quotaBusy || loading}
+              onClick={() =>
+                handleToggleFreeQuota(!data.freeQuota?.enabled)
+              }
+            >
+              {quotaBusy
+                ? tr("处理中…")
+                : data.freeQuota?.enabled
+                  ? tr("暂停赠送免费额度")
+                  : tr("恢复开放赠送")}
+            </Button>
+            {!isEditingLimit && (
+              <Button
+                variant="secondary"
+                disabled={quotaBusy || loading}
+                onClick={() => {
+                  setLimitInput(
+                    String(data.freeQuota?.dailyLimit ?? 100),
+                  );
+                  setIsEditingLimit(true);
+                }}
+              >
+                {tr("修改每日上限")}
+              </Button>
+            )}
+          </div>
+        </div>
+      </>
+    )}
       {loading ? (
         <Loading />
       ) : (

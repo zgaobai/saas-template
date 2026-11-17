@@ -98,17 +98,22 @@ export async function appApi(request: Request, path: string) {
   if (method === "GET" && path === "billing/records")
     return personalBillingRecords(request, u.id);
   if (method === "GET" && path === "billing/summary") {
-    const [credits, entitlement, starter, nextGrant] = await Promise.all([
+    const { getFreeQuotaStatus } = await import(
+      "@/modules/credits/server/service"
+    );
+    const [credits, entitlement, starter, nextGrant, quota] = await Promise.all([
       balance(u.id),
       currentEntitlement(u.id),
       getPlan("starter"),
       nextCreditGrant(u.id),
+      getFreeQuotaStatus(),
     ]);
     return {
       balance: credits,
       entitlement,
       freePlanName: starter.name,
       nextGrant,
+      freeQuotaCapped: quota.isCappedToday || !quota.enabled,
     };
   }
   if (method === "GET" && path === "ai/models") {
@@ -126,7 +131,10 @@ export async function appApi(request: Request, path: string) {
   }
   if (method === "GET" && path === "overview") {
     await recoverStale(u.id);
-    const [credits, entitlement, history] = await Promise.all([
+    const { getFreeQuotaStatus } = await import(
+      "@/modules/credits/server/service"
+    );
+    const [credits, entitlement, history, quota] = await Promise.all([
       balance(u.id),
       currentEntitlement(u.id),
       db
@@ -135,8 +143,14 @@ export async function appApi(request: Request, path: string) {
         )
         .bind(u.id)
         .all(),
+      getFreeQuotaStatus(),
     ]);
-    return { balance: credits, entitlement, history: history.results };
+    return {
+      balance: credits,
+      entitlement,
+      history: history.results,
+      freeQuotaCapped: quota.isCappedToday || !quota.enabled,
+    };
   }
   if (method === "POST" && path === "generate") return generate(request, u.id);
   if (method === "POST" && path === "checkout") return checkout(request, u);
@@ -232,6 +246,20 @@ export async function appApi(request: Request, path: string) {
       await setPaymentsActive(input.enabled, admin.id);
       return { ok: true, paymentsActive: input.enabled };
     }
+    if (path === "admin/free-quota") {
+      const admin = await requireAdmin(request);
+      const input = z
+        .object({
+          enabled: z.boolean().optional(),
+          dailyLimit: z.number().int().min(0).max(1000000).optional(),
+        })
+        .parse(await body(request));
+      const { setFreeQuotaConfig, getFreeQuotaStatus } = await import(
+        "@/modules/credits/server/service"
+      );
+      await setFreeQuotaConfig(input, admin.id);
+      return { ok: true, freeQuota: await getFreeQuotaStatus() };
+    }
     if (path === "admin/ai-config") return saveAdminAiConfig(request);
     if (path === "admin/ai-test") return testAdminAiConnection(request);
     if (path === "admin/codes") return createCode(request);
@@ -254,15 +282,26 @@ export async function appApi(request: Request, path: string) {
     if (path === "admin/ledger") return listAdminLedger(request);
     if (path === "admin/codes") return listAdminCodes(request);
     if (path === "admin/redemptions") return listAdminRedemptions(request);
+    if (path === "admin/free-quota") {
+      await requireAdmin(request);
+      const { getFreeQuotaStatus } = await import(
+        "@/modules/credits/server/service"
+      );
+      return { ok: true, freeQuota: await getFreeQuotaStatus() };
+    }
     if (path === "admin/plans") {
       await requireAdmin(request);
       const { isPaymentsActive } = await import(
         "@/modules/admin/server/system-settings"
       );
+      const { getFreeQuotaStatus } = await import(
+        "@/modules/credits/server/service"
+      );
       return {
         plans: await getPlans(),
         activeProvider: bindings().PAYMENT_PROVIDER || "pancake",
         paymentsActive: await isPaymentsActive(),
+        freeQuota: await getFreeQuotaStatus(),
       };
     }
     if (path === "admin/users") return listAdminUsers(request);

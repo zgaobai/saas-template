@@ -43,6 +43,13 @@ export function AccountSummary({ data }: { data: AccountBilling }) {
           <Link to="/pricing">{tr("查看套餐")}</Link>
         </div>
       </div>
+      {data.balance === 0 && data.freeQuotaCapped && !data.entitlement && (
+        <Notice>
+          {tr(
+            "今日全站免费额度已达上限，明日 00:00 恢复重置。如需无限制使用，可随时选购套餐。",
+          )}
+        </Notice>
+      )}
       {data.nextGrant && (
         <Notice>
           {tr("下期积分起算时间：{0} · {1} 积分（{2}，第 {3}/12 期）。", [

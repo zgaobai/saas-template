@@ -87,6 +87,25 @@ export function AdminOverview() {
                   ])}
                 </small>
               </Link>
+              <Link to="/admin/plans">
+                <span>{tr("每日免费额度")}</span>
+                <strong>
+                  {data.freeQuota
+                    ? `${data.freeQuota.todayGranted} / ${data.freeQuota.dailyLimit}`
+                    : "—"}
+                </strong>
+                <small>
+                  {data.freeQuota
+                    ? !data.freeQuota.enabled
+                      ? tr("🔴 已暂停赠送")
+                      : data.freeQuota.isCappedToday
+                        ? tr("🟡 今日已达上限（停止赠送）")
+                        : tr("🟢 发放中，今日剩余 {0} 份", [
+                            data.freeQuota.remainingToday,
+                          ])
+                    : ""}
+                </small>
+              </Link>
             </div>
             <section className="admin-section">
               <h2>{tr("实收与退款")}</h2>
@@ -213,6 +232,136 @@ export function AdminOverview() {
               ) : (
                 <Empty title={tr("该周期暂无 AI 模型消耗记录")}>
                   {tr("用户使用 AI 工具生成后，这里会自动生成模型成本报表。")}
+                </Empty>
+              )}
+            </section>
+            <section className="admin-section">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "12px",
+                }}
+              >
+                <div>
+                  <h2 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span>{tr("ChatGPT 渠道专项转化分析")}</span>
+                    <span className="admin-channel-badge is-ai">
+                      {tr("ChatGPT 专属链路")}
+                    </span>
+                  </h2>
+                  <p className="admin-secondary">
+                    {tr(
+                      "专门监控来自 ChatGPT 推荐与引用（utm_source=chatgpt 及 chatgpt.com 引荐）的访问、注册、付费转化与落地页表现。",
+                    )}
+                  </p>
+                </div>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <Link
+                    to="/admin/billing"
+                    search={{}}
+                    className="wb-text-btn"
+                    style={{ textDecoration: "underline" }}
+                  >
+                    {tr("查看订单")}
+                  </Link>
+                  <Link
+                    to="/admin/users"
+                    search={{}}
+                    className="wb-text-btn"
+                    style={{ textDecoration: "underline" }}
+                  >
+                    {tr("查看用户")}
+                  </Link>
+                </div>
+              </div>
+
+              <div
+                className="admin-stats"
+                style={{ marginTop: "16px", marginBottom: "16px" }}
+              >
+                <div>
+                  <span>{tr("ChatGPT 引流注册")}</span>
+                  <strong>
+                    {data.chatgptStats?.usersCount ?? 0} {tr("人")}
+                  </strong>
+                  <small>
+                    {tr("全站累计 {0} 人", [
+                      data.chatgptStats?.allTimeUsers ?? 0,
+                    ])}
+                  </small>
+                </div>
+                <div>
+                  <span>{tr("ChatGPT 付费人数")}</span>
+                  <strong>
+                    {data.chatgptStats?.payingUsersCount ?? 0} {tr("人")}
+                  </strong>
+                  <small>
+                    {tr("共完成 {0} 笔付款", [
+                      data.chatgptStats?.paidOrdersCount ?? 0,
+                    ])}
+                  </small>
+                </div>
+                <div>
+                  <span>{tr("付费转化率")}</span>
+                  <strong style={{ color: "var(--color-primary, #6366f1)" }}>
+                    {data.chatgptStats?.conversionRate ?? "0%"}
+                  </strong>
+                  <small>{tr("注册用户付费率")}</small>
+                </div>
+                <div>
+                  <span>{tr("产生实收金额")}</span>
+                  <strong>
+                    {data.chatgptStats?.revenue &&
+                    data.chatgptStats.revenue.length > 0
+                      ? data.chatgptStats.revenue
+                          .map(
+                            (r) => `${r.currency} ${(r.amount / 100).toFixed(2)}`,
+                          )
+                          .join(" / ")
+                      : "$0.00"}
+                  </strong>
+                  <small>
+                    {tr("历史总计成交 {0} 单", [
+                      data.chatgptStats?.allTimePaidOrders ?? 0,
+                    ])}
+                  </small>
+                </div>
+              </div>
+
+              {data.chatgptStats?.landingPages &&
+              data.chatgptStats.landingPages.length > 0 ? (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{tr("ChatGPT 热门落地页")}</th>
+                        <th style={{ width: "120px" }}>{tr("带来注册数")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.chatgptStats.landingPages.map((lp) => (
+                        <tr key={lp.landing_path}>
+                          <td>
+                            <code style={{ fontSize: "13px" }}>
+                              {lp.landing_path}
+                            </code>
+                          </td>
+                          <td>
+                            <strong>{lp.count}</strong> {tr("人")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <Empty title={tr("当前周期暂无 ChatGPT 引流数据")}>
+                  {tr(
+                    "当带有 utm_source=chatgpt 或来自 chatgpt.com 的访客注册时，数据将在此单独呈现。",
+                  )}
                 </Empty>
               )}
             </section>

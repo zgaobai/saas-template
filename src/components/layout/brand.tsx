@@ -8,9 +8,11 @@ export function Brand() {
   return (
     <Link to="/" className="brand" aria-label={tr("{0}首页", [tr(site.name)])}>
       <span className="brand-symbol">
-        <Compass size={18} strokeWidth={2.2} />
+        <Compass size={18} strokeWidth={2} />
       </span>
-      {tr(site.name)}
+      <span className="brand-title">
+        {tr(site.name)}
+      </span>
     </Link>
   );
 }

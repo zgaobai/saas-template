@@ -13,10 +13,11 @@ const ATTR_COOKIE_NAME = "saas_attr";
 export function detectChannel(params: {
   utmSource?: string;
   utmMedium?: string;
+  utmCampaign?: string;
   refCode?: string;
   referrerHost?: string;
 }): { channel: string; source: string; medium?: string } {
-  const { utmSource, utmMedium, refCode, referrerHost } = params;
+  const { utmSource, utmMedium, utmCampaign, refCode, referrerHost } = params;
 
   if (utmSource) {
     const s = utmSource.toLowerCase().trim();
@@ -25,7 +26,7 @@ export function detectChannel(params: {
 
     // AI Search Engines via UTM
     if (s.includes("perplexity")) return { channel: "ai_perplexity", source: s, medium: m || "ai_search" };
-    if (s.includes("chatgpt") || s === "openai") return { channel: "ai_chatgpt", source: s, medium: m || "ai_search" };
+    if (s.includes("chatgpt") || s === "openai" || m?.includes("chatgpt")) return { channel: "ai_chatgpt", source: s, medium: m || "ai_search" };
     if (s.includes("claude") || s.includes("anthropic")) return { channel: "ai_claude", source: s, medium: m || "ai_search" };
     if (s.includes("gemini")) return { channel: "ai_gemini", source: s, medium: m || "ai_search" };
     if (s.includes("grok") || s === "xai") return { channel: "ai_grok", source: s, medium: m || "ai_search" };
@@ -144,6 +145,7 @@ export function captureAttribution(): AttributionPayload | null {
     const { channel, source, medium } = detectChannel({
       utmSource,
       utmMedium,
+      utmCampaign,
       refCode,
       referrerHost,
     });

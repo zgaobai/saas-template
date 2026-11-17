@@ -24,8 +24,8 @@ const icons: Record<string, any> = {
 export function ToolIcon({ tool }: { tool: Tool }) {
   const Icon = icons[tool.icon] || WandSparkles;
   return (
-    <span className={`tool-icon tool-icon-${tool.color}`}>
-      <Icon size={23} strokeWidth={1.7} />
+    <span className="tool-icon">
+      <Icon size={20} strokeWidth={1.75} />
     </span>
   );
 }

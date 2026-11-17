@@ -213,6 +213,13 @@ describe("User Acquisition Channel Attribution", () => {
       expect(record?.landing_path).toBe("/zh/tools/chat");
       expect(record?.referrer_url).toBe("https://www.google.com/search?q=saas");
 
+      // Verify user table itself has attribution columns updated
+      const userRow = db.prepare("SELECT attribution_channel, attribution_source, attribution_landing_path, attribution_referrer_url FROM user WHERE id='u1'").get() as any;
+      expect(userRow?.attribution_channel).toBe("google_organic");
+      expect(userRow?.attribution_source).toBe("www.google.com");
+      expect(userRow?.attribution_landing_path).toBe("/zh/tools/chat");
+      expect(userRow?.attribution_referrer_url).toBe("https://www.google.com/search?q=saas");
+
       // Attempt to overwrite with different source - must preserve first touch
       await recordUserAttribution("u1", {
         channel: "twitter",

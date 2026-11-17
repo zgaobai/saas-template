@@ -6,6 +6,7 @@ import { PageHeading } from "@/components/layout/page-heading";
 import { Button } from "@/components/ui/button";
 import { legacyPlanNames } from "@/modules/billing/plans";
 import { AdminList, DateTime, Person } from "./list";
+import { formatChannel, isAiSearchChannel } from "@/modules/attribution/client";
 import {
   labelFor,
   orderStatuses,
@@ -68,13 +69,58 @@ export function AdminBilling() {
                     <tr key={o.id}>
                       <td>
                         <Person name={o.name} email={o.email} />
+                        {o.attribution_channel && (
+                          <div style={{ marginTop: "4px" }}>
+                            <span
+                              className={`admin-channel-badge ${
+                                isAiSearchChannel(o.attribution_channel)
+                                  ? "is-ai"
+                                  : ""
+                              }`}
+                            >
+                              {formatChannel(
+                                o.attribution_channel,
+                                o.attribution_source,
+                                tr,
+                              )}
+                            </span>
+                          </div>
+                        )}
                         <details className="admin-details">
-                          <summary>{tr("订单编号")}</summary>
+                          <summary>{tr("订单编号与来源")}</summary>
                           <dl>
                             <dt>{tr("站内订单号")}</dt>
                             <dd>{o.id}</dd>
                             <dt>{tr("渠道订单号")}</dt>
                             <dd>{o.provider_id || tr("尚未返回")}</dd>
+                            {o.attribution_channel && (
+                              <>
+                                <dt>{tr("引流来源")}</dt>
+                                <dd>
+                                  {formatChannel(
+                                    o.attribution_channel,
+                                    o.attribution_source,
+                                    tr,
+                                  )}
+                                </dd>
+                              </>
+                            )}
+                            {o.attribution_landing_path && (
+                              <>
+                                <dt>{tr("落地页面")}</dt>
+                                <dd style={{ wordBreak: "break-all" }}>
+                                  {o.attribution_landing_path}
+                                </dd>
+                              </>
+                            )}
+                            {o.attribution_referrer_url && (
+                              <>
+                                <dt>{tr("引荐网址")}</dt>
+                                <dd style={{ wordBreak: "break-all" }}>
+                                  {o.attribution_referrer_url}
+                                </dd>
+                              </>
+                            )}
                           </dl>
                         </details>
                       </td>

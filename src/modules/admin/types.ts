@@ -32,6 +32,10 @@ export type AdminOrder = {
   grant_months?: number;
   status: string;
   created_at: number;
+  attribution_channel?: string | null;
+  attribution_source?: string | null;
+  attribution_landing_path?: string | null;
+  attribution_referrer_url?: string | null;
 };
 export type AdminSubscription = {
   billing_interval: string | null;
@@ -187,6 +191,23 @@ export type AdminOverview = {
   daily: { day: string; count: number; completed: number }[];
   aiUsage?: AdminAiModelUsage[];
   channels?: { channel: string; count: number }[];
+  chatgptStats?: {
+    usersCount: number;
+    payingUsersCount: number;
+    paidOrdersCount: number;
+    revenue: { currency: string; amount: number }[];
+    conversionRate: string;
+    landingPages: { landing_path: string; count: number }[];
+    allTimeUsers: number;
+    allTimePaidOrders: number;
+  };
+  freeQuota?: {
+    enabled: boolean;
+    dailyLimit: number;
+    todayGranted: number;
+    remainingToday: number;
+    isCappedToday: boolean;
+  };
 };
 export const taskStatuses = {
   pending: "生成中",

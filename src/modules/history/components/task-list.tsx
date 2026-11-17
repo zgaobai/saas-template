@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { toast } from "@/components/ui/toast";
 import { confirmAction } from "@/components/ui/confirm-dialog";
+import { Badge } from "@/components/ui/badge";
+import { SegmentedControl } from "@/components/ui/tabs";
 import {
   Download,
   Copy,
@@ -25,6 +27,7 @@ import {
   Music,
   FileText,
   Play,
+  Sparkles,
 } from "lucide-react";
 
 type PageData = {
@@ -173,48 +176,19 @@ export function TaskList() {
       />
 
       <div className="history-filter-bar">
-        <div className="history-filter-tabs">
-          <Button
-            variant="ghost"
-            aria-pressed={status === ""}
-            onClick={() => {
-              setStatus("");
-              setCursors([""]);
-            }}
-          >
-            {tr("全部")}
-          </Button>
-          <Button
-            variant="ghost"
-            aria-pressed={status === "completed"}
-            onClick={() => {
-              setStatus("completed");
-              setCursors([""]);
-            }}
-          >
-            {tr("已完成")}
-          </Button>
-          <Button
-            variant="ghost"
-            aria-pressed={status === "pending"}
-            onClick={() => {
-              setStatus("pending");
-              setCursors([""]);
-            }}
-          >
-            {tr("生成中")}
-          </Button>
-          <Button
-            variant="ghost"
-            aria-pressed={status === "failed"}
-            onClick={() => {
-              setStatus("failed");
-              setCursors([""]);
-            }}
-          >
-            {tr("失败")}
-          </Button>
-        </div>
+        <SegmentedControl
+          value={status}
+          onChange={(val) => {
+            setStatus(val);
+            setCursors([""]);
+          }}
+          options={[
+            { value: "", label: tr("全部") },
+            { value: "completed", label: tr("已完成") },
+            { value: "pending", label: tr("生成中") },
+            { value: "failed", label: tr("失败") },
+          ]}
+        />
         <Button
           variant="secondary"
           size="small"
@@ -301,16 +275,27 @@ export function TaskList() {
                     )}
 
                     <div className="history-media-badges">
-                      <span className="history-tool-badge">
-                        {modality === "image" && <ImageIcon size={12} />}
-                        {modality === "video" && <VideoIcon size={12} />}
-                        {modality === "audio" && <Music size={12} />}
-                        {modality === "text" && <FileText size={12} />}
+                      <Badge variant="glass" size="sm">
+                        {modality === "image" && <ImageIcon size={11} />}
+                        {modality === "video" && <VideoIcon size={11} />}
+                        {modality === "audio" && <Music size={11} />}
+                        {modality === "text" && <FileText size={11} />}
                         <span>{tr(getTool(g.tool_id)?.name || "AI 创作")}</span>
-                      </span>
-                      <span className={`history-status-badge status-${g.status}`}>
+                      </Badge>
+                      <Badge
+                        variant={
+                          g.status === "completed"
+                            ? "success"
+                            : g.status === "pending"
+                              ? "neon"
+                              : "warning"
+                        }
+                        dot={g.status === "pending"}
+                        dotColor={g.status === "pending" ? "cyan" : undefined}
+                        size="sm"
+                      >
                         {tr(labelFor(taskStatuses, g.status))}
-                      </span>
+                      </Badge>
                     </div>
 
                     <div className="history-card-overlay">
@@ -372,6 +357,15 @@ export function TaskList() {
                       </span>
                     </div>
                     <div className="history-card-actions">
+                      <Link
+                        to="/tools/$toolId"
+                        params={{ toolId: g.tool_id || "video" }}
+                        className="button button-ghost button-small"
+                        title={tr("制作同款")}
+                      >
+                        <Sparkles size={13} />
+                        <span>{tr("制作同款")}</span>
+                      </Link>
                       {g.output && (
                         <Button
                           variant="secondary"

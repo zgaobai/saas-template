@@ -7,6 +7,7 @@ export type AccountBilling = {
     plan_name: string;
   } | null;
   freePlanName: string;
+  freeQuotaCapped?: boolean;
   entitlement: {
     plan_id: string;
     plan_name?: string;

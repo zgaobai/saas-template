@@ -1,22 +1,29 @@
 import { useI18n } from "@/i18n/react";
 import { useAuthDialog } from "@/modules/auth/components/auth-dialog";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Copy,
   Check,
   Coins,
-  WandSparkles,
-  Sparkles,
   Download,
-  Maximize2,
   Play,
   Pause,
   Volume2,
+  VolumeX,
+  RotateCcw,
+  Sparkles,
+  ArrowRight,
+  Film,
+  Camera,
+  Music,
+  FileText,
+  Video as VideoIcon,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Field, Textarea } from "@/components/ui/field";
-import { Notice, Loading } from "@/components/ui/feedback";
+import { Notice } from "@/components/ui/feedback";
+import { Scanner } from "@/components/ui/scanner";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 import type { Overview } from "@/modules/tools/types";
@@ -47,8 +54,8 @@ export function ToolWorkbench({
   const modality = (tool as any).modality || "text";
   const [prompt, setPrompt] = useState("");
   const [tone, setTone] = useState<string>("自然清晰");
-  const [aspectRatio, setAspectRatio] = useState("1:1");
-  const [cameraMotion, setCameraMotion] = useState("pan");
+  const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1" | "21:9">("16:9");
+  const [cameraMotion, setCameraMotion] = useState<"pan" | "orbit" | "aerial" | "static">("pan");
   const [genreTag, setGenreTag] = useState("lofi");
   const [output, setOutput] = useState("");
   const [sample, setSample] = useState(false);
@@ -56,6 +63,11 @@ export function ToolWorkbench({
   const [issue, setIssue] = useState("");
   const [copied, setCopied] = useState(false);
   const [restored, setRestored] = useState(false);
+
+  // Video playback state
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   const draftKey = `qihang:draft:${tool.id}`;
 
@@ -65,6 +77,8 @@ export function ToolWorkbench({
       if (typeof draft?.prompt === "string")
         setPrompt(draft.prompt.slice(0, 2000));
       if (tones.includes(draft?.tone)) setTone(draft.tone);
+      if (draft?.aspectRatio) setAspectRatio(draft.aspectRatio);
+      if (draft?.cameraMotion) setCameraMotion(draft.cameraMotion);
     } catch {}
     setRestored(true);
   }, [draftKey]);
@@ -77,10 +91,12 @@ export function ToolWorkbench({
           JSON.stringify({
             prompt,
             tone,
+            aspectRatio,
+            cameraMotion,
           }),
         );
       } catch {}
-  }, [prompt, tone, draftKey, restored]);
+  }, [prompt, tone, aspectRatio, cameraMotion, draftKey, restored]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -91,6 +107,8 @@ export function ToolWorkbench({
           JSON.stringify({
             prompt,
             tone,
+            aspectRatio,
+            cameraMotion,
           }),
         );
       } catch {}
@@ -114,7 +132,6 @@ export function ToolWorkbench({
 
     try {
       if (modality === "text") {
-        // Progressive token streaming for text tools
         const response = await fetch("/api/app/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -148,7 +165,6 @@ export function ToolWorkbench({
           setOutput(accumulated);
         }
       } else {
-        // Multimodal tools (Image, Video, Audio)
         const res = await api<{
           output: string;
         }>("/api/app/generate", {
@@ -171,378 +187,88 @@ export function ToolWorkbench({
     }
   }
 
-  const renderModalitySpecificControls = () => {
-    if (modality === "image") {
-      return (
-        <fieldset className="tone-picker" disabled={busy}>
-          <legend>{tr("画面比例与构图")}</legend>
-          {[
-            { id: "1:1", label: tr("1:1 方形头像/插画") },
-            { id: "16:9", label: tr("16:9 横屏封面壁纸") },
-            { id: "9:16", label: tr("9:16 竖屏社媒海报") },
-          ].map((item) => (
-            <label
-              key={item.id}
-              className={aspectRatio === item.id ? "selected" : ""}
-            >
-              <input
-                name="aspectRatio"
-                type="radio"
-                value={item.id}
-                checked={aspectRatio === item.id}
-                onChange={() => setAspectRatio(item.id)}
-              />
-              {item.label}
-            </label>
-          ))}
-        </fieldset>
-      );
-    }
+  const aspectOptions = [
+    { id: "16:9", label: "16:9", sub: tr("横屏") },
+    { id: "9:16", label: "9:16", sub: tr("竖屏") },
+    { id: "1:1", label: "1:1", sub: tr("方形") },
+    { id: "21:9", label: "21:9", sub: tr("宽银幕") },
+  ] as const;
 
-    if (modality === "video") {
-      return (
-        <fieldset className="tone-picker" disabled={busy}>
-          <legend>{tr("运镜方式与动效")}</legend>
-          {[
-            { id: "pan", label: tr("平移推镜 (Pan/Zoom)") },
-            { id: "orbit", label: tr("环绕运镜 (Orbit)") },
-            { id: "aerial", label: tr("航拍俯冲 (Aerial)") },
-          ].map((item) => (
-            <label
-              key={item.id}
-              className={cameraMotion === item.id ? "selected" : ""}
-            >
-              <input
-                name="cameraMotion"
-                type="radio"
-                value={item.id}
-                checked={cameraMotion === item.id}
-                onChange={() => setCameraMotion(item.id)}
-              />
-              {item.label}
-            </label>
-          ))}
-        </fieldset>
-      );
-    }
-
-    if (modality === "audio") {
-      return (
-        <fieldset className="tone-picker" disabled={busy}>
-          <legend>{tr("音乐风格与情绪")}</legend>
-          {[
-            { id: "lofi", label: tr("Lo-Fi 轻松专注") },
-            { id: "synthpop", label: tr("电子流行 (Synth)") },
-            { id: "acoustic", label: tr("治愈原声 (Acoustic)") },
-            { id: "cyberpunk", label: tr("赛博朋克 (Cyber)") },
-          ].map((item) => (
-            <label
-              key={item.id}
-              className={genreTag === item.id ? "selected" : ""}
-            >
-              <input
-                name="genreTag"
-                type="radio"
-                value={item.id}
-                checked={genreTag === item.id}
-                onChange={() => setGenreTag(item.id)}
-              />
-              {item.label}
-            </label>
-          ))}
-        </fieldset>
-      );
-    }
-
-    // Default text tone picker
-    return (
-      <fieldset className="tone-picker" disabled={busy}>
-        <legend>{tr("表达语气")}</legend>
-        {tones.map((t) => (
-          <label key={t} className={tone === t ? "selected" : ""}>
-            <input
-              name="tone"
-              type="radio"
-              value={t}
-              checked={tone === t}
-              onChange={() => setTone(t)}
-            />
-            {tr(t)}
-          </label>
-        ))}
-      </fieldset>
-    );
-  };
-
-  const renderResultContent = () => {
-    if (busy && !output) {
-      return (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "40px 20px",
-            gap: "12px",
-          }}
-        >
-          <Loading />
-          <p style={{ fontSize: "13px", color: "var(--muted)" }}>
-            {modality === "image"
-              ? tr("🎨 AI 正在绘制高清图像，请稍候…")
-              : modality === "video"
-                ? tr("🎬 AI 正在渲染电影级运镜与视频帧…")
-                : modality === "audio"
-                  ? tr("🎵 AI 正在编排旋律与生成音轨…")
-                  : tr("思考构思中，即将流式输出…")}
-          </p>
-        </div>
-      );
-    }
-
-    if (modality === "image" && output) {
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div
-            style={{
-              position: "relative",
-              borderRadius: "8px",
-              overflow: "hidden",
-              border: "1px solid var(--border)",
-              boxShadow: "var(--shadow-md)",
-              backgroundColor: "rgba(0,0,0,0.05)",
-            }}
-          >
-            <img
-              src={output}
-              alt={prompt || tr("AI 图像生成结果")}
-              style={{
-                width: "100%",
-                height: "auto",
-                maxHeight: "440px",
-                objectFit: "contain",
-                display: "block",
-              }}
-            />
-          </div>
-          <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-            <a
-              href={output}
-              target="_blank"
-              rel="noreferrer"
-              download="ai-generated-image.jpg"
-              className="button-ghost"
-              style={{
-                fontSize: "12px",
-                padding: "6px 12px",
-                borderRadius: "6px",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              <Download size={14} /> {tr("下载高清原图")}
-            </a>
-          </div>
-        </div>
-      );
-    }
-
-    if (modality === "video" && output) {
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div
-            style={{
-              borderRadius: "8px",
-              overflow: "hidden",
-              border: "1px solid var(--border)",
-              backgroundColor: "#000",
-            }}
-          >
-            <video
-              controls
-              autoPlay
-              muted
-              loop
-              playsInline
-              src={output}
-              style={{ width: "100%", maxHeight: "400px", display: "block" }}
-            />
-          </div>
-          <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-            <a
-              href={output}
-              target="_blank"
-              rel="noreferrer"
-              download="ai-video.mp4"
-              className="button-ghost"
-              style={{
-                fontSize: "12px",
-                padding: "6px 12px",
-                borderRadius: "6px",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              <Download size={14} /> {tr("下载视频")}
-            </a>
-          </div>
-        </div>
-      );
-    }
-
-    if (modality === "audio" && output) {
-      return (
-        <div
-          style={{
-            padding: "24px",
-            borderRadius: "8px",
-            border: "1px solid var(--border)",
-            background: "var(--surface-raised, rgba(0,0,0,0.02))",
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div
-              style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "8px",
-                background: "var(--accent-solid)",
-                color: "#fff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Volume2 size={24} />
-            </div>
-            <div>
-              <h4 style={{ margin: 0, fontSize: "15px", fontWeight: 600 }}>
-                {prompt ? prompt.slice(0, 30) : tr("AI 创作音乐")}
-              </h4>
-              <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-                {tr("AI 音乐生成 · 320kbps 高清音轨")}
-              </span>
-            </div>
-          </div>
-
-          {/* 模拟动态音频声波条 */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              height: "36px",
-              padding: "0 10px",
-              background: "rgba(0,0,0,0.04)",
-              borderRadius: "6px",
-            }}
-          >
-            {[40, 70, 30, 85, 60, 95, 45, 80, 55, 90, 35, 75, 50, 100, 65, 85, 40, 70].map(
-              (h, i) => (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1,
-                    height: `${h}%`,
-                    background: "var(--accent)",
-                    borderRadius: "2px",
-                    opacity: 0.8,
-                  }}
-                />
-              ),
-            )}
-          </div>
-
-          <audio controls src={output} style={{ width: "100%", outline: "none" }} />
-        </div>
-      );
-    }
-
-    if (output) {
-      return (
-        <div className="generated-text" style={{ whiteSpace: "pre-wrap" }}>
-          {output}
-          {busy && (
-            <span
-              style={{
-                display: "inline-block",
-                width: "2px",
-                height: "1.1em",
-                backgroundColor: "var(--accent)",
-                marginLeft: "3px",
-                verticalAlign: "text-bottom",
-                animation: "pulse 0.9s infinite",
-              }}
-            />
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <div className="result-empty">
-        <WandSparkles size={30} strokeWidth={1.3} />
-        <h3>{tr("下一份好内容，从这里开始")}</h3>
-        <p>
-          {tr("填写内容后生成，结果会显示在这里。")}
-          <br />
-          {tr("也可以先点「试试示例」了解效果。")}
-        </p>
-      </div>
-    );
-  };
+  const cameraOptions = [
+    { id: "pan", label: tr("平移推镜") },
+    { id: "orbit", label: tr("环绕运镜") },
+    { id: "aerial", label: tr("航拍俯冲") },
+    { id: "static", label: tr("固定镜头") },
+  ] as const;
 
   return (
-    <>
-      <div className="tool-page-heading">
-        <div className="tool-title">
-          <ToolIcon tool={tool} />
+    <div className="wb-container">
+      {/* 顶部精简导航 */}
+      <header className="wb-header">
+        <div className="wb-header-meta">
+          <div className="wb-header-icon">
+            <ToolIcon tool={tool} />
+          </div>
           <div>
-            <h1>{tr(tool.name)}</h1>
-            <p>{tr(tool.description)}</p>
+            <h1 className="wb-title">{tr(tool.name)}</h1>
+            <p className="wb-desc">{tr(tool.description)}</p>
           </div>
         </div>
-        {signedIn ? (
-          <Link to="/billing" className="balance-chip">
-            <Coins size={14} />
-            {data?.balance ?? "—"} {tr("积分")}
-          </Link>
-        ) : (
-          <span className="tool-cost">{tr("每次成功生成 · 1 积分")}</span>
-        )}
-      </div>
+
+        <div className="wb-header-actions">
+          {signedIn ? (
+            <Link to="/billing" className="wb-balance-pill">
+              <Coins size={14} className="text-muted" />
+              <span>{data?.balance ?? "—"}</span>
+              <span className="wb-balance-unit">{tr("积分")}</span>
+            </Link>
+          ) : (
+            <span className="wb-cost-pill">
+              {tr("每次成功生成 · 1 积分")}
+            </span>
+          )}
+        </div>
+      </header>
 
       {error && <Notice kind="error">{tr(error)}</Notice>}
 
-      <div className="workspace tool-workspace">
-        <form className="compose" onSubmit={submit}>
-          <div className="panel-title">
-            <h2>{tr("输入内容")}</h2>
-            <button
-              type="button"
-              className="example-button"
-              disabled={busy}
-              onClick={() => {
-                setPrompt(tr(tool.example));
-                setOutput(tr(tool.sample));
-                setSample(true);
-                setCopied(false);
-                setIssue("");
-              }}
-            >
-              {tr("试试示例")}
-            </button>
-          </div>
+      {/* 左右分栏：左侧参数配置，右侧内容画板 */}
+      <div className="wb-workspace">
+        <form className="wb-form" onSubmit={submit}>
+          {/* 提示词输入区 */}
+          <div className="wb-field-group">
+            <div className="wb-field-head">
+              <label htmlFor="prompt-input" className="wb-field-label">
+                {tr(tool.label)}
+              </label>
+              <div className="wb-field-actions">
+                <button
+                  type="button"
+                  className="wb-text-btn"
+                  onClick={() => {
+                    setPrompt(tr(tool.example));
+                    setOutput(tr(tool.sample));
+                    setSample(true);
+                    setCopied(false);
+                    setIssue("");
+                  }}
+                >
+                  {tr("填入示例")}
+                </button>
+                {prompt && (
+                  <button
+                    type="button"
+                    className="wb-text-btn"
+                    onClick={() => setPrompt("")}
+                  >
+                    {tr("清空")}
+                  </button>
+                )}
+              </div>
+            </div>
 
-          <Field id="tool-prompt" label={tr(tool.label)}>
-            <Textarea
-              id="tool-prompt"
+            <textarea
+              id="prompt-input"
               value={prompt}
               placeholder={tr(tool.placeholder)}
               onChange={(e) => setPrompt(e.target.value)}
@@ -550,93 +276,287 @@ export function ToolWorkbench({
               maxLength={2000}
               required
               disabled={busy}
+              className="wb-textarea"
+              rows={4}
             />
-          </Field>
 
-          <div className="input-meta">
-            <span>{tr("越具体，越贴近你想要的结果。")}</span>
-            <span>{prompt.length} / 2000</span>
+            <div className="wb-field-footer">
+              <span className="wb-hint">{tr("描述越明确，生成效果越贴近预期。")}</span>
+              <span className="wb-counter">{prompt.length} / 2000</span>
+            </div>
           </div>
 
-          {/* 模态专属选项控制 */}
-          {renderModalitySpecificControls()}
+          {/* 画面比例 */}
+          {(modality === "video" || modality === "image") && (
+            <div className="wb-field-group">
+              <label className="wb-field-label">{tr("画面比例")}</label>
+              <div className="wb-segmented-grid">
+                {aspectOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    disabled={busy}
+                    className={`wb-segmented-item ${aspectRatio === opt.id ? "is-active" : ""}`}
+                    onClick={() => setAspectRatio(opt.id)}
+                  >
+                    <span className="wb-segmented-main">{opt.label}</span>
+                    <span className="wb-segmented-sub">{opt.sub}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 运镜方式 (视频专属) */}
+          {modality === "video" && (
+            <div className="wb-field-group">
+              <label className="wb-field-label">{tr("运镜方式")}</label>
+              <div className="wb-segmented-grid">
+                {cameraOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    disabled={busy}
+                    className={`wb-segmented-item ${cameraMotion === opt.id ? "is-active" : ""}`}
+                    onClick={() => setCameraMotion(opt.id)}
+                  >
+                    <span className="wb-segmented-main">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 语气风格 (文本专属) */}
+          {modality === "text" && (
+            <div className="wb-field-group">
+              <label className="wb-field-label">{tr("表达语气")}</label>
+              <div className="wb-segmented-grid">
+                {tones.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    disabled={busy}
+                    className={`wb-segmented-item ${tone === t ? "is-active" : ""}`}
+                    onClick={() => setTone(t)}
+                  >
+                    <span className="wb-segmented-main">{tr(t)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 音乐风格 (音频专属) */}
+          {modality === "audio" && (
+            <div className="wb-field-group">
+              <label className="wb-field-label">{tr("风格偏好")}</label>
+              <div className="wb-segmented-grid">
+                {[
+                  { id: "lofi", label: "Lo-Fi" },
+                  { id: "synthpop", label: "Synthwave" },
+                  { id: "acoustic", label: "Acoustic" },
+                  { id: "ambient", label: "Ambient" },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    disabled={busy}
+                    className={`wb-segmented-item ${genreTag === item.id ? "is-active" : ""}`}
+                    onClick={() => setGenreTag(item.id)}
+                  >
+                    <span className="wb-segmented-main">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {issue && <Notice kind="error">{tr(issue)}</Notice>}
 
           {!aiReady && (
-            <p className="service-hint">
+            <p className="wb-service-notice">
               {tr("生成服务尚未启用，可先查看示例，或填写内容留作草稿。")}
             </p>
           )}
 
-          <div className="compose-footer">
-            <span>
-              {signedIn
-                ? tr("成功后自动保存到创作记录")
-                : tr("登录后保留当前草稿")}
-            </span>
-            <Button
+          {/* 生成提交按钮 */}
+          <div className="wb-submit-wrap">
+            <button
               type="submit"
               disabled={
                 busy || (signedIn && (!aiReady || !data || data.balance < 1))
               }
+              className="wb-primary-btn"
             >
-              {busy
-                ? tr("正在生成…")
-                : !signedIn
-                  ? tr("登录并继续")
-                  : tr("开始生成")}
-              <WandSparkles size={17} />
-            </Button>
+              {busy ? (
+                <span>{tr("正在生成…")}</span>
+              ) : !signedIn ? (
+                <span>{tr("登录并继续")}</span>
+              ) : (
+                <span>
+                  {modality === "video"
+                    ? tr("生成视频")
+                    : modality === "image"
+                      ? tr("生成图像")
+                      : tr("开始生成")}
+                  {" · 1 "}
+                  {tr("积分")}
+                </span>
+              )}
+            </button>
+
+            <span className="wb-submit-note">
+              {signedIn
+                ? tr("生成成功后自动归档至历史记录")
+                : tr("登录后保留当前草稿")}
+            </span>
           </div>
 
           {signedIn && data && data.balance < 1 && (
-            <Link to="/pricing" className="low-credit-link">
-              {tr("积分不足，查看补充方案")}
-            </Link>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              {data.freeQuotaCapped && (
+                <small style={{ fontSize: "12px", color: "var(--color-warning-text, #d97706)" }}>
+                  {tr("今日免费额度已发完（明日恢复），您可以升级套餐立即开始体验")}
+                </small>
+              )}
+              <Link to="/pricing" className="wb-low-credit-link">
+                {tr("积分不足，查看补充方案")}
+              </Link>
+            </div>
           )}
         </form>
 
-        <section className="result-panel" aria-live="polite" aria-busy={busy}>
-          <div className="panel-title">
-            <h2>{sample ? tr("示例结果") : tr("生成结果")}</h2>
+        {/* 右侧画板 */}
+        <section className="wb-stage">
+          <div className="wb-stage-bar">
+            <span className="wb-stage-title">
+              {sample ? tr("示例预览") : tr("生成结果")}
+            </span>
+
             {output && modality === "text" && (
-              <Button
-                variant="ghost"
-                size="small"
+              <button
+                type="button"
+                className="wb-text-btn"
                 onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(output);
                     setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
                   } catch {
                     setIssue("复制失败，请选择文字手动复制。");
                   }
                 }}
               >
-                {copied ? <Check size={15} /> : <Copy size={15} />}{" "}
-                {copied ? tr("已复制") : tr("复制")}
-              </Button>
+                {copied ? <Check size={13} /> : <Copy size={13} />}
+                <span>{copied ? tr("已复制") : tr("复制")}</span>
+              </button>
             )}
           </div>
 
-          {renderResultContent()}
-
-          <div className="result-note">
-            {sample
-              ? tr("预置示例，仅用于展示效果，不消耗积分。")
-              : tr("AI 生成内容，请在使用前核实与调整。")}
+          <div className={`wb-canvas wb-ratio-${aspectRatio.replace(":", "-")}`}>
+            {busy && !output ? (
+              <Scanner modality={modality} />
+            ) : modality === "video" && output ? (
+              <div className="wb-video-wrapper">
+                <video
+                  ref={videoRef}
+                  src={output}
+                  controls
+                  loop
+                  playsInline
+                  autoPlay
+                  className="wb-video-elem"
+                />
+              </div>
+            ) : modality === "image" && output ? (
+              <div className="wb-image-wrapper">
+                <img
+                  src={output}
+                  alt={prompt || tr("生成结果")}
+                  className="wb-image-elem"
+                />
+              </div>
+            ) : modality === "audio" && output ? (
+              <div className="wb-audio-wrapper">
+                <div className="wb-audio-info">
+                  <Music size={20} className="text-muted" />
+                  <span>{prompt ? prompt.slice(0, 32) : tr("音频生成结果")}</span>
+                </div>
+                <audio controls src={output} className="wb-audio-elem" />
+              </div>
+            ) : output ? (
+              <div className="wb-text-wrapper">
+                <div className="wb-text-content">{output}</div>
+                {busy && <span className="wb-cursor" />}
+              </div>
+            ) : (
+              /* 空白状态 */
+              <div className="wb-empty-state">
+                <div className="wb-empty-icon">
+                  {modality === "video" ? (
+                    <VideoIcon size={28} strokeWidth={1.5} />
+                  ) : modality === "image" ? (
+                    <ImageIcon size={28} strokeWidth={1.5} />
+                  ) : (
+                    <FileText size={28} strokeWidth={1.5} />
+                  )}
+                </div>
+                <p className="wb-empty-text">
+                  {tr("填写左侧内容并点击生成，结果将在此呈现。")}
+                </p>
+                <button
+                  type="button"
+                  className="wb-secondary-btn"
+                  onClick={() => {
+                    setPrompt(tr(tool.example));
+                    setOutput(tr(tool.sample));
+                    setSample(true);
+                    setCopied(false);
+                    setIssue("");
+                  }}
+                >
+                  {tr("填入示例")}
+                </button>
+              </div>
+            )}
           </div>
+
+          {/* 画板底部操作 */}
+          {output && (
+            <div className="wb-stage-footer">
+              <span className="wb-footer-hint">
+                {sample
+                  ? tr("当前为展示示例，不扣除积分。")
+                  : tr("内容由模型生成，请注意核对。")}
+              </span>
+              <div className="wb-footer-actions">
+                <a
+                  href={output}
+                  target="_blank"
+                  rel="noreferrer"
+                  download={`export-${tool.id}`}
+                  className="wb-action-btn"
+                >
+                  <Download size={13} />
+                  <span>{tr("下载")}</span>
+                </a>
+                <button
+                  type="button"
+                  className="wb-action-btn"
+                  onClick={() => {
+                    setOutput("");
+                    setSample(false);
+                  }}
+                >
+                  <RotateCcw size={13} />
+                  <span>{tr("重置")}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       </div>
-
-      <div className="tool-tips">
-        <h2>{tr("让结果更贴近你的需求")}</h2>
-        <p>
-          {tr(
-            "提供必要的背景、目标读者和具体用途；避免填写密码等敏感信息。草稿暂存在当前浏览器标签页中，生成结果仅在登录后保存到账户。",
-          )}
-        </p>
-      </div>
-    </>
+    </div>
   );
 }

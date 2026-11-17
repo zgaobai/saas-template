@@ -15,4 +15,5 @@ export type Overview = {
   balance: number;
   history: Generation[];
   entitlement: { plan_id: string; status: string; paid_until: number } | null;
+  freeQuotaCapped?: boolean;
 };

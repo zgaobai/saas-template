@@ -90,6 +90,19 @@ export async function recordUserAttribution(
         now,
       )
       .run();
+
+    // Also persist into user table so user queries and relations carry attribution
+    await db
+      .prepare(
+        `UPDATE user SET
+          attribution_channel = COALESCE(attribution_channel, ?),
+          attribution_source = COALESCE(attribution_source, ?),
+          attribution_landing_path = COALESCE(attribution_landing_path, ?),
+          attribution_referrer_url = COALESCE(attribution_referrer_url, ?)
+        WHERE id = ?`,
+      )
+      .bind(channel, source, landingPath, referrerUrl, userId)
+      .run();
   } catch {
     // Safe failure if database is down or table does not exist
   }
